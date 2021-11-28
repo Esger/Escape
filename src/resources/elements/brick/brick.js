@@ -19,15 +19,15 @@ export class BrickCustomElement {
 
     attached() {
         this._setBlocks();
+        this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.direction];
     }
+
+    isOdd = (num) => { return num % 2 }
 
     _setBlocks() {
         this.blocks.push([0, 0]);
         const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
         this.blocks.push(directions[this.direction]);
-    }
-
-    detached() {
     }
 
     valueChanged(newValue, oldValue) {

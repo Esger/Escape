@@ -1,10 +1,43 @@
 brick {
-    position: absolute;
+    --bRadius   : .5vmin;
+    --blockColor: crimson;
+    position    : absolute;
+    color       : antiquewhite;
 
-    div {
-        position  : absolute;
-        width     : var(--blockSize);
-        height    : var(--blockSize);
-        background: crimson;
+    .block {
+        position       : absolute;
+        width          : var(--blockSize);
+        height         : var(--blockSize);
+        background     : var(--blockColor);
+        border-radius  : var(--bRadius);
+        border         : 1px solid var(--boardColor);
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
     }
+
+    &.toRight .block,
+    &.toLeft .block+.block {
+        border-color : var(--boardColor) transparent var(--boardColor) var(--boardColor);
+        border-radius: var(--bRadius) 0 0 var(--bRadius);
+    }
+
+    &.toRight .block+.block,
+    &.toLeft .block {
+        border-color : var(--boardColor) var(--boardColor) var(--boardColor) transparent;
+        border-radius: 0 var(--bRadius) var(--bRadius) 0;
+    }
+
+    &.toBottom .block,
+    &.toTop .block+.block {
+        border-color : var(--boardColor) var(--boardColor) transparent var(--boardColor);
+        border-radius: var(--bRadius) var(--bRadius) 0 0;
+    }
+
+    &.toBottom .block+.block,
+    &.toTop .block {
+        border-color : transparent var(--boardColor) var(--boardColor) var(--boardColor);
+        border-radius: 0 0 var(--bRadius) var(--bRadius);
+    }
+
 }
