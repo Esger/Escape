@@ -5,31 +5,29 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 export class BrickCustomElement {
     @bindable last;
     @bindable brickIndex;
+    @bindable left;
+    @bindable top;
+    @bindable direction;
+    @bindable blockSize;
 
-    _squares = [[0, 0]];
+    blocks = [];
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
+        this.blocSize
     }
 
     attached() {
-        this._positionSubscription = this._eventAggregator.subscribe('brickPosition', brick => {
-            (brick.index == this.brickIndex) && this.setPosition(brick);
-        });
-        setTimeout(() => {
-            if (this.last) {
-                this._eventAggregator.publish('bricksReady');
-            }
-        });
+        this._setBlocks();
+    }
+
+    _setBlocks() {
+        this.blocks.push([0, 0]);
+        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        this.blocks.push(directions[this.direction]);
     }
 
     detached() {
-        this._positionSubscription.dispose();
-    }
-
-    setPosition(brick) {
-        this.left = brick.position.left;
-        this.top = brick.position.top;
     }
 
     valueChanged(newValue, oldValue) {
