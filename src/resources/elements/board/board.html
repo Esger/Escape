@@ -1,6 +1,7 @@
 <template>
     <require from="./board.css"></require>
     <require from="elements/brick/brick"></require>
+    <require from="elements/pusher/pusher"></require>
 
     <template repeat.for="brick of bricks">
         <brick brick-index.bind="$index"
@@ -10,4 +11,5 @@
                left.bind="brick.position.left"
                top.bind="brick.position.top"></brick>
     </template>
+    <pusher block-size.bind="blockSize"></pusher>
 </template>
