@@ -46,7 +46,6 @@ export class BoardCustomElement {
             position.top >= 0 && position.top < this.boardSize &&
             position2.left >= 0 && position2.left < this.boardSize &&
             position2.top >= 0 && position2.top < this.boardSize;
-        // !withinBounds && console.log(position, direction);
         return isFree && p2isFree && withinBounds;
     }
 
@@ -61,7 +60,6 @@ export class BoardCustomElement {
             position.top = this._randomNumberWithin(this.boardSize);
             positionFound = this._positionIsFree(position, direction);
         } while (!positionFound && count < maxPositions); // geen goede check
-        // console.log(position, direction);
         if (positionFound) {
             brick.position = position;
             brick.direction = direction;
