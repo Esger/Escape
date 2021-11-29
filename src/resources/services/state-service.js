@@ -24,10 +24,13 @@ export class StateService {
         return this._pusher.position;
     }
 
-    canMoveTo(position) {
-        const isFree = this._isFree(position);
-        const withinBounds = this._withinBounds(position);
-        return isFree && withinBounds;
+    moveBlock(newPosition, vector) {
+        const brick = this._bricks.find(brick => brick.blocks.some(block => {
+            const blockPosition = this._getBlockPosition(brick.position, block);
+            return blockPosition.left == newPosition.left && blockPosition.top == newPosition.top;
+        }));
+        console.log(brick);
+        return false;
     }
 
     _randomNumberWithin(max) {
@@ -35,8 +38,13 @@ export class StateService {
     }
 
     _getBlockPosition(position, direction) {
-        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-        const directionVector = directions[direction];
+        let directionVector;
+        if (typeof direction === 'number') {
+            const directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [0, 0]];
+            directionVector = directions[direction];
+        } else {
+            directionVector = direction;
+        }
         const position2 = {
             left: position.left + directionVector[0],
             top: position.top + directionVector[1]
@@ -44,22 +52,22 @@ export class StateService {
         return position2;
     }
 
-    _withinBounds(position) {
+    withinBounds(position) {
         const withinBounds =
             position.left >= 0 && position.left < this._boardSize &&
             position.top >= 0 && position.top < this._boardSize;
         return withinBounds;
     }
 
-    _isFree(position) {
+    isFree(position) {
         const isFree = !this._blocks.some(block => block.left == position.left && block.top == position.top);
         return isFree;
     }
 
     _positionIsFree(position, direction) {
         const position2 = this._getBlockPosition(position, direction);
-        const isFree = this._isFree(position) && this._isFree(position2);
-        const withinBounds = this._withinBounds(position) && this._withinBounds(position2);
+        const isFree = this.isFree(position) && this.isFree(position2);
+        const withinBounds = this.withinBounds(position) && this.withinBounds(position2);
         return isFree && withinBounds;
     }
 

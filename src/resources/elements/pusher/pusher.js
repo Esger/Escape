@@ -37,8 +37,12 @@ export class PusherCustomElement {
             left: this.position.left + vector[0],
             top: this.position.top + vector[1]
         }
-        if (this._stateService.canMoveTo(newPosition)) {
-            this.position = newPosition;
+        if (this._stateService.withinBounds(newPosition)) {
+            if (this._stateService.isFree(newPosition)) {
+                this.position = newPosition;
+            } else if (this._stateService.moveBlock(newPosition, vector)) {
+                this.position = newPosition;
+            }
         }
     }
 

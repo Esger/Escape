@@ -1,8 +1,8 @@
-<template class="brick ${isOdd(direction) ? 'vertical' : 'horizontal'}
+<template class="brick ${isOdd(brick.direction) ? 'vertical' : 'horizontal'}
                  ${directionClass}"
-          css="left: ${blockSize * left}vmin; top: ${blockSize * top}vmin;">
+          css="left: ${blockSize * brick.position.left}vmin; top: ${blockSize * brick.position.top}vmin;">
     <require from="./brick.css"></require>
-    <div repeat.for="block of blocks"
+    <div repeat.for="block of brick.blocks"
          class="block"
          css="left: ${blockSize * block[0]}vmin; top: ${blockSize * block[1]}vmin;"></div>
 </template>
