@@ -26,7 +26,7 @@ export class PusherCustomElement {
         const direction = ['right', 'down', 'left', 'up'].indexOf(key);
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
-            const newPosition = this._stateService.addVectorTo(this.position, vector);
+            const newPosition = this._stateService.sumVectors(this.position, vector);
             if (this._stateService.isFree(newPosition)) {
                 this.position = newPosition;
             } else if (this._stateService.moveBrick(newPosition, vector)) {

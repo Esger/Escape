@@ -10,10 +10,7 @@ export class StateService {
     _blockSize = 10;//5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
-        position: {
-            left: Math.round(this._boardSize / 2),
-            top: Math.round(this._boardSize / 2)
-        }
+        position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
     };
 
     constructor(directionToVectorValueConverter, vectorToDirectionValueConverter) {
@@ -39,16 +36,16 @@ export class StateService {
             let spaceBehindBrickIsFree;
             if (moveLongitudonal) {
                 const doubleVector = this._multiplyVector(vector, 2);
-                const spaceBehindBrick = this.addVectorTo(position, doubleVector);
+                const spaceBehindBrick = this.sumVectors(position, doubleVector);
                 spaceBehindBrickIsFree = this.isFree(spaceBehindBrick);
             } else {
-                const spacesBehindBrick = brick.blocks.map(block => this._sumVectors([brick.position.left, brick.position.top], block, vector));
+                const spacesBehindBrick = brick.blocks.map(block => this.sumVectors([brick.position[0], brick.position[1]], block, vector));
                 spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space));
             }
             console.log(spaceBehindBrickIsFree);
             if (spaceBehindBrickIsFree) {
                 this._setBothBlocks(brick, false);
-                brick.position = this.addVectorTo(brick.position, vector);
+                brick.position = this.sumVectors(brick.position, vector);
                 this._setBothBlocks(brick, true);
                 console.table(this._blocks);
                 return true;
@@ -60,18 +57,18 @@ export class StateService {
     _findBrickAt(position) {
         const brick = this._bricks.find(brick => brick.blocks.some(block => {
             const blockPosition = this._getBlockPosition(brick.position, block);
-            return blockPosition.left == position.left && blockPosition.top == position.top;
+            return blockPosition[0] == position[0] && blockPosition[1] == position[1];
         }));
         return brick;
     }
 
     _setBlock(position, occupied) {
-        this._blocks[position.top][position.left] = occupied;
+        this._blocks[position[1]][position[0]] = occupied;
     }
 
     _setBothBlocks(brick, occupied) {
         brick.blocks.forEach(block => {
-            const position = this.addVectorTo(brick.position, block);
+            const position = this.sumVectors(brick.position, block);
             this._setBlock(position, occupied);
         });
     }
@@ -81,7 +78,7 @@ export class StateService {
         return newVector;
     }
 
-    _sumVectors() {
+    sumVectors() {
         const args = Array.prototype.slice.call(arguments);
         const sumVector = [0, 0];
         args.forEach(arg => {
@@ -89,14 +86,6 @@ export class StateService {
             sumVector[1] += arg[1];
         });
         return sumVector;
-    }
-
-    addVectorTo(position, vector) {
-        const newPosition = {
-            left: position.left + vector[0],
-            top: position.top + vector[1]
-        }
-        return newPosition;
     }
 
     _randomNumberWithin(max) {
@@ -110,23 +99,20 @@ export class StateService {
         } else {
             directionVector = direction;
         }
-        const position2 = {
-            left: position.left + directionVector[0],
-            top: position.top + directionVector[1]
-        };
+        const position2 = this.sumVectors(position, directionVector);
         return position2;
     }
 
     _withinBounds(position) {
         const withinBounds =
-            position.left >= 0 && position.left < this._boardSize &&
-            position.top >= 0 && position.top < this._boardSize;
+            position[0] >= 0 && position[0] < this._boardSize &&
+            position[1] >= 0 && position[1] < this._boardSize;
         return withinBounds;
     }
 
     isFree(position) {
         if (this._withinBounds(position)) {
-            const isFree = !this._blocks[position.top][position.left];
+            const isFree = !this._blocks[position[1]][position[0]];
             return isFree;
         }
         return false;
@@ -141,13 +127,13 @@ export class StateService {
     _findAndSetPosition(brick) {
         let positionFound, count = 0;
         const maxPositions = Math.pow(this._boardSize, 2);
-        const position = {}
+        const position = [];
         let direction;
         do {
             count++;
             direction = this._randomNumberWithin(4);
-            position.left = this._randomNumberWithin(this._boardSize);
-            position.top = this._randomNumberWithin(this._boardSize);
+            position.push(this._randomNumberWithin(this._boardSize));
+            position.push(this._randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
         } while (!positionFound && count < maxPositions); // geen goede check
         if (positionFound) {
@@ -161,7 +147,7 @@ export class StateService {
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = {
                 index: i,
-                position: {},
+                position: [],
                 direction: undefined
             }
             if (this._findAndSetPosition(brick)) {
