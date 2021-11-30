@@ -1,14 +1,16 @@
 import { inject, bindable } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
+import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, StateService)
+@inject(EventAggregator, StateService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable blockSize;
 
-    constructor(eventAggregator, stateService) {
+    constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this._directionToVector = directionToVectorValueConverter;
         this.position = this._stateService.getPusherPosition();
     }
 
@@ -21,26 +23,13 @@ export class PusherCustomElement {
     }
 
     _moveIfPossible(key) {
-        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-        let vector = [];
-        switch (key) {
-            case 'right': vector = directions[0];
-                break;
-            case 'down': vector = directions[1]
-                break;
-            case 'left': vector = directions[2];
-                break;
-            case 'up': vector = directions[3];
-                break;
-        }
-        const newPosition = {
-            left: this.position.left + vector[0],
-            top: this.position.top + vector[1]
-        }
-        if (this._stateService.withinBounds(newPosition)) {
+        const direction = ['right', 'down', 'left', 'up'].indexOf(key);
+        if (direction > -1) {
+            const vector = this._directionToVector.toView(direction);
+            const newPosition = this._stateService.addVectorTo(this.position, vector);
             if (this._stateService.isFree(newPosition)) {
                 this.position = newPosition;
-            } else if (this._stateService.moveBlock(newPosition, vector)) {
+            } else if (this._stateService.moveBrick(newPosition, vector)) {
                 this.position = newPosition;
             }
         }

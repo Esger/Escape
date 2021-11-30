@@ -1,14 +1,15 @@
 import { inject, bindable } from "aurelia-framework";
 import { EventAggregator } from 'aurelia-event-aggregator';
+import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator)
+@inject(EventAggregator, DirectionToVectorValueConverter)
 export class BrickCustomElement {
     @bindable brick;
     @bindable blockSize;
 
-
-    constructor(eventAggregator) {
+    constructor(eventAggregator, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
+        this._directionToVector = directionToVectorValueConverter;
     }
 
     attached() {
@@ -21,12 +22,7 @@ export class BrickCustomElement {
     _setBlocks() {
         this.brick.blocks = [];
         this.brick.blocks.push([0, 0]);
-        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-        this.brick.blocks.push(directions[this.brick.direction]);
-    }
-
-    valueChanged(newValue, oldValue) {
-        //
+        this.brick.blocks.push(this._directionToVector.toView(this.brick.direction));
     }
 
 }
