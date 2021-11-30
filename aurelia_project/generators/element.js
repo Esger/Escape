@@ -43,11 +43,12 @@ export class ${className} {
 
     generateHTMLSource(className) {
         return `<template>
-  <h1>\${value}</h1>
+    <require from="./`+ className + `.css"></require>
+    <h1>\${value}</h1>
 </template>
 `;
     }
     generateLESSSource(className) {
-        return `body:{background:crimson}`;
+        return className + `{background:crimson}`;
     }
 }
