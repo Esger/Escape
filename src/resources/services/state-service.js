@@ -6,8 +6,8 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 export class StateService {
 
     _bricks = [];
-    _bricksCount = 100;
-    _blockSize = 5;
+    _bricksCount = 5;//125;
+    _blockSize = 10;//5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
         position: {
@@ -36,16 +36,17 @@ export class StateService {
         if (brick) {
             const vectorDirection = this._vectorToDirection.toView(vector);
             const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
-            let spaceBehindBlockIsFree;
+            let spaceBehindBrickIsFree;
             if (moveLongitudonal) {
                 const doubleVector = this._multiplyVector(vector, 2);
                 const spaceBehindBrick = this.addVectorTo(position, doubleVector);
-                spaceBehindBlockIsFree = this.isFree(spaceBehindBrick);
+                spaceBehindBrickIsFree = this.isFree(spaceBehindBrick);
             } else {
-
+                const spacesBehindBrick = brick.blocks.map(block => this._sumVectors([brick.position.left, brick.position.top], block, vector));
+                spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space));
             }
-            console.log(spaceBehindBlockIsFree);
-            if (spaceBehindBlockIsFree) {
+            console.log(spaceBehindBrickIsFree);
+            if (spaceBehindBrickIsFree) {
                 this._setBothBlocks(brick, false);
                 brick.position = this.addVectorTo(brick.position, vector);
                 this._setBothBlocks(brick, true);
@@ -78,6 +79,16 @@ export class StateService {
     _multiplyVector(vector, factor) {
         const newVector = [vector[0] * factor, vector[1] * factor];
         return newVector;
+    }
+
+    _sumVectors() {
+        const args = Array.prototype.slice.call(arguments);
+        const sumVector = [0, 0];
+        args.forEach(arg => {
+            sumVector[0] += arg[0];
+            sumVector[1] += arg[1];
+        });
+        return sumVector;
     }
 
     addVectorTo(position, vector) {
