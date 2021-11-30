@@ -6,8 +6,8 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 export class StateService {
 
     _bricks = [];
-    _bricksCount = 5;//125;
-    _blockSize = 10;//5;
+    _bricksCount = 150;
+    _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
         position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
@@ -42,12 +42,10 @@ export class StateService {
                 const spacesBehindBrick = brick.blocks.map(block => this.sumVectors([brick.position[0], brick.position[1]], block, vector));
                 spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space));
             }
-            console.log(spaceBehindBrickIsFree);
             if (spaceBehindBrickIsFree) {
                 this._setBothBlocks(brick, false);
                 brick.position = this.sumVectors(brick.position, vector);
                 this._setBothBlocks(brick, true);
-                console.table(this._blocks);
                 return true;
             }
         }
@@ -157,6 +155,5 @@ export class StateService {
             };
         }
         this._setBlock(this._pusher.position, false);
-        console.table(this._blocks);
     }
 }
