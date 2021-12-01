@@ -18,6 +18,28 @@ export class StateService {
         this._setBlock(this._pusher.position, true);
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
+        this._setExits();
+    }
+
+    _setExits() {
+        const full = this._boardSize;
+        const half = Math.floor(full / 2);
+        const extra = half + 1;
+        this._exits = [
+            [[full, half], [full, half + 1]],
+            [[half, full], [half + 1, full]],
+            [[-1, half], [-1, half + 1]],
+            [[half, -1], [half + 1, -1]]
+        ];
+    }
+
+    throughExit(position) {
+        const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
+        return exited;
+    }
+
+    win() {
+        alert("YO");
     }
 
     getBricks() { return this._bricks; }
