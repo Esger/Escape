@@ -17,6 +17,10 @@ brick {
         justify-content: center;
     }
 
+    &.shrunk {
+        transform: scale(0);
+    }
+
     &.toRight .block,
     &.toLeft .block+.block {
         border-color : var(--boardColor) transparent var(--boardColor) var(--boardColor);

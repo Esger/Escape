@@ -1,19 +1,21 @@
 import { inject } from 'aurelia-framework';
+import { EventAggregator } from 'aurelia-event-aggregator';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 import { VectorToDirectionValueConverter } from "resources/value-converters/vector-to-direction-value-converter";
 
-@inject(DirectionToVectorValueConverter, VectorToDirectionValueConverter)
+@inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
     _bricks = [];
-    _bricksCount = 150;
+    _bricksCount = 175;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
         position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
     };
 
-    constructor(directionToVectorValueConverter, vectorToDirectionValueConverter) {
+    constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
+        this._eventAgregator = eventAggregator;
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._setBlock(this._pusher.position, true);
         this._directionToVector = directionToVectorValueConverter;
@@ -39,7 +41,7 @@ export class StateService {
     }
 
     win() {
-        alert("YO");
+        this._eventAgregator.publish('win');
     }
 
     getBricks() { return this._bricks; }
