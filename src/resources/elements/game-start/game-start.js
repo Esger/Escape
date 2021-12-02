@@ -6,6 +6,14 @@ export class GameStart {
     constructor(eventAggregator) {
         this._eventAgregator = eventAggregator;
     }
+    attached() {
+        this._winSubscribtion = this._eventAgregator.subscribe('win', _ => {
+            this.gameStartVisible = true;
+        });
+    }
+    detached() {
+        this._winSubscribtion.dispose();
+    }
     startGame() {
         this.gameStartVisible = false;
         this._eventAgregator.publish('gameStart');

@@ -6,24 +6,31 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 @inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _bricks = [];
     _bricksCount = 160;//175;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
-    _pusher = {
-        position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
-    };
 
     constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAgregator = eventAggregator;
-        this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
-        this._setBlock(this._pusher.position, true);
+        this._cleanUp();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this.gameStartSubscriber = this._eventAgregator.subscribe('gameStart', _ => {
             this._initialize();
         });
+        this.winSubscriber = this._eventAgregator.subscribe('win', _ => {
+            this._cleanUp();
+        });
+    }
+
+    _cleanUp() {
+        this._bricks = [];
+        this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
+        this._pusher = {
+            position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
+        };
+        this._setBlock(this._pusher.position, true);
     }
 
     _setExits() {
@@ -150,7 +157,7 @@ export class StateService {
     }
 
     _blocksExit(positions) {
-        const blocksExit = this._beforeExits.some((exit) => exit.every(exitBlock => positions.some((block) => {
+        const blocksExit = this._beforeExits.some((exit) => exit.some(exitBlock => positions.some((block) => {
             return block[0] == exitBlock[0] && block[1] == exitBlock[1];
         })));
         return blocksExit;

@@ -15,11 +15,19 @@ export class PusherCustomElement {
     }
 
     attached() {
-        this._addMoveListener();
+        this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
+            this._moveSubscription.dispose();
+        });
+        this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
+            this.position = this._stateService.getPusherPosition();
+            this._addMoveListener();
+        })
     }
 
     detached() {
         this._moveSubscription.dispose();
+        this._winSubscriber.dispose();
+        this._gameStartSubscriber.dispose();
     }
 
     _moveIfPossible(key) {
@@ -46,7 +54,4 @@ export class PusherCustomElement {
         });
     }
 
-    valueChanged(newValue, oldValue) {
-        //
-    }
 }
