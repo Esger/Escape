@@ -9,7 +9,6 @@ export class BoardCustomElement {
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
-        this._stateService.initialize();
         this.blockSize = this._stateService.getBlockSize();
     }
 
