@@ -21,6 +21,9 @@ export class StateService {
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
+        this.gameStartSubscriber = this._eventAgregator.subscribe('gameStart', _ => {
+            this._initialize();
+        });
     }
 
     _setExits() {
@@ -28,10 +31,16 @@ export class StateService {
         const half = Math.floor(full / 2);
         const extra = half + 1;
         this._exits = [
-            [[full, half], [full, half + 1]],
-            [[half, full], [half + 1, full]],
-            [[-1, half], [-1, half + 1]],
-            [[half, -1], [half + 1, -1]]
+            [[full, half], [full, half - 1]],
+            [[half, full], [half - 1, full]],
+            [[-1, half], [-1, half - 1]],
+            [[half, -1], [half - 1, -1]]
+        ];
+        this._beforeExits = [
+            [[full - 1, half], [full - 1, half - 1]],
+            [[half, full - 1], [half - 1, full - 1]],
+            [[1, half], [1, half - 1]],
+            [[half, 1], [half - 1, 1]]
         ];
     }
 
@@ -140,10 +149,18 @@ export class StateService {
         return false;
     }
 
+    _blocksExit(positions) {
+        const blocksExit = this._beforeExits.some((exit) => exit.every(exitBlock => positions.some((block) => {
+            return block[0] == exitBlock[0] && block[1] == exitBlock[1];
+        })));
+        return blocksExit;
+    }
+
     _brickSpaceIsFree(position, direction) {
         const position2 = this._getBlockPosition(position, direction);
+        const blocksExit = this._blocksExit([position, position2]);
         const isFree = this.isFree(position) && this.isFree(position2);
-        return isFree;
+        return !blocksExit && isFree;
     }
 
     _findAndSetPosition(brick) {
@@ -165,7 +182,7 @@ export class StateService {
         return positionFound;
     }
 
-    initialize() {
+    _initialize() {
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = {
                 index: i,
@@ -173,9 +190,11 @@ export class StateService {
                 direction: undefined
             }
             if (this._findAndSetPosition(brick)) {
-                this._bricks.push(brick);
                 this._setBlock(brick.position, true);
                 this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                setTimeout(_ => {
+                    window.requestAnimationFrame(_ => { this._bricks.push(brick) });
+                }, i * 5);
             };
         }
         this._setBlock(this._pusher.position, false);
