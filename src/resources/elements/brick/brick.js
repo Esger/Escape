@@ -18,12 +18,14 @@ export class BrickCustomElement {
         this._setBlocks();
         this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.brick.direction];
         this.winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._hideBlocks();
+            this._hideBrick();
         });
     }
 
-    _hideBlocks() {
-        this.gameOver = true;
+    _hideBrick() {
+        setTimeout(() => {
+            this.gameOver = true;
+        }, Math.random() * 300);
     }
 
     isOdd = (num) => { return num % 2 }

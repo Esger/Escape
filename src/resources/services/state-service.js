@@ -7,7 +7,7 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 export class StateService {
 
     _bricks = [];
-    _bricksCount = 175;
+    _bricksCount = 160;//175;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
