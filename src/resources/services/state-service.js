@@ -1,23 +1,47 @@
 import { inject } from 'aurelia-framework';
+import { EventAggregator } from 'aurelia-event-aggregator';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 import { VectorToDirectionValueConverter } from "resources/value-converters/vector-to-direction-value-converter";
 
-@inject(DirectionToVectorValueConverter, VectorToDirectionValueConverter)
+@inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
     _bricks = [];
-    _bricksCount = 150;
+    _bricksCount = 160;//175;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
     _pusher = {
         position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
     };
 
-    constructor(directionToVectorValueConverter, vectorToDirectionValueConverter) {
+    constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
+        this._eventAgregator = eventAggregator;
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._setBlock(this._pusher.position, true);
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
+        this._setExits();
+    }
+
+    _setExits() {
+        const full = this._boardSize;
+        const half = Math.floor(full / 2);
+        const extra = half + 1;
+        this._exits = [
+            [[full, half], [full, half + 1]],
+            [[half, full], [half + 1, full]],
+            [[-1, half], [-1, half + 1]],
+            [[half, -1], [half + 1, -1]]
+        ];
+    }
+
+    throughExit(position) {
+        const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
+        return exited;
+    }
+
+    win() {
+        this._eventAgregator.publish('win');
     }
 
     getBricks() { return this._bricks; }

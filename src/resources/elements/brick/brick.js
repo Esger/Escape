@@ -7,14 +7,25 @@ export class BrickCustomElement {
     @bindable brick;
     @bindable blockSize;
 
+
     constructor(eventAggregator, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
         this._directionToVector = directionToVectorValueConverter;
+        this.gameOver = false;
     }
 
     attached() {
         this._setBlocks();
         this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.brick.direction];
+        this.winSubscription = this._eventAggregator.subscribe('win', _ => {
+            this._hideBrick();
+        });
+    }
+
+    _hideBrick() {
+        setTimeout(() => {
+            this.gameOver = true;
+        }, Math.random() * 300);
     }
 
     isOdd = (num) => { return num % 2 }

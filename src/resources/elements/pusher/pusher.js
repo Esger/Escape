@@ -27,10 +27,15 @@ export class PusherCustomElement {
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
             const newPosition = this._stateService.sumVectors(this.position, vector);
-            if (this._stateService.isFree(newPosition)) {
+            if (this._stateService.throughExit(newPosition)) {
                 this.position = newPosition;
-            } else if (this._stateService.moveBrick(newPosition, vector)) {
-                this.position = newPosition;
+                this._stateService.win();
+            } else {
+                if (this._stateService.isFree(newPosition)) {
+                    this.position = newPosition;
+                } else if (this._stateService.moveBrick(newPosition, vector)) {
+                    this.position = newPosition;
+                }
             }
         }
     }

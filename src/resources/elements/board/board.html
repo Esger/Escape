@@ -2,10 +2,12 @@
     <require from="./board.css"></require>
     <require from="elements/brick/brick"></require>
     <require from="elements/pusher/pusher"></require>
+    <require from="elements/exits/exits"></require>
 
-    <template repeat.for="brick of bricks">
-        <brick block-size.bind="blockSize"
-               brick.bind="brick"></brick>
-    </template>
+    <exits></exits>
+    <brick repeat.for="brick of bricks"
+           block-size.bind="blockSize"
+           brick.bind="brick"></brick>
     <pusher block-size.bind="blockSize"></pusher>
+
 </template>
