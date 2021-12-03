@@ -6,7 +6,8 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 @inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _bricksCount = 100;//175;
+    _initialBricksCount = 100;
+    _bricksCount = this._initialBricksCount;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
 
@@ -16,11 +17,11 @@ export class StateService {
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
-        this.gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
-            this._initialize();
-        });
         this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount += 5;
+        });
+        this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+            this._bricksCount = _initialBricksCount;
         });
     }
 
@@ -56,7 +57,10 @@ export class StateService {
         return exited;
     }
 
-    getBricks() { return this._bricks; }
+    getBricks() {
+        this._initialize();
+        return this._bricks;
+    }
 
     getBlockSize() { return this._blockSize; }
 
@@ -204,11 +208,7 @@ export class StateService {
             if (this._findAndSetPosition(brick)) {
                 this._setBlock(brick.position, true);
                 this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                setTimeout(_ => {
-                    window.requestAnimationFrame(_ => {
-                        this._bricks.push(brick);
-                    });
-                }, i * 5);
+                this._bricks.push(brick);
             };
         }
         this._setBlock(this._pusher.position, false);

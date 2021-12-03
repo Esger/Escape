@@ -16,6 +16,11 @@ export class BoardCustomElement {
         this._element.style.setProperty('--blockSize', this.blockSize + "vmin");
         this._addGameStartSubscription();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
+            this._removeBricks();
+            this._addGameStartSubscription();
+        });
+        this._giveUpSubscristion = this._eventAggregator.subscribe('giveUp', _ => {
+            this._removeBricks();
             this._addGameStartSubscription();
         });
     }
@@ -25,17 +30,22 @@ export class BoardCustomElement {
             this._gameStartSubscription.dispose();
             this._getBricks();
         });
-
     }
 
     detached() {
         this._gameStartSubscription.dispose();
+        this._giveUpSubscristion.dispose();
+    }
+
+    _removeBricks() {
+        this.bricks = [];
     }
 
     _getBricks() {
         setTimeout(() => {
-            // wacht tot pusher geplaatst is.
+            // wacht tot bricks bepaald zijn en pusher geplaatst is.
             this.bricks = this._stateService.getBricks();
+            console.log(this.bricks.length);
         });
     }
 

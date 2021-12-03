@@ -34,10 +34,10 @@ export class KeyInputService {
                 this._eventAggregator.publish('keyPressed', "down");
                 break;
             case this._keys.enter:
-                this._eventAgregator.publish('start');
+                this._eventAggregator.publish('start');
                 break;
             case this._keys.space:
-                this._eventAgregator.publish('start');
+                this._eventAggregator.publish('start');
                 break;
             case this._keys.escape:
                 this._eventAggregator.publish('giveUp');

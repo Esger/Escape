@@ -13,9 +13,6 @@ export class PusherCustomElement {
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
         this.position = this._stateService.getPusherPosition();
-    }
-
-    attached() {
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription.dispose();
             this.isVisible = false;
@@ -31,14 +28,18 @@ export class PusherCustomElement {
         })
     }
 
+    attached() {
+    }
+
     detached() {
-        this._moveSubscription.dispose();
+        this._moveSubscription && this._moveSubscription.dispose();
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
         this._gameStartSubscriber.dispose();
     }
 
     _addMoveListener() {
+        this._moveSubscription && this._moveSubscription.dispose();
         this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
             this._moveIfPossible(key);
         });
