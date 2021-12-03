@@ -12,7 +12,7 @@ export class StateService {
 
     constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAgregator = eventAggregator;
-        this._cleanUp();
+        this._newGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
@@ -20,11 +20,11 @@ export class StateService {
             this._initialize();
         });
         this.winSubscriber = this._eventAgregator.subscribe('win', _ => {
-            this._cleanUp();
+            this._newGame();
         });
     }
 
-    _cleanUp() {
+    _newGame() {
         this._bricks = [];
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._pusher = {
@@ -156,23 +156,28 @@ export class StateService {
         return false;
     }
 
-    _blocksExit(positions) {
-        const blocksExit = this._beforeExits.some((exit) => exit.some(exitBlock => positions.some((block) => {
-            return block[0] == exitBlock[0] && block[1] == exitBlock[1];
-        })));
-        return blocksExit;
+    _areEqual(positions) { // array of positions [x,y]
+        const areEqual = positions.every(position => position[0] == positions[0][0] && position[1] == positions[0][1]);
+        return areEqual;
+    }
+
+    _isBlockingExit(positions) {  // array of positions [x,y]
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((e) => this._areEqual([e, pos])));
+        console.log(isBlockingExit);
+        isBlockingExit && console.table(this._beforeExits, positions);
+        return isBlockingExit;
     }
 
     _brickSpaceIsFree(position, direction) {
         const position2 = this._getBlockPosition(position, direction);
-        const blocksExit = this._blocksExit([position, position2]);
+        const isBlockingExit = this._isBlockingExit([position, position2]);
         const isFree = this.isFree(position) && this.isFree(position2);
-        return !blocksExit && isFree;
+        return !isBlockingExit && isFree;
     }
 
     _findAndSetPosition(brick) {
         let positionFound, count = 0;
-        const maxPositions = Math.pow(this._boardSize, 2);
+        const maxPositions = 50;
         const position = [];
         let direction;
         do {
@@ -181,6 +186,7 @@ export class StateService {
             position.push(this._randomNumberWithin(this._boardSize));
             position.push(this._randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
+            !positionFound && count++;
         } while (!positionFound && count < maxPositions); // geen goede check
         if (positionFound) {
             brick.position = position;

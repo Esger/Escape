@@ -6,6 +6,7 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 @inject(EventAggregator, StateService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable blockSize;
+    isVisible = false;
 
     constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
@@ -17,10 +18,12 @@ export class PusherCustomElement {
     attached() {
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription.dispose();
+            this.isVisible = false;
         });
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.position = this._stateService.getPusherPosition();
             this._addMoveListener();
+            this.isVisible = true;
         })
     }
 
