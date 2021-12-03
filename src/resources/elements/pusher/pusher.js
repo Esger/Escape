@@ -33,19 +33,24 @@ export class PusherCustomElement {
         this._gameStartSubscriber.dispose();
     }
 
+    _doMove(newPosition) {
+        this.position = newPosition;
+        this._eventAggregator.publish('move', -1);
+    }
+
     _moveIfPossible(key) {
         const direction = ['right', 'down', 'left', 'up'].indexOf(key);
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
             const newPosition = this._stateService.sumVectors(this.position, vector);
             if (this._stateService.throughExit(newPosition)) {
-                this.position = newPosition;
+                this._doMove(newPosition);
                 this._stateService.win();
             } else {
                 if (this._stateService.isFree(newPosition)) {
-                    this.position = newPosition;
+                    this._doMove(newPosition);
                 } else if (this._stateService.moveBrick(newPosition, vector)) {
-                    this.position = newPosition;
+                    this._doMove(newPosition);
                 }
             }
         }
