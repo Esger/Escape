@@ -14,9 +14,18 @@ export class BoardCustomElement {
 
     attached() {
         this._element.style.setProperty('--blockSize', this.blockSize + "vmin");
+        this._addGameStartSubscription();
+        this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
+            this._addGameStartSubscription();
+        });
+    }
+
+    _addGameStartSubscription() {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._gameStartSubscription.dispose();
             this._getBricks();
-        })
+        });
+
     }
 
     detached() {
