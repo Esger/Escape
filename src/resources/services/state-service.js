@@ -6,7 +6,7 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 @inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _bricksCount = 160;//175;
+    _bricksCount = 100;//175;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
 
@@ -44,10 +44,10 @@ export class StateService {
             [[half, -1], [half - 1, -1]]
         ];
         this._beforeExits = [
-            [[full - 1, half], [full - 1, half - 1]],
-            [[half, full - 1], [half - 1, full - 1]],
-            [[1, half], [1, half - 1]],
-            [[half, 1], [half - 1, 1]]
+            [full - 1, half], [full - 1, half - 1],
+            [half, full - 1], [half - 1, full - 1],
+            [1, half], [1, half - 1],
+            [half, 1], [half - 1, 1]
         ];
     }
 
@@ -157,14 +157,15 @@ export class StateService {
     }
 
     _areEqual(positions) { // array of positions [x,y]
-        const areEqual = positions.every(position => position[0] == positions[0][0] && position[1] == positions[0][1]);
+        const areEqual = positions.every(position => {
+            const areEqual = position[0] == positions[0][0] && position[1] == positions[0][1];
+            return areEqual;
+        });
         return areEqual;
     }
 
     _isBlockingExit(positions) {  // array of positions [x,y]
         const isBlockingExit = positions.some((pos) => this._beforeExits.some((e) => this._areEqual([e, pos])));
-        console.log(isBlockingExit);
-        isBlockingExit && console.table(this._beforeExits, positions);
         return isBlockingExit;
     }
 
@@ -178,11 +179,12 @@ export class StateService {
     _findAndSetPosition(brick) {
         let positionFound, count = 0;
         const maxPositions = 50;
-        const position = [];
+        let position = [];
         let direction;
         do {
             count++;
             direction = this._randomNumberWithin(4);
+            position = [];
             position.push(this._randomNumberWithin(this._boardSize));
             position.push(this._randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
