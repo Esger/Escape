@@ -3,8 +3,8 @@
     <div class="clickCatcher"
          click.delegate="startGame()"
          if.bind="gameStartVisible">
-        <h1>${title}</h1>
-        <h3>Move with the arrow keys</h3>
-        <h2>Click to play</h2>
+        <h1 class="${animating ? 'animating' : ''}">${title}</h1>
+        <h3 class="${animating ? 'animating' : ''}">Move with the arrow keys</h3>
+        <h2 class="${animating ? 'animating' : ''}">Click to play</h2>
     </div>
 </template>

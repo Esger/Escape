@@ -23,18 +23,31 @@ game-start {
         color      : var(--white);
         margin     : 5vmin 0;
         font-family: 'Bungee Hairline';
+        transition : transform 300ms ease-in;
     }
 
     h1 {
         font-size: 12vmin;
+
+        &.animating {
+            transform: translateX(-90vmin);
+        }
     }
 
     h2 {
         font-size: 8vmin;
+
+        &.animating {
+            transform: translateX(90vmin);
+        }
     }
 
     h3 {
         font-size  : 4vmin;
         font-family: 'Bungee Outline';
+
+        &.animating {
+            transform: scale(0);
+        }
     }
 }

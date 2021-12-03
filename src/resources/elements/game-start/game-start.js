@@ -4,6 +4,7 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 export class GameStart {
     gameStartVisible = true;
     title = 'Escape';
+    animating = false;
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
@@ -41,7 +42,11 @@ export class GameStart {
     }
 
     startGame() {
-        this.gameStartVisible = false;
-        this._eventAggregator.publish('gameStart');
+        this.animating = true;
+        setTimeout(() => {
+            this.gameStartVisible = false;
+            this._eventAggregator.publish('gameStart');
+            this.animating = false;
+        }, 500);
     }
 }
