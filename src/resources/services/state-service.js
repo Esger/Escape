@@ -8,8 +8,8 @@ export class StateService {
 
     _initialBricksCount = 100;
     _bricksCount = this._initialBricksCount;
-    _blockSize = 5;
-    _boardSize = Math.round(100 / this._blockSize);
+    _blockSize = 4;
+    _boardSize = Math.round(80 / this._blockSize);
 
     constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAggregator = eventAggregator;
