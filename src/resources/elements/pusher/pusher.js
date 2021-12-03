@@ -6,20 +6,48 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 @inject(EventAggregator, StateService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable blockSize;
+    isVisible = false;
 
     constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
         this.position = this._stateService.getPusherPosition();
+        this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
+            this._moveSubscription.dispose();
+            this.isVisible = false;
+        });
+        this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+            this._moveSubscription.dispose();
+            this.isVisible = false;
+        });
+        this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
+            this.position = this._stateService.getPusherPosition();
+            this._addMoveListener();
+            this.isVisible = true;
+        })
     }
 
     attached() {
-        this._addMoveListener();
     }
 
     detached() {
-        this._moveSubscription.dispose();
+        this._moveSubscription && this._moveSubscription.dispose();
+        this._winSubscriber.dispose();
+        this._giveUpSubscriber.dispose();
+        this._gameStartSubscriber.dispose();
+    }
+
+    _addMoveListener() {
+        this._moveSubscription && this._moveSubscription.dispose();
+        this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
+            this._moveIfPossible(key);
+        });
+    }
+
+    _doMove(newPosition) {
+        this.position = newPosition;
+        this._eventAggregator.publish('move');
     }
 
     _moveIfPossible(key) {
@@ -28,25 +56,16 @@ export class PusherCustomElement {
             const vector = this._directionToVector.toView(direction);
             const newPosition = this._stateService.sumVectors(this.position, vector);
             if (this._stateService.throughExit(newPosition)) {
-                this.position = newPosition;
-                this._stateService.win();
+                this._doMove(newPosition);
+                this._eventAggregator.publish('win');
             } else {
                 if (this._stateService.isFree(newPosition)) {
-                    this.position = newPosition;
+                    this._doMove(newPosition);
                 } else if (this._stateService.moveBrick(newPosition, vector)) {
-                    this.position = newPosition;
+                    this._doMove(newPosition);
                 }
             }
         }
     }
 
-    _addMoveListener() {
-        this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
-            this._moveIfPossible(key);
-        });
-    }
-
-    valueChanged(newValue, oldValue) {
-        //
-    }
 }

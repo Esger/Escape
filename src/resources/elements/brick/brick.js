@@ -17,15 +17,27 @@ export class BrickCustomElement {
     attached() {
         this._setBlocks();
         this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.brick.direction];
-        this.winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._hideBrick();
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
+            setTimeout(() => {
+                window.requestAnimationFrame(_ => this._hideBrick());
+            }, Math.random() * 1000);
+        });
+        this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
+            this.gameOver = false;
+        });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this.gameOver = true;
         });
     }
 
+    detached() {
+        this._winSubscription.dispose();
+        this._gameStartSubscriber.dispose();
+        this._giveUpSubscription.dispose();
+    }
+
     _hideBrick() {
-        setTimeout(() => {
-            this.gameOver = true;
-        }, Math.random() * 300);
+        this.gameOver = true;
     }
 
     isOdd = (num) => { return num % 2 }

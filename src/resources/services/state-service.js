@@ -6,21 +6,32 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 @inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _bricks = [];
-    _bricksCount = 160;//175;
+    _initialBricksCount = 100;
+    _bricksCount = this._initialBricksCount;
     _blockSize = 5;
     _boardSize = Math.round(100 / this._blockSize);
-    _pusher = {
-        position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
-    };
 
     constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
-        this._eventAgregator = eventAggregator;
-        this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
-        this._setBlock(this._pusher.position, true);
+        this._eventAggregator = eventAggregator;
+        this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
+        this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
+            this._bricksCount += 5;
+        });
+        this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+            this._bricksCount = _initialBricksCount;
+        });
+    }
+
+    _cleanGame() {
+        this._bricks = [];
+        this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
+        this._pusher = {
+            position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
+        };
+        this._setBlock(this._pusher.position, true);
     }
 
     _setExits() {
@@ -28,10 +39,16 @@ export class StateService {
         const half = Math.floor(full / 2);
         const extra = half + 1;
         this._exits = [
-            [[full, half], [full, half + 1]],
-            [[half, full], [half + 1, full]],
-            [[-1, half], [-1, half + 1]],
-            [[half, -1], [half + 1, -1]]
+            [[full, half], [full, half - 1]],
+            [[half, full], [half - 1, full]],
+            [[-1, half], [-1, half - 1]],
+            [[half, -1], [half - 1, -1]]
+        ];
+        this._beforeExits = [
+            [full - 1, half], [full - 1, half - 1],
+            [half, full - 1], [half - 1, full - 1],
+            [1, half], [1, half - 1],
+            [half, 1], [half - 1, 1]
         ];
     }
 
@@ -40,11 +57,10 @@ export class StateService {
         return exited;
     }
 
-    win() {
-        this._eventAgregator.publish('win');
+    getBricks() {
+        this._initialize();
+        return this._bricks;
     }
-
-    getBricks() { return this._bricks; }
 
     getBlockSize() { return this._blockSize; }
 
@@ -140,23 +156,39 @@ export class StateService {
         return false;
     }
 
+    _areEqual(positions) { // array of positions [x,y]
+        const areEqual = positions.every(position => {
+            const areEqual = position[0] == positions[0][0] && position[1] == positions[0][1];
+            return areEqual;
+        });
+        return areEqual;
+    }
+
+    _isBlockingExit(positions) {  // array of positions [x,y]
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((e) => this._areEqual([e, pos])));
+        return isBlockingExit;
+    }
+
     _brickSpaceIsFree(position, direction) {
         const position2 = this._getBlockPosition(position, direction);
+        const isBlockingExit = this._isBlockingExit([position, position2]);
         const isFree = this.isFree(position) && this.isFree(position2);
-        return isFree;
+        return !isBlockingExit && isFree;
     }
 
     _findAndSetPosition(brick) {
         let positionFound, count = 0;
-        const maxPositions = Math.pow(this._boardSize, 2);
-        const position = [];
+        const maxPositions = 50;
+        let position = [];
         let direction;
         do {
             count++;
             direction = this._randomNumberWithin(4);
+            position = [];
             position.push(this._randomNumberWithin(this._boardSize));
             position.push(this._randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
+            !positionFound && count++;
         } while (!positionFound && count < maxPositions); // geen goede check
         if (positionFound) {
             brick.position = position;
@@ -165,7 +197,8 @@ export class StateService {
         return positionFound;
     }
 
-    initialize() {
+    _initialize() {
+        this._cleanGame();
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = {
                 index: i,
@@ -173,9 +206,9 @@ export class StateService {
                 direction: undefined
             }
             if (this._findAndSetPosition(brick)) {
-                this._bricks.push(brick);
                 this._setBlock(brick.position, true);
                 this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                this._bricks.push(brick);
             };
         }
         this._setBlock(this._pusher.position, false);

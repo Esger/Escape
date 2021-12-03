@@ -5,10 +5,11 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 export class KeyInputService {
 
     constructor(eventAggregator) {
-        this._eventAgregator = eventAggregator;
+        this._eventAggregator = eventAggregator;
         this._keys = {
             'enter': 13,
             'space': 32,
+            'escape': 27,
             'left': 37,
             'up': 38,
             'right': 39,
@@ -21,25 +22,28 @@ export class KeyInputService {
         let keycode = event.keyCode;
         switch (keycode) {
             case this._keys.left:
-                this._eventAgregator.publish('keyPressed', "left");
+                this._eventAggregator.publish('keyPressed', "left");
                 break;
             case this._keys.up:
-                this._eventAgregator.publish('keyPressed', "up");
+                this._eventAggregator.publish('keyPressed', "up");
                 break;
             case this._keys.right:
-                this._eventAgregator.publish('keyPressed', "right");
+                this._eventAggregator.publish('keyPressed', "right");
                 break;
             case this._keys.down:
-                this._eventAgregator.publish('keyPressed', "down");
+                this._eventAggregator.publish('keyPressed', "down");
                 break;
             case this._keys.enter:
-                this._eventAgregator.publish('start');
+                this._eventAggregator.publish('start');
                 break;
             case this._keys.space:
-                this._eventAgregator.publish('start');
+                this._eventAggregator.publish('start');
+                break;
+            case this._keys.escape:
+                this._eventAggregator.publish('giveUp');
                 break;
             default:
-                this._eventAgregator.publish('keyPressed', "somekey");
+                this._eventAggregator.publish('keyPressed', "somekey");
         }
         return true;
     }
