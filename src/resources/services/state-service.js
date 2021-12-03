@@ -18,10 +18,10 @@ export class StateService {
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
-            this._bricksCount += 5;
+            this._bricksCount += 2;
         });
         this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
-            this._bricksCount = _initialBricksCount;
+            this._bricksCount = this._initialBricksCount;
         });
     }
 
