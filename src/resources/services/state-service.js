@@ -31,7 +31,19 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
-        this._setBlock(this._pusher.position, true);
+        this._setPusherArea(true);
+    }
+
+    _setPusherArea(value) {
+        const maxLeft = this._pusher.position[0] + 1;
+        const maxTop = this._pusher.position[1] + 1;
+        let left = this._pusher.position[0] - 1;
+        for (; left <= maxLeft; left++) {
+            let top = this._pusher.position[1] - 1;
+            for (; top <= maxTop; top++) {
+                this._setBlock([left, top], value);
+            }
+        }
     }
 
     _setExits() {
@@ -47,8 +59,8 @@ export class StateService {
         this._beforeExits = [
             [full - 1, half], [full - 1, half - 1],
             [half, full - 1], [half - 1, full - 1],
-            [1, half], [1, half - 1],
-            [half, 1], [half - 1, 1]
+            [0, half], [0, half - 1],
+            [half, 0], [half - 1, 0]
         ];
     }
 
@@ -211,6 +223,6 @@ export class StateService {
                 this._bricks.push(brick);
             };
         }
-        this._setBlock(this._pusher.position, false);
+        this._setPusherArea(false);
     }
 }
