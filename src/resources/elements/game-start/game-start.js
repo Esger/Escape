@@ -6,12 +6,19 @@ export class GameStart {
     title = 'Escape';
 
     constructor(eventAggregator) {
-        this._eventAgregator = eventAggregator;
+        this._eventAggregator = eventAggregator;
     }
 
     attached() {
-        this._winSubscribtion = this._eventAgregator.subscribe('win', _ => this._showWinScreen());
+        this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen())
         this._addStartSubscription();
+    }
+
+    detached() {
+        this._winSubscribtion.dispose();
+        this._giveUpSubscription.dispose();
+        this._startSubscription && this._startSubscription.dispose();
     }
 
     _showWinScreen() {
@@ -20,20 +27,21 @@ export class GameStart {
         this._addStartSubscription();
     }
 
+    _showStuckScreen() {
+        this.gameStartVisible = true;
+        this.title = 'Stuck'
+        this._addStartSubscription();
+    }
+
     _addStartSubscription() {
-        this._startSubscription = this._eventAgregator.subscribe('start', _ => {
+        this._startSubscription = this._eventAggregator.subscribe('start', _ => {
             this._startSubscription.dispose();
             this.startGame();
         })
     }
 
-    detached() {
-        this._winSubscribtion.dispose();
-        this._startSubscription && this._startSubscription.dispose();
-    }
-
     startGame() {
         this.gameStartVisible = false;
-        this._eventAgregator.publish('gameStart');
+        this._eventAggregator.publish('gameStart');
     }
 }

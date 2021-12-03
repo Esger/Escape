@@ -25,11 +25,15 @@ export class BrickCustomElement {
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.gameOver = false;
         });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this.gameOver = true;
+        });
     }
 
     detached() {
         this._winSubscription.dispose();
         this._gameStartSubscriber.dispose();
+        this._giveUpSubscription.dispose();
     }
 
     _hideBrick() {

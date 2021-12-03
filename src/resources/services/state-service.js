@@ -11,20 +11,20 @@ export class StateService {
     _boardSize = Math.round(100 / this._blockSize);
 
     constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
-        this._eventAgregator = eventAggregator;
-        this._newGame();
+        this._eventAggregator = eventAggregator;
+        this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
-        this.gameStartSubscriber = this._eventAgregator.subscribe('gameStart', _ => {
+        this.gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this._initialize();
         });
-        this.winSubscriber = this._eventAgregator.subscribe('win', _ => {
-            this._newGame();
+        this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
+            this._bricksCount += 5;
         });
     }
 
-    _newGame() {
+    _cleanGame() {
         this._bricks = [];
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._pusher = {
@@ -54,10 +54,6 @@ export class StateService {
     throughExit(position) {
         const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
         return exited;
-    }
-
-    win() {
-        this._eventAgregator.publish('win');
     }
 
     getBricks() { return this._bricks; }
@@ -198,6 +194,7 @@ export class StateService {
     }
 
     _initialize() {
+        this._cleanGame();
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = {
                 index: i,
@@ -208,7 +205,9 @@ export class StateService {
                 this._setBlock(brick.position, true);
                 this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
                 setTimeout(_ => {
-                    window.requestAnimationFrame(_ => { this._bricks.push(brick) });
+                    window.requestAnimationFrame(_ => {
+                        this._bricks.push(brick);
+                    });
                 }, i * 5);
             };
         }
