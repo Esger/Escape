@@ -10,8 +10,18 @@ export class App {
         this._eventAggregator = eventAggregator;
     }
 
-    isTouchDevice() {
-        this._eventAggregator.publish('isTouchDevice');
+    attached() {
+        setTimeout(() => this.detectTouchDevice(), 100);
+    }
+
+    detectTouchDevice() {
+        const isTouchDevice =
+            (('ontouchstart' in window) ||
+                (navigator.maxTouchPoints > 0) ||
+                (navigator.msMaxTouchPoints > 0));
+        const isSmallScreen = Math.min(window.innerHeight, window.innerWidth) < 800;
+        isTouchDevice && isSmallScreen && console.log('isTouchDevice');
+        isTouchDevice && isSmallScreen && this._eventAggregator.publish('isTouchDevice');
     }
 
 }
