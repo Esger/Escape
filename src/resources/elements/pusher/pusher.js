@@ -7,6 +7,8 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 export class PusherCustomElement {
     @bindable blockSize;
     isVisible = false;
+    step = false;
+    direction = 1;
 
     constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
@@ -28,9 +30,6 @@ export class PusherCustomElement {
         })
     }
 
-    attached() {
-    }
-
     detached() {
         this._moveSubscription && this._moveSubscription.dispose();
         this._winSubscriber.dispose();
@@ -46,11 +45,13 @@ export class PusherCustomElement {
     }
 
     _doMove(newPosition) {
+        this.step = (this.step == 'step') ? '' : 'step';
         this.position = newPosition;
         this._eventAggregator.publish('move');
     }
 
     _moveIfPossible(key) {
+        this.lastKey = key;
         const direction = ['right', 'down', 'left', 'up'].indexOf(key);
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);

@@ -1,20 +1,21 @@
 .pusher {
-    position         : absolute;
-    background       : crimson;
-    width            : var(--blockSize);
-    height           : var(--blockSize);
-    border-radius    : 1in;
-    background-repeat: no-repeat;
-    background-size  : 200%;
-    background-image : url("./smileys.png");
-    box-shadow       : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 15px 0 rgba(0, 0, 0, 0.7);
-    transform        : translate3d(0, 0, 0) rotate(90deg);
-    transition       : all 200ms ease-in-out;
-    will-change      : transform;
-    zoom             : 1;
+    position           : absolute;
+    width              : var(--blockSize);
+    height             : var(--blockSize);
+    border-radius      : 1in;
+    background-repeat  : no-repeat;
+    background-size    : 200%;
+    background-image   : url("./smileys.png");
+    box-shadow         : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 15px 0 rgba(0, 0, 0, 0.7);
+    transform          : translate3d(0, 0, 0) rotate(90deg);
+    transition         : 200ms ease-in-out;
+    transition-property: transform, left, top;
+    will-change        : transform;
+    zoom               : 1;
 
     &.male {
         background-position: 0 100%;
+        background-color   : crimson;
     }
 
     &.male.step {
@@ -23,6 +24,8 @@
 
     &.female {
         background-position: 0 0;
+        background-color   : gold;
+
     }
 
     &.female.step {

@@ -24,7 +24,7 @@ export class GameStart {
 
     _showWinScreen() {
         this.gameStartVisible = true;
-        this.title = 'Escaped!'
+        this.title = 'Escaped'
         this._addStartSubscription();
     }
 
