@@ -2,7 +2,7 @@
                  ${isOdd(brick.direction) ? 'vertical' : 'horizontal'}
                  ${directionClass} 
                  ${gameOver ? 'gameOver' : ''}
-                 ${visible ? '' : 'XoffScreen'}"
+                 ${visible ? '' : 'offScreen'}"
           css="left: ${blockSize * brick.position[0]}vmin; top: ${blockSize * brick.position[1]}vmin;">
     <require from="./brick.css"></require>
     <div repeat.for="block of brick.blocks"
