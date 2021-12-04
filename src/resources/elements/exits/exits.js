@@ -20,4 +20,8 @@ export class Exits {
         this._giveUpSubscription.dispose();
         this._gameStartSubscription.dispose();
     }
+
+    move(direction) {
+        this._eventAggregator.publish('keyPressed', direction);
+    }
 }
