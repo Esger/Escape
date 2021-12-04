@@ -26,8 +26,9 @@ export class PusherCustomElement {
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.position = this._stateService.getPusherPosition();
             this._addMoveListener();
+            // this.changeGender();
             this.isVisible = true;
-        })
+        });
     }
 
     detached() {
@@ -35,6 +36,10 @@ export class PusherCustomElement {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
         this._gameStartSubscriber.dispose();
+    }
+
+    changeGender() {
+        this.gender = (this.gender == 'male') ? 'female' : 'male';
     }
 
     _addMoveListener() {
