@@ -1,6 +1,8 @@
 brick {
     --bRadius     : .5vmin;
     --blockColor  : royalblue;
+    --lightShadow : #ffffff66;
+    --darkShadow  : #00000088;
     position      : absolute;
     color         : antiquewhite;
     transition    : all 300ms ease-in-out;
@@ -13,7 +15,6 @@ brick {
         height         : var(--blockSize);
         background     : var(--blockColor);
         border-radius  : var(--bRadius);
-        border         : 1px solid var(--boardColor);
         display        : flex;
         align-items    : center;
         justify-content: center;
@@ -33,25 +34,25 @@ brick {
 
     &.toRight .block,
     &.toLeft .block+.block {
-        border-color : var(--boardColor) transparent var(--boardColor) var(--boardColor);
+        box-shadow   : inset 2px 2px 2px 0 var(--lightShadow), inset 0 -2px 2px 0 var(--darkShadow);
         border-radius: var(--bRadius) 0 0 var(--bRadius);
     }
 
     &.toRight .block+.block,
     &.toLeft .block {
-        border-color : var(--boardColor) var(--boardColor) var(--boardColor) transparent;
+        box-shadow   : inset 0 2px 2px 0 var(--lightShadow), inset -2px -2px 2px 0 var(--darkShadow);
         border-radius: 0 var(--bRadius) var(--bRadius) 0;
     }
 
     &.toBottom .block,
     &.toTop .block+.block {
-        border-color : var(--boardColor) var(--boardColor) transparent var(--boardColor);
+        box-shadow   : inset 2px 2px 2px 0 var(--lightShadow), inset -2px 0 2px 0 var(--darkShadow);
         border-radius: var(--bRadius) var(--bRadius) 0 0;
     }
 
     &.toBottom .block+.block,
     &.toTop .block {
-        border-color : transparent var(--boardColor) var(--boardColor) var(--boardColor);
+        box-shadow   : inset 2px 0 2px 0 var(--lightShadow), inset -2px -2px 2px 0 var(--darkShadow);
         border-radius: 0 0 var(--bRadius) var(--bRadius);
     }
 
