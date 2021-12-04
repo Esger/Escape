@@ -38,7 +38,11 @@ export class BoardCustomElement {
     }
 
     _removeBricks() {
-        this.bricks = [];
+        this.bricks.forEach(brick => {
+            setTimeout(() => {
+                brick.removed = true;
+            }, Math.random() * 300)
+        })
     }
 
     _getBricks() {
