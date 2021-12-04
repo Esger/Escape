@@ -3,8 +3,10 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 @inject(EventAggregator)
 export class GameStart {
     gameStartVisible = true;
-    title = 'Escape';
     animating = false;
+    title = 'Escape';
+    howToPlay = 'Move with the arrow keys';
+    howToStart = 'Click to play';
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
@@ -12,14 +14,21 @@ export class GameStart {
 
     attached() {
         this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen())
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setIsTouchDevice())
         this._addStartSubscription();
+    }
+
+    _setIsTouchDevice() {
+        this.howToPlay = 'Tap the exits to move';
+        this.howToStart = 'Tap to play';
     }
 
     detached() {
         this._winSubscribtion.dispose();
         this._giveUpSubscription.dispose();
         this._startSubscription && this._startSubscription.dispose();
+        this._isTouchDeviceSubscription.dispose();
     }
 
     _showWinScreen() {
