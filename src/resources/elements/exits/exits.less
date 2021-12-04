@@ -18,11 +18,17 @@ exits {
 }
 
 .exit {
-    --exitSize: 26vmin;
+    --exitSize    : 26vmin;
+    --gradientSize: 45%;
+
+    .isMobile & {
+        --gradientSize: 60%;
+    }
+
     width     : var(--exitSize);
     height    : var(--exitSize);
     transform : rotate(var(--angle, 45deg));
-    background: radial-gradient(at top left, var(--color), transparent 45%);
+    background: radial-gradient(at top left, var(--color), transparent var(--gradientSize));
     filter    : blur(.5vmin);
 
     &.exit-0 {
