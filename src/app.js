@@ -11,17 +11,22 @@ export class App {
     }
 
     attached() {
-        setTimeout(() => this.detectTouchDevice(), 100);
+        setTimeout(() => {
+            this._detectTouchDevice();
+        }, 100);
     }
 
-    detectTouchDevice() {
+    _detectTouchDevice() {
         const isTouchDevice =
             (('ontouchstart' in window) ||
                 (navigator.maxTouchPoints > 0) ||
                 (navigator.msMaxTouchPoints > 0));
         const isSmallScreen = Math.min(window.innerHeight, window.innerWidth) < 800;
-        isTouchDevice && isSmallScreen && console.log('isTouchDevice');
-        isTouchDevice && isSmallScreen && this._eventAggregator.publish('isTouchDevice');
+        if (isTouchDevice && isSmallScreen) {
+            this._eventAggregator.publish('isTouchDevice');
+            document.body.style.setProperty('--maxWidth', 90 + "vmin");
+            document.body.classList.add('isMobile');
+        }
     }
 
 }

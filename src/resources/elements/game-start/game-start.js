@@ -15,7 +15,7 @@ export class GameStart {
     attached() {
         this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setIsTouchDevice())
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setIsTouchDevice());
         this._addStartSubscription();
     }
 

@@ -13,7 +13,7 @@ export class BoardCustomElement {
     }
 
     attached() {
-        this._element.style.setProperty('--blockSize', this.blockSize + "vmin");
+        this._setBlockSize();
         this._addGameStartSubscription();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             this._removeBricks();
@@ -23,6 +23,14 @@ export class BoardCustomElement {
             this._removeBricks();
             this._addGameStartSubscription();
         });
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setBlockSize());
+    }
+
+    _setBlockSize() {
+        setTimeout(() => { // wacht tot waarde in _stateService gezet is.
+            this.blockSize = this._stateService.getBlockSize();
+            this._element.style.setProperty('--blockSize', this.blockSize + "vmin");
+        })
     }
 
     _addGameStartSubscription() {

@@ -23,6 +23,13 @@ export class StateService {
         this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
         });
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
+    }
+
+    _adjustSizes() {
+        this._blockSize = 4.5;
+        this._boardSize = Math.round(90 / this._blockSize);
+        this._cleanGame();
     }
 
     _cleanGame() {

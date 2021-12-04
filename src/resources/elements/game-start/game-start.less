@@ -15,6 +15,10 @@ game-start {
         align-items    : center;
         justify-content: center;
         pointer-events : all;
+
+        .isMobile & {
+            margin-top: 7vmin;
+        }
     }
 
     h1,
@@ -48,6 +52,10 @@ game-start {
 
         &.animating {
             transform: scale(0);
+        }
+
+        .isMobile & {
+            font-family: 'Bungee Hairline';
         }
     }
 }

@@ -1,4 +1,5 @@
 <template>
     <require from="./footer.css"></require>
-    <h3 class="${showHint ? '' : 'hidden'}">${hint}</h3>
+    <h3 class="${showHint ? '' : 'hidden'}"
+        click.trigger="giveUp()">${hint}</h3>
 </template>

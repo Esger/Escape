@@ -15,6 +15,22 @@ export class Footer {
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._resetHintTimeout());
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this._resetHintTimeout());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._resetHintTimeout());
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setTouchText());
+    }
+
+    detached() {
+        this._gameStartSubscrption.dispose();
+        this._giveUpSubscription.dispose();
+        this._moveSubscription.dispose();
+        this._winSubscription.dispose();
+    }
+
+    giveUp() {
+        this._eventAggregator.publish('giveUp');
+    }
+
+    _setTouchText() {
+        this.hint = 'Tap here when stuck';
     }
 
     _setHintTimeout() {
@@ -25,12 +41,5 @@ export class Footer {
         this.showHint = false;
         clearTimeout(this._hintTimeoutHandle);
         this._setHintTimeout();
-    }
-
-    detached() {
-        this._gameStartSubscrption.dispose();
-        this._giveUpSubscription.dispose();
-        this._moveSubscription.dispose();
-        this._winSubscription.dispose();
     }
 }
