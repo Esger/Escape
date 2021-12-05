@@ -12,9 +12,9 @@ export class Footer {
 
     attached() {
         this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => this._resetHintTimeout());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._resetHintTimeout());
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._unsetHintTimeout());
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this._resetHintTimeout());
-        this._winSubscription = this._eventAggregator.subscribe('win', _ => this._resetHintTimeout());
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => this._unsetHintTimeout());
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setTouchText());
     }
 
@@ -27,6 +27,8 @@ export class Footer {
 
     giveUp() {
         this._eventAggregator.publish('giveUp');
+        this.showHint = false;
+        this._unsetHintTimeout();
     }
 
     _setTouchText() {
@@ -37,9 +39,13 @@ export class Footer {
         this._hintTimeoutHandle = setTimeout(() => { this.showHint = true }, 10000);
     }
 
+    _unsetHintTimeout() {
+        clearTimeout(this._hintTimeoutHandle);
+    }
+
     _resetHintTimeout() {
         this.showHint = false;
-        clearTimeout(this._hintTimeoutHandle);
+        this._unsetHintTimeout();
         this._setHintTimeout();
     }
 }

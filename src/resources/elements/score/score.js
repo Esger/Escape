@@ -44,6 +44,8 @@ export class Score {
         let highscore = localStorage.getItem('escape-score');
         if (highscore) {
             this.highScore = parseInt(highscore, 10);
+        } else {
+            this.highScore = 0;
         }
     }
 

@@ -1,25 +1,36 @@
 footer {
+    position       : relative;
     width          : 100%;
     display        : flex;
     justify-content: center;
     align-items    : center;
 
-    h3 {
+    h3,
+    h4 {
         font-family: Bungee Hairline;
         font-size  : 4vmin;
         color      : var(--white);
-        font-size  : 3vmin;
-        margin     : 3.5vmin 0 0;
-        cursor     : pointer;
         opacity    : 1;
         transition : opacity 5s ease;
-
-        .isMobile & {
-            font-size: 5vmin;
-        }
+        cursor     : pointer;
 
         &.hidden {
             opacity: 0;
         }
+
+        .isMobile & {
+            font-size: 5vmin;
+        }
+    }
+
+    h3 {
+        margin: 3.5vmin 0 0;
+    }
+
+    h4 {
+        position : absolute;
+        bottom   : 1vmin;
+        right    : 0;
+        font-size: 3vmin;
     }
 }
