@@ -3,12 +3,13 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 @inject(EventAggregator)
 export class Score {
     score = 0;
+    bolts = 0;
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this._winScore = 25;
         this._levelScore = 5;
         this._moveScore = -1;
-        this._level = 1;
+        this.level = 1;
         this._resetScore = true;
         this._getHighScore();
     }
@@ -24,9 +25,10 @@ export class Score {
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this.score += this._winScore + this._level * this._levelScore;
+            this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
-            this._level++;
+            this.level++;
+            this.bolts += this.level % 5 === 0 ? 1 : 0;
         });
     }
 
