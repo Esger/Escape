@@ -16,6 +16,7 @@ export class Footer {
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this._resetHintTimeout());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._unsetHintTimeout());
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setTouchText());
+        this._showMessageSubscription = this._eventAggregator.subscribe('showMessage', _message => this._showMessage(_message));
     }
 
     detached() {
@@ -25,6 +26,16 @@ export class Footer {
         this._winSubscription.dispose();
     }
 
+    _showMessage(message) {
+        const previousMessage = message;
+        this.hint = message;
+        this.showHint = true;
+        this._hintHideTimeoutHandle = setTimeout((previousHint) => {
+            this.showHint = false;
+            this.hint = previousHint;
+        }, 10000);
+    }
+
     giveUp() {
         this._eventAggregator.publish('giveUp');
         this.showHint = false;
@@ -32,6 +43,7 @@ export class Footer {
     }
 
     _setTouchText() {
+        this._setHintTimeout();
         this.hint = 'Tap here when stuck';
     }
 
