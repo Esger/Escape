@@ -87,7 +87,7 @@ export class StateService {
         return this._pusher.position;
     }
 
-    moveBrick(position, vector) {
+    moveBrick(position, vector, hasBolts = false) {
         const brick = this._findBrickAt(position);
         if (brick) {
             const vectorDirection = this._vectorToDirection.toView(vector);
@@ -106,9 +106,26 @@ export class StateService {
                 brick.position = this.sumVectors(brick.position, vector);
                 this._setBothBlocks(brick, true);
                 return true;
+            } else {
+                hasBolts && this._throwBolt(position);
             }
         }
         return false;
+    }
+
+    _throwBolt(position) {
+        const offsets = [ // 'X'
+            [-1, -1], [1, -1],
+            [0, 0],
+            [-1, 1], [1, 1]
+        ];
+        const positions = offsets.map(offset => this.sumVectors(position, offset));
+        const bricks = [];
+        positions.forEach(position => {
+            const brick = this._findBrickAt(position);
+            brick && bricks.push(brick.index);
+        });
+        this._eventAggregator.publish('removeBricks', bricks);
     }
 
     _findBrickAt(position) {
@@ -117,6 +134,12 @@ export class StateService {
             return blockPosition[0] == position[0] && blockPosition[1] == position[1];
         }));
         return brick;
+    }
+
+    removeBrick(index) {
+        const brick = this._bricks.find(brick => brick.index == index);
+        this._setBothBlocks(brick, false);
+        this._bricks.splice(index, 1);
     }
 
     _setBlock(position, occupied) {
@@ -222,7 +245,8 @@ export class StateService {
             const brick = {
                 index: i,
                 position: [],
-                direction: undefined
+                direction: undefined,
+                content: ''
             }
             if (this._findAndSetPosition(brick)) {
                 this._setBlock(brick.position, true);

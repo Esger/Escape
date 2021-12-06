@@ -9,15 +9,19 @@ export class Score {
         this._winScore = 25;
         this._levelScore = 5;
         this._moveScore = -1;
-        this.level = 1;
+        this.level = 0;
         this._resetScore = true;
         this._getHighScore();
     }
 
     attached() {
         this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
-            this._resetScore && (this.score = 0);
-            this._resetScore = false;
+            if (this._resetScore) {
+                this.score = 0;
+                this.level = 0;
+                this.bolts = 0;
+                this._resetScore = false;
+            }
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._resetScore = true;
@@ -29,7 +33,9 @@ export class Score {
             this._saveScores();
             this.level++;
             this.bolts += this.level % 5 === 0 ? 1 : 0;
+            this._eventAggregator.publish('boltsCount', this.bolts);
         });
+        this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => this.bolts--)
     }
 
     detached() {

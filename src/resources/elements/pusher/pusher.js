@@ -9,6 +9,7 @@ export class PusherCustomElement {
     isVisible = false;
     step = false;
     direction = 1;
+    bolts = 0;
 
     constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
@@ -29,6 +30,7 @@ export class PusherCustomElement {
             // this.changeGender();
             this.isVisible = true;
         });
+        this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => this.bolts = bolts);
     }
 
     detached() {
@@ -36,6 +38,7 @@ export class PusherCustomElement {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
         this._gameStartSubscriber.dispose();
+        this._boltsCountSubscriber.dispose();
     }
 
     changeGender() {
@@ -67,7 +70,7 @@ export class PusherCustomElement {
             } else {
                 if (this._stateService.isFree(newPosition)) {
                     this._doMove(newPosition);
-                } else if (this._stateService.moveBrick(newPosition, vector)) {
+                } else if (this._stateService.moveBrick(newPosition, vector, (this.bolts > 0))) {
                     this._doMove(newPosition);
                 }
             }

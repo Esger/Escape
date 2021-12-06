@@ -7,5 +7,5 @@
     <require from="./brick.css"></require>
     <div repeat.for="block of brick.blocks"
          class="block"
-         css="left: ${blockSize * block[0]}vmin; top: ${blockSize * block[1]}vmin;"></div>
+         css="left: ${blockSize * block[0]}vmin; top: ${blockSize * block[1]}vmin;">${brick.content}</div>
 </template>
