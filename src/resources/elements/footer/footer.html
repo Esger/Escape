@@ -1,8 +1,7 @@
 <template>
     <require from="./footer.css"></require>
-    <h3 class="${showHint ? '' : 'hidden'}"
-        click.trigger="giveUp()">${hint}</h3>
-    <h4 class="${showHint ? 'hidden' : ''}">
-        <a href="http://ashware.nl">&copy;ashWare</a>
-    </h4>
+    <h3 click.trigger="giveUp()">
+        <span if.bind="showHint">${hint}</span>
+        <a else href="http://ashware.nl">&copy;ashWare</a>
+    </h3>
 </template>
