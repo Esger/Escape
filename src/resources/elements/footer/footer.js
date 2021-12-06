@@ -48,7 +48,6 @@ export class Footer {
                 this._showMessage('move through the <span class="green">exits</span>');
                 break;
         }
-
     }
 
     _showMessage(message) {
