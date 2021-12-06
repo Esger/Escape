@@ -34,7 +34,6 @@ export class GameStart {
     _showWinScreen() {
         this.gameStartVisible = true;
         this.title = 'Escaped'
-        this._eventAggregator.publish('showMessage', 'Press Space or Enter');
         this._addStartSubscription();
     }
 

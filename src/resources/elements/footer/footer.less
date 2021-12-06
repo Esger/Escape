@@ -5,14 +5,20 @@ footer {
     justify-content: center;
     align-items    : center;
 
-    h3,
-    h4 {
+    h3 {
         font-family: Bungee Hairline;
         font-size  : 4vmin;
+        text-align : center;
         color      : var(--white);
         opacity    : 1;
         transition : opacity 5s ease;
+        margin     : 3.5vmin 0 0;
         cursor     : pointer;
+
+        .green {
+            font-family: Bungee Outline;
+            color      : var(--exitColor);
+        }
 
         &.hidden {
             opacity: 0;
@@ -21,16 +27,5 @@ footer {
         .isMobile & {
             font-size: 5vmin;
         }
-    }
-
-    h3 {
-        margin: 3.5vmin 0 0;
-    }
-
-    h4 {
-        position : absolute;
-        bottom   : 1vmin;
-        right    : 0;
-        font-size: 3vmin;
     }
 }
