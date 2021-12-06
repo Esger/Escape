@@ -7,6 +7,9 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 export class PusherCustomElement {
     @bindable blockSize;
     isVisible = false;
+    step = false;
+    direction = 1;
+    bolts = 0;
 
     constructor(eventAggregator, stateService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
@@ -24,11 +27,10 @@ export class PusherCustomElement {
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.position = this._stateService.getPusherPosition();
             this._addMoveListener();
+            // this.changeGender();
             this.isVisible = true;
-        })
-    }
-
-    attached() {
+        });
+        this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => this.bolts = bolts);
     }
 
     detached() {
@@ -36,6 +38,11 @@ export class PusherCustomElement {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
         this._gameStartSubscriber.dispose();
+        this._boltsCountSubscriber.dispose();
+    }
+
+    changeGender() {
+        this.gender = (this.gender == 'male') ? 'female' : 'male';
     }
 
     _addMoveListener() {
@@ -46,11 +53,13 @@ export class PusherCustomElement {
     }
 
     _doMove(newPosition) {
+        this.step = (this.step == 'step') ? '' : 'step';
         this.position = newPosition;
         this._eventAggregator.publish('move');
     }
 
     _moveIfPossible(key) {
+        this.lastKey = key;
         const direction = ['right', 'down', 'left', 'up'].indexOf(key);
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
@@ -61,7 +70,7 @@ export class PusherCustomElement {
             } else {
                 if (this._stateService.isFree(newPosition)) {
                     this._doMove(newPosition);
-                } else if (this._stateService.moveBrick(newPosition, vector)) {
+                } else if (this._stateService.moveBrick(newPosition, vector, (this.bolts > 0))) {
                     this._doMove(newPosition);
                 }
             }

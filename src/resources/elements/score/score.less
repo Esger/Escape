@@ -1,15 +1,22 @@
 score {
-    h2 {
+    width          : 100%;
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+
+    h2,
+    h3 {
         color      : var(--white);
-        margin     : 1vmin 0;
         font-family: 'Bungee Hairline';
+        font-size  : 8vmin;
     }
 
-    h1 {
-        font-size: 15vmin;
-    }
+    h3 {
+        font-size: 4vmin;
+        cursor   : pointer;
 
-    h2 {
-        font-size: 10vmin;
+        .isMobile & {
+            font-size: 5vmin;
+        }
     }
 }

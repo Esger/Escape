@@ -5,12 +5,12 @@
     <require from="elements/exits/exits"></require>
 
     <exits></exits>
-    <template if.bind="bricks.length">
-        <brick repeat.for="brick of bricks"
-               block-size.bind="blockSize"
-               brick.bind="brick">
-        </brick>
-    </template>
+
+    <brick repeat.for="brick of bricks"
+           block-size.bind="blockSize"
+           brick.bind="brick">
+    </brick>
+
     <pusher block-size.bind="blockSize"></pusher>
 
 </template>
