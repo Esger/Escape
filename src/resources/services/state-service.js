@@ -7,6 +7,7 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 export class StateService {
 
     _initialBricksCount = 100;
+    _maxBricksCount = 125;
     _bricksCount = this._initialBricksCount;
     _blockSize = 4;
     _boardSize = Math.round(80 / this._blockSize);
@@ -18,7 +19,7 @@ export class StateService {
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
-            this._bricksCount += 1;
+            this._bricksCount = Math.min(this._bricksCount + 1, this._maxBricksCount);
         });
         this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;

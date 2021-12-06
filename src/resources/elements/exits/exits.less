@@ -1,5 +1,4 @@
 exits {
-    --color        : lime;
     display        : flex;
     flex-direction : column;
     justify-content: space-between;
@@ -28,7 +27,7 @@ exits {
     width     : var(--exitSize);
     height    : var(--exitSize);
     transform : rotate(var(--angle, 45deg));
-    background: radial-gradient(at top left, var(--color), transparent var(--gradientSize));
+    background: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
     filter    : blur(.5vmin);
 
     &.exit-0 {
