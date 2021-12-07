@@ -12,10 +12,11 @@ export class Footer {
 
     attached() {
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._showMessage('Tap here when stuck'));
-        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
-            this._setHint();
+        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => this._setHint());
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this._showMessage('or hit enter/space');
+            this._wins = 0;
         });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showMessage('or hit enter/space'));
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this._resetHintTimeout());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._showMessage('or hit enter/space');
@@ -43,6 +44,7 @@ export class Footer {
                 break;
             case this._wins % 7 == 1:
                 this._showMessage('move into an unmoveable brick to destroy it 💥');
+                this._wins = 0;
                 break;
             default:
                 this._showMessage('escape through the <span class="green">exits</span>');

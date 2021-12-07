@@ -17,6 +17,8 @@ export class BrickCustomElement {
     }
 
     attached() {
+        this.left = this.brick.position[0];
+        this.top = this.brick.position[1];
         this._setBlocks();
         this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.brick.direction];
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
