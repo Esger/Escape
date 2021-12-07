@@ -141,7 +141,9 @@ export class StateService {
         const brick = this._bricks.find(brick => brick.index == index);
         this._setBothBlocks(brick, false);
         this._bricks.splice(index, 1);
-        this._bricks.forEach((brick, i) => brick.index = i); // re-index
+        setTimeout(() => {
+            this._bricks.forEach((brick, i) => brick.index = i); // re-index
+        }, 100);
     }
 
     _setBlock(position, occupied) {
