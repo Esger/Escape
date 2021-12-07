@@ -45,7 +45,7 @@ export class Footer {
                 this._showMessage('move into an unmoveable brick to destroy it 💥');
                 break;
             default:
-                this._showMessage('move through the <span class="green">exits</span>');
+                this._showMessage('escape through the <span class="green">exits</span>');
                 break;
         }
     }
