@@ -9,10 +9,10 @@ export class Exits {
         this._element = element;
         this.color = 'lime';
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this._element.style.setProperty('--color', 'red');
+            this._element.style.setProperty('--exitColor', 'red');
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._element.style.setProperty('--color', 'lime');
+            this._element.style.setProperty('--exitColor', 'lime');
         })
     }
 
