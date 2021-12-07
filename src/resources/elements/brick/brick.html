@@ -3,7 +3,9 @@
                  ${directionClass} 
                  ${gameOver ? 'gameOver' : ''}
                  ${visible ? '' : 'offScreen'}"
-          css="left: ${blockSize * brick.position[0]}vmin; top: ${blockSize * brick.position[1]}vmin;">
+          css="left: ${blockSize * left}vmin; 
+                top: ${blockSize * top}vmin;
+                transform:translate3d(${blockSize * (brick.position[0] - left)}vmin, ${blockSize * (brick.position[1] - top)}vmin, 0)">
     <require from="./brick.css"></require>
     <div repeat.for="block of brick.blocks"
          class="block"
