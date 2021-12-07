@@ -143,7 +143,7 @@ export class StateService {
         this._bricks.splice(index, 1);
         setTimeout(() => {
             this._bricks.forEach((brick, i) => brick.index = i); // re-index
-        }, 100);
+        }, 300);
     }
 
     _setBlock(position, occupied) {
