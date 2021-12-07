@@ -66,7 +66,9 @@ export class PusherCustomElement {
             const newPosition = this._stateService.sumVectors(this.position, vector);
             if (this._stateService.throughExit(newPosition)) {
                 this._doMove(newPosition);
-                this._eventAggregator.publish('win');
+                setTimeout(() => {
+                    this._eventAggregator.publish('win');
+                }, 200);
             } else {
                 if (this._stateService.isFree(newPosition)) {
                     this._doMove(newPosition);
