@@ -36,7 +36,10 @@ export class Score {
             this.bolts += this.level % 5 === 0 ? 1 : 0;
             this._eventAggregator.publish('boltsCount', this.bolts);
         });
-        this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => this.bolts--)
+        this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
+            this.bolts--;
+            this._eventAggregator.publish('boltsCount', this.bolts);
+        });
     }
 
     detached() {
