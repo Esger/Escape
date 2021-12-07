@@ -32,16 +32,16 @@ export class Footer {
 
     _setHint() {
         switch (true) {
-            case this._wins % 2 == 0:
+            case this._wins % 2 == 1:
                 this._showMessage('exiting is rewarded with 💚');
                 break;
-            case this._wins % 3 == 0:
+            case this._wins % 3 == 1:
                 this._showMessage('five 💚 buys a 💥');
                 break;
-            case this._wins % 5 == 0:
+            case this._wins % 5 == 1:
                 this._showMessage('💥 lets you destroy bricks');
                 break;
-            case this._wins % 7 == 0:
+            case this._wins % 7 == 1:
                 this._showMessage('move into an unmoveable brick to destroy it 💥');
                 break;
             default:
