@@ -20,6 +20,7 @@ export class Score {
                 this.score = 0;
                 this.level = 0;
                 this.bolts = 0;
+                this._eventAggregator.publish('boltsCount', this.bolts);
                 this._resetScore = false;
             }
         });
