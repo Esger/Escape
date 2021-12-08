@@ -4,12 +4,15 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 export class Score {
     score = 0;
     bolts = 0;
+    level = 0;
+
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
+        this._boltsUsed = 0;
         this._winScore = 25;
         this._levelScore = 5;
+        this._boltScore = -50;
         this._moveScore = -1;
-        this.level = 0;
         this._resetScore = true;
         this._getHighScore();
     }
@@ -40,7 +43,8 @@ export class Score {
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
-            this.bolts--;
+            this._boltsUsed++;
+            this.score += this._boltScore;
             this._publishBolts();
         });
     }
@@ -60,7 +64,7 @@ export class Score {
     }
 
     _publishBolts() {
-        this.bolts = Math.floor(this.level / 5);
+        this.bolts = Math.floor(this.level / 5) - this._boltsUsed;
         this._eventAggregator.publish('boltsCount', this.bolts);
     }
 
