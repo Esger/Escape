@@ -36,7 +36,6 @@ export class Score {
             this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
             this.level++;
-            this.bolts += this.level % 5 === 0 ? 1 : 0;
             this._publishBolts();
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
@@ -61,6 +60,7 @@ export class Score {
     }
 
     _publishBolts() {
+        this.bolts = Math.floor(this.level / 5);
         this._eventAggregator.publish('boltsCount', this.bolts);
     }
 
