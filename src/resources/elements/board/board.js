@@ -19,6 +19,9 @@ export class BoardCustomElement {
             this._removeBricks();
             this._addGameStartSubscription();
         });
+        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
+            this._getBricks(true);
+        });
         this._giveUpSubscristion = this._eventAggregator.subscribe('giveUp', _ => {
             this._removeBricks();
             this._addGameStartSubscription();
@@ -43,6 +46,8 @@ export class BoardCustomElement {
     detached() {
         this._gameStartSubscription.dispose();
         this._giveUpSubscristion.dispose();
+        this._retrySubscription.dispose();
+        this._isTouchDeviceSubscription.dispose();
     }
 
     _removeBricks() {
@@ -53,10 +58,10 @@ export class BoardCustomElement {
         })
     }
 
-    _getBricks() {
-        setTimeout(() => {
+    _getBricks(retry = false) {
+        setTimeout(_ => {
             // wacht tot bricks bepaald zijn en pusher geplaatst is.
-            this.bricks = this._stateService.getBricks();
+            this.bricks = this._stateService.getBricks(retry);
             // console.log(this.bricks.length);
         });
     }

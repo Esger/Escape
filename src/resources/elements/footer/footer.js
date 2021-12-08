@@ -25,6 +25,7 @@ export class Footer {
     }
 
     detached() {
+        this._isTouchDeviceSubscription.dispose();
         this._gameStartSubscrption.dispose();
         this._giveUpSubscription.dispose();
         this._moveSubscription.dispose();

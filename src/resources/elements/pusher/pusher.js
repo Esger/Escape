@@ -20,6 +20,9 @@ export class PusherCustomElement {
             this._moveSubscription.dispose();
             this.isVisible = false;
         });
+        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
+            this.position = this._stateService.getPusherPosition();
+        });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._moveSubscription.dispose();
             this.isVisible = false;
@@ -36,6 +39,7 @@ export class PusherCustomElement {
     detached() {
         this._moveSubscription && this._moveSubscription.dispose();
         this._winSubscriber.dispose();
+        this._retrySubscription.dispose();
         this._giveUpSubscriber.dispose();
         this._gameStartSubscriber.dispose();
         this._boltsCountSubscriber.dispose();

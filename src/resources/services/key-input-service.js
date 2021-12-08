@@ -13,7 +13,8 @@ export class KeyInputService {
             'left': 37,
             'up': 38,
             'right': 39,
-            'down': 40
+            'down': 40,
+            'r': 82
         };
         document.addEventListener('keydown', (event) => { this.handleKeyInput(event); }, true);
     }
@@ -41,6 +42,9 @@ export class KeyInputService {
                 break;
             case this._keys.escape:
                 this._eventAggregator.publish('giveUp');
+                break;
+            case this._keys.r:
+                this._eventAggregator.publish('retry');
                 break;
             default:
                 this._eventAggregator.publish('keyPressed', "somekey");

@@ -20,7 +20,7 @@ export class Score {
                 this.score = 0;
                 this.level = 0;
                 this.bolts = 0;
-                this._eventAggregator.publish('boltsCount', this.bolts);
+                this._publishBolts();
                 this._resetScore = false;
             }
         });
@@ -28,28 +28,40 @@ export class Score {
             this._resetScore = true;
             this._saveScores();
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
+        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
+            this.level -= this.level > 0 ? 1 : 0;
+            this._publishBolts();
+        })
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
             this.level++;
             this.bolts += this.level % 5 === 0 ? 1 : 0;
-            this._eventAggregator.publish('boltsCount', this.bolts);
+            this._publishBolts();
         });
+        this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this.bolts--;
-            this._eventAggregator.publish('boltsCount', this.bolts);
+            this._publishBolts();
         });
     }
 
     detached() {
-        this._moveSubscription.dispose();
+        this._gameStartSubscrption.dispose();
+        this._giveUpSubscription.dispose();
+        this._retrySubscription.dispose();
         this._winSubscription.dispose();
+        this._moveSubscription.dispose();
+        this._boltThrownSubscription.dispose();
     }
 
     resetHigh() {
         this.highScore = 0;
         localStorage.setItem('escape-score', this.highScore);
+    }
+
+    _publishBolts() {
+        this._eventAggregator.publish('boltsCount', this.bolts);
     }
 
     _getHighScore() {

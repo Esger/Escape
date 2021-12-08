@@ -39,7 +39,6 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
-        this._setPusherArea(true);
     }
 
     _setPusherArea(value) {
@@ -77,8 +76,13 @@ export class StateService {
         return exited;
     }
 
-    getBricks() {
-        this._initialize();
+    getBricks(retry) {
+        this._initializeBricks(retry);
+        if (retry) {
+            const tempBricks = this._originalBricks;
+            this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
+            this._originalBricks = tempBricks;
+        }
         return this._bricks;
     }
 
@@ -243,21 +247,33 @@ export class StateService {
         return positionFound;
     }
 
-    _initialize() {
+    _registerBricksOnBoard(bricks) {
+        bricks.forEach(brick => this._setBothBlocks(brick, true));
+    }
+
+    _initializeBricks(retry) {
         this._cleanGame();
-        for (let i = 0; i < this._bricksCount; i++) {
-            const brick = {
-                index: i,
-                position: [],
-                direction: undefined,
-                content: ''
+        if (!retry) {
+            this._setPusherArea(true);
+            for (let i = 0; i < this._bricksCount; i++) {
+                const brick = {
+                    index: i,
+                    position: [],
+                    direction: undefined,
+                    content: ''
+                }
+                if (this._findAndSetPosition(brick)) {
+                    this._setBlock(brick.position, true);
+                    this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                    this._bricks.push(brick);
+                };
             }
-            if (this._findAndSetPosition(brick)) {
-                this._setBlock(brick.position, true);
-                this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                this._bricks.push(brick);
-            };
+            this._setPusherArea(false);
+            setTimeout(_ => { // wacht tot bricks blocks hebben
+                this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
+            });
+        } else {
+            this._registerBricksOnBoard(this._originalBricks);
         }
-        this._setPusherArea(false);
     }
 }
