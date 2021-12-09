@@ -3,78 +3,70 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 
 @inject(EventAggregator)
 export class Footer {
-    _wins = 0;
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
+        this._messageIndex = 0;
+        this._messages = [
+            'escape through the <span class="green">exits</span>',
+            'Press Escape when stuck',
+            'press r to restart level',
+            'exiting is rewarded with 💚',
+            'push blocking bricks away',
+            'five 💚 buys a 💥',
+            '💥 lets you destroy bricks',
+            'move into an unmoveable brick to destroy it 💥',
+        ];
         this.showHint = false;
     }
 
     attached() {
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._showMessage('Tap here when stuck'));
-        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => this._setHint());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this._showMessage('or hit enter/space');
-            this._wins = 0;
+        this._setNextHint();
+        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => {
+            this._messages[1] = 'Tap here when stuck';
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', _ => this._resetHintTimeout());
-        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
+        this._addGameStartSubscription();
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this._addGameStartSubscription();
+            this._messageIndex = 0;
             this._showMessage('or hit enter/space');
-            this._wins++;
+        });
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
+            this._addGameStartSubscription();
+            this._showMessage('or hit enter/space');
+        });
+    }
+
+    _addGameStartSubscription() {
+        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
+            this._gameStartSubscrption.dispose();
+            this._setNextHint();
         });
     }
 
     detached() {
+        this._isTouchDeviceSubscription.dispose();
         this._gameStartSubscrption.dispose();
-        this._giveUpSubscription.dispose();
-        this._moveSubscription.dispose();
+        this._giveUpSubscription && this._giveUpSubscription.dispose();
         this._winSubscription.dispose();
     }
 
-    _setHint() {
-        switch (true) {
-            case this._wins % 2 == 1:
-                this._showMessage('exiting is rewarded with 💚');
-                break;
-            case this._wins % 3 == 1:
-                this._showMessage('five 💚 buys a 💥');
-                break;
-            case this._wins % 5 == 1:
-                this._showMessage('💥 lets you destroy bricks');
-                break;
-            case this._wins % 7 == 1:
-                this._showMessage('move into an unmoveable brick to destroy it 💥');
-                this._wins = 0;
-                break;
-            default:
-                this._showMessage('escape through the <span class="green">exits</span>');
-                break;
-        }
+    giveUp() {
+        this._eventAggregator.publish('giveUp');
+    }
+
+    _setNextHint() {
+        this._showMessage(this._messages[this._messageIndex]);
+        this._messageIndex = (this._messageIndex + 1) % this._messages.length;
     }
 
     _showMessage(message) {
-        const previousMessage = message;
         this.hint = message;
         this.showHint = true;
-        this._hintHideTimeoutHandle = setTimeout((previousHint) => {
+        clearTimeout(this._hintHideTimeoutHandle);
+        this._hintHideTimeoutHandle = setTimeout(_ => {
             this.showHint = false;
-            // this.hint = previousHint;
         }, 10000);
     }
 
-    _setHintTimeout() {
-        this._hintTimeoutHandle = setTimeout(() => {
-            this._showMessage('Press Escape when stuck');
-        }, 10000);
-    }
-
-    _unsetHintTimeout() {
-        clearTimeout(this._hintTimeoutHandle);
-    }
-
-    _resetHintTimeout() {
-        this.showHint = false;
-        this._unsetHintTimeout();
-        this._setHintTimeout();
-    }
 }
