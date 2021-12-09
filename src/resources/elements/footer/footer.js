@@ -58,7 +58,6 @@ export class Footer {
     _setNextHint() {
         this._showMessage(this._messages[this._messageIndex]);
         this._messageIndex = (this._messageIndex + 1) % this._messages.length;
-        console.trace(this._messageIndex);
     }
 
     _showMessage(message) {
