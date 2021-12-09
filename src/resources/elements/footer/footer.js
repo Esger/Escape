@@ -18,6 +18,7 @@ export class Footer {
             'move into an unmoveable brick to destroy it 💥',
         ];
         this.showHint = false;
+        this._wins = 0;
     }
 
     attached() {
@@ -33,13 +34,14 @@ export class Footer {
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._addGameStartSubscription();
+            (this._wins == 0) && this._messages.shift();
             this._showMessage('or hit enter/space');
+            this._wins++;
         });
     }
 
     _addGameStartSubscription() {
-        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
-            this._gameStartSubscrption.dispose();
+        this._gameStartSubscrption = this._eventAggregator.subscribeOnce('gameStart', _ => {
             this._setNextHint();
         });
     }
