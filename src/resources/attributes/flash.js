@@ -4,18 +4,18 @@ import { inject, bindable } from 'aurelia-framework';
 export class FlashCustomAttribute {
 
     constructor(element) {
-        this.element = element;
-        this.element.classList.add('flash');
-        setTimeout(() => {
-            console.log(this.value);
-        });
+        this._element = element;
+        this._element.classList.add('flash');
     }
 
     flash(className) {
-        console.log(className);
-        this.element.classList.add(className);
-        setTimeout(() => {
-            this.element.classList.remove(className);
+        if (this._flasTimeoutHandle) {
+            clearTimeout(this._flasTimeoutHandle);
+            this._element.classList.remove('flash--in', 'flash--out');
+        }
+        this._element.classList.add(className);
+        this._flasTimeoutHandle = setTimeout(() => {
+            this._element.classList.remove(className);
         }, 250);
     }
 
