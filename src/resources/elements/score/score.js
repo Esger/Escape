@@ -5,6 +5,7 @@ export class Score {
     score = 0;
     bolts = 0;
     level = 0;
+    flast = false;
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
@@ -12,7 +13,7 @@ export class Score {
         this._winScore = 25;
         this._levelScore = 5;
         this._boltScore = -50;
-        this._moveScore = -1;
+        this._moveScore = 1;
         this._resetScore = true;
         this._getHighScore();
     }
@@ -41,7 +42,9 @@ export class Score {
             this.level++;
             this._publishBolts();
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', _ => this.score += this._moveScore);
+        this._moveSubscription = this._eventAggregator.subscribe('move', _ => {
+            this.score -= this._moveScore;
+        });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
