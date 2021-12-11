@@ -3,7 +3,7 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, StateService, DirectionToVectorValueConverter)
+@inject(EventAggregator, Element, StateService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable blockSize;
     isVisible = false;
@@ -11,7 +11,9 @@ export class PusherCustomElement {
     direction = 1;
     bolts = 0;
 
-    constructor(eventAggregator, stateService, directionToVectorValueConverter) {
+    constructor(eventAggregator, element, stateService, directionToVectorValueConverter) {
+        this._enter = 0;
+        this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
@@ -19,19 +21,29 @@ export class PusherCustomElement {
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription.dispose();
             this.isVisible = false;
+            this.lastKey = 'down';
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this.position = this._stateService.getPusherPosition();
+            this.lastKey = 'down';
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._moveSubscription.dispose();
             this.isVisible = false;
+            this.lastKey = 'down';
         });
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.position = this._stateService.getPusherPosition();
+            this.isVisible = true;
+            this.direction = 1;
+            setTimeout(() => {
+                this._element.classList.add('flash', 'flash--in');
+                setTimeout(() => {
+                    this._element.classList.remove('flash', 'flash--in');
+                }, 250);
+            });
             this._addMoveListener();
             // this.changeGender();
-            this.isVisible = true;
         });
         this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => this.bolts = bolts);
     }
