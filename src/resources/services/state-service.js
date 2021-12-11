@@ -28,8 +28,8 @@ export class StateService {
     }
 
     _adjustSizes() {
-        this._blockSize = 4.5;
-        this._boardSize = Math.round(90 / this._blockSize);
+        this._blockSize = 5;
+        this._boardSize = Math.round(100 / this._blockSize);
         this._cleanGame();
     }
 
