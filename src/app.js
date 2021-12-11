@@ -24,7 +24,7 @@ export class App {
         const isSmallScreen = Math.min(window.innerHeight, window.innerWidth) < 800;
         if (isTouchDevice && isSmallScreen) {
             this._eventAggregator.publish('isTouchDevice');
-            document.body.style.setProperty('--maxWidth', 90 + "vmin");
+            document.body.style.setProperty('--maxWidth', 100 + "vmin");
             document.body.classList.add('isMobile');
         }
     }
