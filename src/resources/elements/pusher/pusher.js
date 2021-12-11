@@ -19,7 +19,7 @@ export class PusherCustomElement {
         this._directionToVector = directionToVectorValueConverter;
         this.position = this._stateService.getPusherPosition();
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
-            this._moveSubscription.dispose();
+            this._moveSubscription?.dispose();
             this.isVisible = false;
             this.lastKey = 'down';
         });
@@ -28,7 +28,7 @@ export class PusherCustomElement {
             this.lastKey = 'down';
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
-            this._moveSubscription.dispose();
+            this._moveSubscription?.dispose();
             this.isVisible = false;
             this.lastKey = 'down';
         });

@@ -17,6 +17,17 @@ export class GameStart {
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setIsTouchDevice());
         this._addStartSubscription();
+        this._flashHint();
+    }
+
+    _flashHint() {
+        setTimeout(() => {
+            const keysHint = document.querySelectorAll('.keysHint')[0];
+            keysHint.classList.add('flash', 'flash--in');
+            setTimeout(() => {
+                keysHint.classList.remove('flash', 'flash--in');
+            }, 200);
+        }, 300);
     }
 
     _setIsTouchDevice() {
@@ -35,12 +46,14 @@ export class GameStart {
         this.gameStartVisible = true;
         this.title = 'Escaped'
         this._addStartSubscription();
+        this._flashHint();
     }
 
     _showStuckScreen() {
         this.gameStartVisible = true;
         this.title = 'Stuck'
         this._addStartSubscription();
+        this._flashHint();
     }
 
     _addStartSubscription() {
