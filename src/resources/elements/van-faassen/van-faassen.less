@@ -1,0 +1,16 @@
+van-faassen {
+    position         : absolute;
+    top              : 48vmin;
+    left             : 48vmin;
+    width            : 4.5vmin;
+    height           : 4.5vmin;
+    background-image : url(./van-faassen.webp);
+    background-repeat: no-repeat;
+    background-size  : cover;
+    transition       : all 300ms ease-out;
+
+    &.hi {
+        transform                 : scale3d(2.7, 2.7, 1) rotate(13deg);
+        transition-timing-function: ease-in;
+    }
+}
