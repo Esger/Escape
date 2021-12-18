@@ -34,7 +34,7 @@ game-start {
         font-size: 12vmin;
 
         &.animating {
-            transform: translateX(-120vmin);
+            transform: translate3d(-120vmin, 0, 0);
         }
     }
 
@@ -42,7 +42,7 @@ game-start {
         font-size: 8vmin;
 
         &.animating {
-            transform: translateX(120vmin);
+            transform: translate3d(120vmin, 0, 0);
         }
     }
 
@@ -51,7 +51,7 @@ game-start {
         font-family: 'Bungee Outline';
 
         &.animating {
-            transform: scale(0);
+            transform: scale3d(0, 0, 0);
         }
 
         .isMobile & {
