@@ -71,6 +71,14 @@ export class StateService {
         ];
     }
 
+    _setPositionFaassen() {
+        this._eventAggregator.publish('positionFaassen', [12, 12]);
+    }
+
+    getPositionFaassen() {
+        this._setPositionFaassen();
+    }
+
     throughExit(position) {
         const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
         return exited;
