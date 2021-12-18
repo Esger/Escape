@@ -15,6 +15,7 @@ export class VanFaassen {
     }
     attached() {
         this._eventAggregator.subscribe('gameStart', _ => this._getPositionFaassen());
+        this.blockSize = this._stateService.getBlockSize();
     }
     _getPositionFaassen() {
         this._eventAggregator.subscribeOnce('positionFaassen', position => {

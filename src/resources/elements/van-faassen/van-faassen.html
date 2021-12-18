@@ -1,7 +1,7 @@
 <template class="${inYourFace ? 'hi' : ''}"
           click.delegate="sayHi()"
-          css="left: ${4 * position[1]}vmin; 
-               top: ${4 * position[0]}vmin;
+          css="left: ${blockSize * position[1]}vmin; 
+               top: ${blockSize * position[0]}vmin;
                opacity: ${showMe ? 1 : 0}">
     <require from="./van-faassen.css"></require>
 </template>
