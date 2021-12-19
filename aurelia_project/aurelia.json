@@ -8,7 +8,8 @@
         "attributes": "resources/attributes",
         "valueConverters": "resources/value-converters",
         "bindingBehaviors": "resources/binding-behaviors",
-        "services": "resources/services"
+        "services": "resources/services",
+        "workers": "resources/workers"
     },
     "transpiler": {
         "id": "babel",

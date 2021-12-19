@@ -1,9 +1,10 @@
-import { inject } from 'aurelia-framework';
+import { inject, bindable } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
 
 @inject(Element, EventAggregator, StateService)
 export class VanFaassen {
+    @bindable position;
     constructor(element, eventAggregator, stateService) {
         this._element = element;
         this._eventAggregator = eventAggregator;
@@ -11,26 +12,13 @@ export class VanFaassen {
         this.inYourFace = false;
         this.showMe = false;
         this.state = 0;
-        this.position = [-10, -10];
     }
     attached() {
-        this._eventAggregator.subscribe('gameStart', _ => this._getPositionFaassen());
         this.blockSize = this._stateService.getBlockSize();
-    }
-    _getPositionFaassen() {
-        this._eventAggregator.subscribeOnce('positionFaassen', position => {
-            this._element.ontransitionend = (_ => {
-                this._unsetTransitionendListener();
-                this.showMe = true;
-                setTimeout(() => {
-                    this.sayHi();
-                });
-            });
-            this.position = [...position];
-        });
+        this.showMe = true;
         setTimeout(() => {
-            this._stateService.getPositionFaassen();
-        }, 1000);
+            this.sayHi();
+        });
     }
     sayHi() {
         this._setOntransitionend();
