@@ -5,10 +5,23 @@ van-faassen {
     background-image : url(./van-faassen.webp);
     background-repeat: no-repeat;
     background-size  : cover;
-    transition       : all 300ms ease-out;
 
     &.hi {
+        animation: sayHi 300ms ease-out forwards;
+    }
+}
+
+@keyframes sayHi {
+    0% {
+        transform: scale3d(1, 1, 1) rotate(0);
+    }
+
+    50% {
         transform                 : scale3d(2.7, 2.7, 1) rotate(13deg);
         transition-timing-function: ease-in;
+    }
+
+    100% {
+        transform: scale3d(1, 1, 1) rotate(0);
     }
 }

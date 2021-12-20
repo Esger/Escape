@@ -26,6 +26,9 @@ export class StateService {
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
         });
+        this._faassenPositionsSubscription = this._eventAggregator.subscribe('faassenPositions', positions => {
+            this.setFaassens(positions);
+        });
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
 
@@ -47,6 +50,8 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
+        this.setFaassens([]);
+        this._eventAggregator.publish('faassenPositions', []);
     }
 
     _setPusherArea(value) {
@@ -72,10 +77,10 @@ export class StateService {
             [[half, -1], [half - 1, -1]]
         ];
         this._beforeExits = [
-            [full - 1, half], [full - 1, half - 1],
-            [half, full - 1], [half - 1, full - 1],
-            [0, half], [0, half - 1],
-            [half, 0], [half - 1, 0]
+            [[full - 1, half], [full - 1, half - 1]],
+            [[half, full - 1], [half - 1, full - 1]],
+            [[0, half], [0, half - 1]],
+            [[half, 0], [half - 1, 0]]
         ];
     }
 
@@ -98,6 +103,24 @@ export class StateService {
 
     getPusherPosition() {
         return this._pusher.position;
+    }
+
+    setFaassens(positions) {
+        this.faassens = positions;
+        this.faassens.forEach(position => { this._registerBlock(position, true) });
+    }
+
+    moveFaassen(index, position) {
+        this._registerBlock(this.faassens[index], false);
+        this.faassens[index] = position;
+        this._registerBlock(position, true)
+    }
+
+    faassenIsBlocking(newPosition) {
+        const blockingFaassen = this.faassens?.findIndex(faassen => faassen.every((coordinate, i) => {
+            return coordinate == newPosition[i];
+        }));
+        return blockingFaassen;
     }
 
     moveBrick(position, vector, hasBolts = false) {
@@ -223,7 +246,7 @@ export class StateService {
     }
 
     _isBlockingExit(positions) {  // array of positions [x,y]
-        const isBlockingExit = positions.some((pos) => this._beforeExits.some((e) => this._areEqual([e, pos])));
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((exit) => exit.some(ePos => this._areEqual([ePos, pos]))));
         return isBlockingExit;
     }
 

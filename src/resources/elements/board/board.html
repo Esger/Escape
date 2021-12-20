@@ -15,6 +15,7 @@
     <pusher block-size.bind="blockSize"></pusher>
 
     <van-faassen repeat.for="faassen of faassens"
-                 position.one-time="faassen"></van-faassen>
+                 position.bind="faassen"
+                 index.bind="$index"></van-faassen>
 
 </template>

@@ -42,8 +42,8 @@ const copyMazeWithMarks = function () {
     });
 };
 
-const findPositionHalfway = function (targetPositions) {
-    const isTargetPosition = (xy) => targetPositions.some(position => position.every((coordinate, i) => coordinate == xy[i]));
+const findPositionHalfway = function (targetPositionSets) {
+    const isTargetPosition = (xy) => targetPositionSets.some(positionSet => positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i])));
     const queue = [];
     const targets = [];
     const results = [];
@@ -51,10 +51,8 @@ const findPositionHalfway = function (targetPositions) {
     queue.push(root);
     while (queue.length > 0) {
         let node = queue.shift();
-        console.count('shift');
         node.children.forEach(child => {
             queue.push(child);
-            console.count('push');
         });
         if (isTargetPosition(node.xy)) {
             targets.push(node);
@@ -123,7 +121,6 @@ onmessage = function (e) {
     let message = e.data.message;
     switch (message) {
         case 'initMaze':
-            console.log(e.data);
             initVariables(e.data);
             break;
         case 'getPositionHalfway':
