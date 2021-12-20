@@ -7,7 +7,7 @@ export class MazeWorkerService {
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
-        this._mazeWorker = new Worker('./src/resources/workers/maze-worker.js');
+        this._mazeWorker = new Worker('./assets/workers/maze-worker.js');
         this._mazeWorker.onmessage = (event) => {
             if (event.data.message == 'faassenPositions' && event.data.positions.length) {
                 this._eventAggregator.publish('faassenPositions', event.data.positions);
