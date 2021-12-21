@@ -10,6 +10,7 @@ export class PusherCustomElement {
     step = false;
     direction = 1;
     bolts = 0;
+    track = [];
 
     constructor(eventAggregator, element, stateService, directionToVectorValueConverter) {
         this._enter = 0;
@@ -25,6 +26,7 @@ export class PusherCustomElement {
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this.position = this._stateService.getPusherPosition();
+            this.track = [];
             this.lastKey = 'down';
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
@@ -34,6 +36,7 @@ export class PusherCustomElement {
         });
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
             this.position = this._stateService.getPusherPosition();
+            this.track = [];
             this.isVisible = true;
             this.direction = 1;
             setTimeout(() => {
@@ -68,10 +71,22 @@ export class PusherCustomElement {
         });
     }
 
-    _doMove(newPosition) {
+    _step() {
         this.step = (this.step == 'step') ? '' : 'step';
-        this.position = newPosition;
         this._eventAggregator.publish('move');
+    }
+
+    _doMove(newPosition) {
+        this.track.push([...this.position]);
+        this.position = newPosition;
+        this._step();
+    }
+
+    _backup(faassenIndex) {
+        const currentPosition = [...this.position];
+        this.position = this.track.length ? this.track.pop() : this.position;
+        this._eventAggregator.publish('followMe', { position: currentPosition, index: faassenIndex });
+        this._step();
     }
 
     _moveIfPossible(key) {
@@ -86,7 +101,10 @@ export class PusherCustomElement {
                     this._eventAggregator.publish('win');
                 }, 200);
             } else {
-                if (this._stateService.isFree(newPosition)) {
+                const blockingFaassen = this._stateService.faassenIsBlocking(newPosition);
+                if (blockingFaassen > -1) {
+                    this._backup(blockingFaassen);
+                } else if (this._stateService.isFree(newPosition)) {
                     this._doMove(newPosition);
                 } else if (this._stateService.moveBrick(newPosition, vector, (this.bolts > 0))) {
                     this._doMove(newPosition);
