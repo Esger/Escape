@@ -18,7 +18,14 @@ brick {
         display        : flex;
         align-items    : center;
         justify-content: center;
+
+        &.hasCracks {
+            background-image : url(./cracks.webp);
+            background-repeat: no-repeat;
+            background-size  : 500%;
+        }
     }
+
 
     &.offScreen {
         transform: translate3d(0, -100vh, 0) !important;

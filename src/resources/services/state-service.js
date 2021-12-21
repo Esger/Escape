@@ -112,7 +112,11 @@ export class StateService {
                 this._setBothBlocks(brick, true);
                 return true;
             } else {
-                hasBolts && this._throwBolt(position);
+                if (brick.bumpedIn) {
+                    hasBolts && this._throwBolt(position);
+                } else {
+                    brick.bumpedIn = true;
+                }
             }
         }
         return false;
