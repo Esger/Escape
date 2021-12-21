@@ -11,6 +11,7 @@ export class VanFaassen {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService
         this.showMe = false;
+        this.inYourFace = false;
     }
     attached() {
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
@@ -32,15 +33,18 @@ export class VanFaassen {
         this.blockSize = this._stateService.getBlockSize();
         this.showMe = true;
         setTimeout(() => {
-            this.inYourFace = true;
-            this._element.ontransitionend = (_ => {
-                this.inYourFace = false;
-            });
+            this.sayHi();
         });
     }
     detached() {
         this._winSubscription.dispose();
         this._giveUpSubscription.dispose();
         this._followMeSubscription.dispose();
+    }
+    sayHi() {
+        this._element.addEventListener('animationend', _ => {
+            this.inYourFace = false;
+        });
+        this.inYourFace = true;
     }
 }
