@@ -27,9 +27,6 @@ export class BoardCustomElement {
             this._addGameStartSubscription();
         });
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setBlockSize());
-        this._faassenPositionsSubscription = this._eventAggregator.subscribe('faassenPositions', positions => {
-            this.faassens = positions;
-        });
     }
 
     _setBlockSize() {
@@ -51,7 +48,6 @@ export class BoardCustomElement {
         this._giveUpSubscristion.dispose();
         this._retrySubscription.dispose();
         this._isTouchDeviceSubscription.dispose();
-        this._faassenPositionsSubscription.dispose();
     }
 
     _removeBricks() {
@@ -66,7 +62,6 @@ export class BoardCustomElement {
         setTimeout(_ => {
             // wacht tot bricks bepaald zijn en pusher geplaatst is.
             this.bricks = this._stateService.getBricks(retry);
-            // console.log(this.bricks.length);
         });
     }
 

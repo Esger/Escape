@@ -7,9 +7,10 @@ import { VectorToDirectionValueConverter } from "resources/value-converters/vect
 @inject(EventAggregator, MazeWorkerService, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _initialBricksCount = 100;
-    _maxBricksCount = 125;
+    _initialBricksCount = 80;
+    _maxBricksCount = 120;
     _bricksCount = this._initialBricksCount;
+    _bricksIncrement = 2;
     _blockSize = 4;
     _boardSize = Math.round(80 / this._blockSize);
 
@@ -21,13 +22,11 @@ export class StateService {
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
-            this._bricksCount = Math.min(this._bricksCount + 1, this._maxBricksCount);
+            this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
+            console.log(this._bricksCount);
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
-        });
-        this._faassenPositionsSubscription = this._eventAggregator.subscribe('faassenPositions', positions => {
-            this.setFaassens(positions);
         });
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
@@ -50,8 +49,7 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
-        this.setFaassens([]);
-        this._eventAggregator.publish('faassenPositions', []);
+        // this._eventAggregator.publish('throughPositions', []);
     }
 
     _setPusherArea(value) {
@@ -103,24 +101,6 @@ export class StateService {
 
     getPusherPosition() {
         return this._pusher.position;
-    }
-
-    setFaassens(positions) {
-        this.faassens = positions;
-        this.faassens.forEach(position => { this._registerBlock(position, true) });
-    }
-
-    moveFaassen(index, position) {
-        this._registerBlock(this.faassens[index], false);
-        this.faassens[index] = position;
-        this._registerBlock(position, true)
-    }
-
-    faassenIsBlocking(newPosition) {
-        const blockingFaassen = this.faassens?.findIndex(faassen => faassen.every((coordinate, i) => {
-            return coordinate == newPosition[i];
-        }));
-        return blockingFaassen;
     }
 
     moveBrick(position, vector, hasBolts = false) {
@@ -186,7 +166,9 @@ export class StateService {
     }
 
     _registerBlock(position, occupied) {
-        this._blocks[position[1]][position[0]] = occupied;
+        if (this._withinBounds(position)) {
+            this._blocks[position[1]][position[0]] = occupied;
+        }
     }
 
     _registerBothBlocks(brick, occupied) {
@@ -282,35 +264,65 @@ export class StateService {
         return positionFound;
     }
 
+    _findDirection(position) {
+        for (let direction = 0; direction < 4; direction++) {
+            if (this._brickSpaceIsFree(position, direction)) {
+                return direction;
+            }
+        }
+        return false;
+    }
+
     _registerBricks(bricks) {
         bricks.forEach(brick => this._registerBothBlocks(brick, true));
     }
 
-    _initializeBricks(retry) {
+    _newBrick(i) {
+        const brick = {
+            index: i,
+            position: [],
+            direction: undefined,
+            content: ''
+        }
+        return brick;
+    }
+
+    async _initializeBricks(retry) {
         this._cleanGame();
         if (!retry) {
             this._setPusherArea(true);
+            // find random places for bricks
             for (let i = 0; i < this._bricksCount; i++) {
-                const brick = {
-                    index: i,
-                    position: [],
-                    direction: undefined,
-                    content: ''
-                }
+                const brick = this._newBrick(i);
                 if (this._findAndSetPosition(brick)) {
                     this._registerBlock(brick.position, true);
                     this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
                     this._bricks.push(brick);
-                };
+                }
             }
             this._setPusherArea(false);
+            // block the throughs
+            let throughs = [];
+            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+            while (throughs && throughs.length) {
+                const brick = this._newBrick(this._bricks.length + 1);
+                brick.position = throughs[0];
+                const direction = this._findDirection(brick.position);
+                if (direction !== false) {
+                    brick.direction = direction;
+                    this._registerBlock(brick.position, true);
+                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                    this._bricks.push(brick);
+                }
+                throughs = [];
+                throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+            }
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
             });
         } else {
             this._registerBricks(this._originalBricks);
         }
-        this._mazeWorkerService.initMazeWorker(this._blocks);
-        this._mazeWorkerService.askPositionFaassen(this._pusher.position, this._beforeExits);
+        console.log(this._bricks.length);
     }
 }

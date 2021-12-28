@@ -3,7 +3,6 @@
     <require from="elements/brick/brick"></require>
     <require from="elements/pusher/pusher"></require>
     <require from="elements/exits/exits"></require>
-    <require from="elements/van-faassen/van-faassen"></require>
 
     <exits></exits>
 
@@ -13,9 +12,5 @@
     </brick>
 
     <pusher block-size.bind="blockSize"></pusher>
-
-    <van-faassen repeat.for="faassen of faassens"
-                 position.bind="faassen"
-                 index.bind="$index"></van-faassen>
 
 </template>

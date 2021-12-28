@@ -43,7 +43,7 @@ const copyMazeWithMarks = function () {
 };
 
 const findPositionHalfway = function (targetPositionSets) {
-    const isTargetPosition = (xy) => targetPositionSets.some(positionSet => positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i])));
+    const isTargetPosition = (xy) => xy && targetPositionSets.some(positionSet => positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i])));
     const queue = [];
     const targets = [];
     const results = [];
@@ -56,6 +56,7 @@ const findPositionHalfway = function (targetPositionSets) {
         });
         if (isTargetPosition(node.xy)) {
             targets.push(node);
+            break;
         }
     }
     if (targets.length) {
@@ -72,28 +73,27 @@ const findPositionHalfway = function (targetPositionSets) {
 };
 
 const getNeighbourXY = function (xy, direction) {
-    const neighbourPosition = xy.map((xy, i) => {
+    const neighbourPosition = xy?.map((xy, i) => {
         return xy += directions[direction][i];
     });
-    const withinBounds = neighbourPosition.every(coord => {
+    const withinBounds = neighbourPosition?.every(coord => {
         return coord >= 0 && coord < cells.length;
     });
     return withinBounds ? neighbourPosition : false;
 };
 
 const getPositionHalfway = function (data) {
-    const position = data.position;
-    searchTree = buildBFTree(position, null); // TODO: kan ook in initVariables
-    const targetPositions = findPositionHalfway(data.targetPositions);
-    sendFeedBack('faassenPositions', targetPositions);
-};
-
-const initVariables = function (data) {
     cells = data.cells;
+    const position = data.position;
+    searchTree = buildBFTree(position, null);
+    const targetPositions = findPositionHalfway(data.targetPositions);
+    sendFeedBack('throughPositions', targetPositions);
 };
 
 const markCell = function (xy) {
-    markedCells[xy[1]][xy[0]] = true;
+    if (xy) {
+        markedCells[xy[1]][xy[0]] = true;
+    }
 };
 
 const sendFeedBack = function (message, positions) {
@@ -114,15 +114,13 @@ let treeNode = function (parent, xy, depth) {
 };
 
 let unMarkedCell = function (xy) {
-    return !markedCells[xy[1]][xy[0]];
+    const withinBounds = xy.every(coordinate => coordinate >= 0 && coordinate < markedCells.length);
+    return withinBounds && !markedCells[xy[1]][xy[0]];
 };
 
 onmessage = function (e) {
     let message = e.data.message;
     switch (message) {
-        case 'initMaze':
-            initVariables(e.data);
-            break;
         case 'getPositionHalfway':
             getPositionHalfway(e.data);
             break;
