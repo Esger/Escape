@@ -68,10 +68,14 @@ export class PusherCustomElement {
         });
     }
 
-    _doMove(newPosition) {
+    _step() {
         this.step = (this.step == 'step') ? '' : 'step';
-        this.position = newPosition;
         this._eventAggregator.publish('move');
+    }
+
+    _doMove(newPosition) {
+        this.position = newPosition;
+        this._step();
     }
 
     _moveIfPossible(key) {

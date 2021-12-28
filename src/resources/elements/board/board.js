@@ -62,7 +62,6 @@ export class BoardCustomElement {
         setTimeout(_ => {
             // wacht tot bricks bepaald zijn en pusher geplaatst is.
             this.bricks = this._stateService.getBricks(retry);
-            // console.log(this.bricks.length);
         });
     }
 

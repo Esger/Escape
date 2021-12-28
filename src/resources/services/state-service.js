@@ -1,30 +1,40 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
+import { MazeWorkerService } from 'services/maze-worker-service';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 import { VectorToDirectionValueConverter } from "resources/value-converters/vector-to-direction-value-converter";
 
-@inject(EventAggregator, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
+@inject(EventAggregator, MazeWorkerService, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
 export class StateService {
 
-    _initialBricksCount = 100;
-    _maxBricksCount = 125;
+    _initialBricksCount = 80;
+    _maxBricksCount = 120;
     _bricksCount = this._initialBricksCount;
+    _bricksIncrement = 2;
     _blockSize = 4;
     _boardSize = Math.round(80 / this._blockSize);
 
-    constructor(eventAggregator, directionToVectorValueConverter, vectorToDirectionValueConverter) {
+    constructor(eventAggregator, mazeWorkerService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAggregator = eventAggregator;
+        this._mazeWorkerService = mazeWorkerService
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
-        this.winSubscriber = this._eventAggregator.subscribe('win', _ => {
-            this._bricksCount = Math.min(this._bricksCount + 1, this._maxBricksCount);
+        this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
+            this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
+            console.log(this._bricksCount);
         });
-        this.giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+        this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
         });
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
+    }
+
+    detached() {
+        this._winSubscriber.dispose();
+        this._giveUpSubscriber.dispose();
+        this._isTouchDeviceSubscription.dispose();
     }
 
     _adjustSizes() {
@@ -39,6 +49,7 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
+        // this._eventAggregator.publish('throughPositions', []);
     }
 
     _setPusherArea(value) {
@@ -48,7 +59,7 @@ export class StateService {
         for (; left <= maxLeft; left++) {
             let top = this._pusher.position[1] - 1;
             for (; top <= maxTop; top++) {
-                this._setBlock([left, top], value);
+                this._registerBlock([left, top], value);
             }
         }
     }
@@ -64,10 +75,10 @@ export class StateService {
             [[half, -1], [half - 1, -1]]
         ];
         this._beforeExits = [
-            [full - 1, half], [full - 1, half - 1],
-            [half, full - 1], [half - 1, full - 1],
-            [0, half], [0, half - 1],
-            [half, 0], [half - 1, 0]
+            [[full - 1, half], [full - 1, half - 1]],
+            [[half, full - 1], [half - 1, full - 1]],
+            [[0, half], [0, half - 1]],
+            [[half, 0], [half - 1, 0]]
         ];
     }
 
@@ -107,9 +118,9 @@ export class StateService {
                 spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space));
             }
             if (spaceBehindBrickIsFree) {
-                this._setBothBlocks(brick, false);
+                this._registerBothBlocks(brick, false);
                 brick.position = this.sumVectors(brick.position, vector);
-                this._setBothBlocks(brick, true);
+                this._registerBothBlocks(brick, true);
                 return true;
             } else {
                 if (brick.bumpedIn) {
@@ -147,21 +158,23 @@ export class StateService {
 
     removeBrick(index) {
         const brick = this._bricks.find(brick => brick.index == index);
-        this._setBothBlocks(brick, false);
+        this._registerBothBlocks(brick, false);
         this._bricks.splice(index, 1);
         setTimeout(() => {
             this._bricks.forEach((brick, i) => brick.index = i); // re-index
         }, 300);
     }
 
-    _setBlock(position, occupied) {
-        this._blocks[position[1]][position[0]] = occupied;
+    _registerBlock(position, occupied) {
+        if (this._withinBounds(position)) {
+            this._blocks[position[1]][position[0]] = occupied;
+        }
     }
 
-    _setBothBlocks(brick, occupied) {
+    _registerBothBlocks(brick, occupied) {
         brick.blocks.forEach(block => {
             const position = this.sumVectors(brick.position, block);
-            this._setBlock(position, occupied);
+            this._registerBlock(position, occupied);
         });
     }
 
@@ -219,7 +232,7 @@ export class StateService {
     }
 
     _isBlockingExit(positions) {  // array of positions [x,y]
-        const isBlockingExit = positions.some((pos) => this._beforeExits.some((e) => this._areEqual([e, pos])));
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((exit) => exit.some(ePos => this._areEqual([ePos, pos]))));
         return isBlockingExit;
     }
 
@@ -251,33 +264,65 @@ export class StateService {
         return positionFound;
     }
 
-    _registerBricksOnBoard(bricks) {
-        bricks.forEach(brick => this._setBothBlocks(brick, true));
+    _findDirection(position) {
+        for (let direction = 0; direction < 4; direction++) {
+            if (this._brickSpaceIsFree(position, direction)) {
+                return direction;
+            }
+        }
+        return false;
     }
 
-    _initializeBricks(retry) {
+    _registerBricks(bricks) {
+        bricks.forEach(brick => this._registerBothBlocks(brick, true));
+    }
+
+    _newBrick(i) {
+        const brick = {
+            index: i,
+            position: [],
+            direction: undefined,
+            content: ''
+        }
+        return brick;
+    }
+
+    async _initializeBricks(retry) {
         this._cleanGame();
         if (!retry) {
             this._setPusherArea(true);
+            // find random places for bricks
             for (let i = 0; i < this._bricksCount; i++) {
-                const brick = {
-                    index: i,
-                    position: [],
-                    direction: undefined,
-                    content: ''
-                }
+                const brick = this._newBrick(i);
                 if (this._findAndSetPosition(brick)) {
-                    this._setBlock(brick.position, true);
-                    this._setBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                    this._registerBlock(brick.position, true);
+                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
                     this._bricks.push(brick);
-                };
+                }
             }
             this._setPusherArea(false);
+            // block the throughs
+            let throughs = [];
+            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+            while (throughs && throughs.length) {
+                const brick = this._newBrick(this._bricks.length + 1);
+                brick.position = throughs[0];
+                const direction = this._findDirection(brick.position);
+                if (direction !== false) {
+                    brick.direction = direction;
+                    this._registerBlock(brick.position, true);
+                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                    this._bricks.push(brick);
+                }
+                throughs = [];
+                throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+            }
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
             });
         } else {
-            this._registerBricksOnBoard(this._originalBricks);
+            this._registerBricks(this._originalBricks);
         }
+        console.log(this._bricks.length);
     }
 }
