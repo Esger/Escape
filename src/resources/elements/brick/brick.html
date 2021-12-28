@@ -1,0 +1,16 @@
+<template class="brick 
+                 ${isOdd(brick.direction) ? 'vertical' : 'horizontal'}
+                 ${directionClass} 
+                 ${gameOver ? 'gameOver' : ''}
+                 ${visible ? '' : 'offScreen'}"
+          css="left: ${blockSize * left}vmin; 
+                top: ${blockSize * top}vmin;
+                transform:translate3d(${blockSize * (brick.position[0] - left)}vmin, ${blockSize * (brick.position[1] - top)}vmin, 0)">
+    <require from="./brick.css"></require>
+    <div repeat.for="block of brick.blocks"
+         class="block
+                ${brick.bumpedIn ? 'hasCracks' : ''}"
+         css="left: ${blockSize * block[0]}vmin; 
+              top: ${blockSize * block[1]}vmin;
+              background-position: ${25 * ((left + block[1]) % 5)}% ${50 * ((top + block[0]) % 3)}%">${brick.content}</div>
+</template>

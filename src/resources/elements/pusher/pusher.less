@@ -1,0 +1,62 @@
+.pusher {
+    position           : absolute;
+    width              : var(--blockSize);
+    height             : var(--blockSize);
+    border-radius      : 1in;
+    background-repeat  : no-repeat;
+    background-size    : 200%;
+    background-image   : url("./smileys.png");
+    box-shadow         : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 10px 0 rgba(0, 0, 0, 0.7);
+    transform          : translate3d(0, 0, 0) rotate(90deg);
+    transition         : 200ms ease-in-out;
+    transition-property: transform, left, top;
+    will-change        : transform;
+    zoom               : 1;
+
+    .isMobile & {
+        box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    &.male {
+        background-position: 0 100%;
+        background-color   : crimson;
+    }
+
+    &.male.step {
+        background-position: 100% 100%;
+    }
+
+    &.female {
+        background-position: 0 0;
+        background-color   : gold;
+
+    }
+
+    &.female.step {
+        background-position: 100% 0;
+    }
+
+    &.up {
+        transform: rotate(-90deg);
+    }
+
+    &.right {
+        transform: rotate(0);
+    }
+
+    &.down {
+        transform: rotate(90deg);
+    }
+
+    &.left {
+        transform: rotate(180deg);
+    }
+
+    &.flash {
+        transition: transform .2s ease-in-out;
+
+        &.flash--in {
+            transform: scale3d(1.41, 1.41, 1.41) rotate(90deg);
+        }
+    }
+}

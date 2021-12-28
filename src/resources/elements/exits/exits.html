@@ -1,0 +1,17 @@
+<template>
+    <require from="./exits.css"></require>
+    <div class="top">
+        <div class="exit exit-3"
+             touchstart.trigger="move('up')"></div>
+    </div>
+    <div class="middle">
+        <div class="exit exit-2"
+             touchstart.trigger="move('left')"></div>
+        <div class="exit exit-0"
+             touchstart.trigger="move('right')"></div>
+    </div>
+    <div class="bottom">
+        <div class="exit exit-1"
+             touchstart.trigger="move('down')"></div>
+    </div>
+</template>

@@ -1,0 +1,61 @@
+game-start {
+    position      : absolute;
+    width         : 100%;
+    height        : 100%;
+    max-height    : 90vmin;
+    pointer-events: none;
+
+    .clickCatcher {
+        position       : absolute;
+        width          : 100%;
+        height         : 100%;
+        margin-top     : 2vmin;
+        display        : flex;
+        flex-direction : column;
+        align-items    : center;
+        justify-content: center;
+        pointer-events : all;
+
+        .isMobile & {
+            margin-top: 7vmin;
+        }
+    }
+
+    h1,
+    h2,
+    h3 {
+        color      : var(--white);
+        margin     : 5vmin 0;
+        font-family: 'Bungee Hairline';
+        transition : transform 300ms ease-in;
+    }
+
+    h1 {
+        font-size: 12vmin;
+
+        &.animating {
+            transform: translate3d(-120vmin, 0, 0);
+        }
+    }
+
+    h2 {
+        font-size: 8vmin;
+
+        &.animating {
+            transform: translate3d(120vmin, 0, 0);
+        }
+    }
+
+    h3 {
+        font-size  : 4vmin;
+        font-family: 'Bungee Outline';
+
+        &.animating {
+            transform: scale3d(0, 0, 0);
+        }
+
+        .isMobile & {
+            font-family: 'Bungee Hairline';
+        }
+    }
+}

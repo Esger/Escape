@@ -1,0 +1,15 @@
+board {
+    --boardColor: #1e1e1e;
+    aspect-ratio: 1;
+    position    : relative;
+    display     : block;
+    width       : 80vmin;
+    height      : 80vmin;
+    background  : var(--boardColor);
+    overflow    : hidden;
+
+    .isMobile & {
+        width : 100vmin;
+        height: 100vmin;
+    }
+}

@@ -1,0 +1,10 @@
+<template>
+    <require from="./score.css"></require>
+    <require from="attributes/flash"></require>
+    <h3 click.delegate="resetHigh()">Best: <span flash="${highScore}">${highScore}</span></h3>
+    <p>
+        <span repeat.for="i of bolts">💥</span>
+        <span repeat.for="i of (level % 5)">💚</span>
+    </p>
+    <h2 flash="${score}">${score}</h2>
+</template>
