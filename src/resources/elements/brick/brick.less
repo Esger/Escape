@@ -18,6 +18,12 @@ brick {
         display        : flex;
         align-items    : center;
         justify-content: center;
+        transition     : opacity 300ms ease-out;
+        opacity        : 0;
+
+        &:empty {
+            opacity: 1;
+        }
 
         &.hasCracks {
             background-image : url(./cracks.webp);

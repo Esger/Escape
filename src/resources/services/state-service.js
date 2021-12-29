@@ -123,8 +123,8 @@ export class StateService {
                 this._registerBothBlocks(brick, true);
                 return true;
             } else {
-                if (brick.bumpedIn) {
-                    hasBolts && this._throwBolt(position);
+                if (brick.bumpedIn && hasBolts) {
+                    this._throwBolt(position);
                 } else {
                     brick.bumpedIn = true;
                 }
