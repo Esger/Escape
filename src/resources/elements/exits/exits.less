@@ -19,6 +19,40 @@ exits {
 .exit {
     --exitSize    : 26vmin;
     --gradientSize: 45%;
+    overflow      : hidden;
+
+    &:before,
+    &:after {
+        content      : '';
+        display      : block;
+        position     : absolute;
+        left         : -50%;
+        top          : -50%;
+        width        : 30%;
+        aspect-ratio : 1;
+        border-radius: 50%;
+        border       : 1vmin solid var(--exitColor);
+        animation    : ripple 4s ease-out infinite forwards;
+    }
+
+    &:after {
+        animation-delay: 2s;
+    }
+
+    @keyframes ripple {
+        0% {
+            opacity: 0;
+            width  : 120%;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            width: 30%;
+        }
+    }
 
     .isMobile & {
         --gradientSize: 60%;
