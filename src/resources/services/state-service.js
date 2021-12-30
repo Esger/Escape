@@ -12,6 +12,7 @@ export class StateService {
     _bricksCount = this._initialBricksCount;
     _bricksIncrement = 2;
     _blockSize = 4;
+    _level = 0;
     _boardSize = Math.round(80 / this._blockSize);
 
     constructor(eventAggregator, mazeWorkerService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
@@ -23,10 +24,12 @@ export class StateService {
         this._setExits();
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
+            this._level++;
             console.log(this._bricksCount);
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
+            this._level = 0;
         });
         this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
@@ -64,22 +67,38 @@ export class StateService {
         }
     }
 
+    _calcLevelForOffset() {
+        const halfLevel = Math.floor(this._level / 2);
+        const theLevel = halfLevel > 9 ? halfLevel % 10 - 19 : halfLevel;
+        return theLevel;
+    }
+
     _setExits() {
         const full = this._boardSize;
         const half = Math.floor(full / 2);
-        const extra = half + 1;
+        const offset = this._calcLevelForOffset();
         this._exits = [
-            [[full, half], [full, half - 1]],
-            [[half, full], [half - 1, full]],
-            [[-1, half], [-1, half - 1]],
-            [[half, -1], [half - 1, -1]]
+            [[full, half - offset], [full, half - offset - 1]],
+            [[half + offset, full], [half + offset - 1, full]],
+            [[-1, half + offset], [-1, half + offset - 1]],
+            [[half - offset, -1], [half - offset - 1, -1]]
         ];
         this._beforeExits = [
-            [[full - 1, half], [full - 1, half - 1]],
-            [[half, full - 1], [half - 1, full - 1]],
-            [[0, half], [0, half - 1]],
-            [[half, 0], [half - 1, 0]]
+            [[full - 1, half - offset], [full - 1, half - offset - 1]],
+            [[half + offset, full - 1], [half + offset - 1, full - 1]],
+            [[0, half + offset], [0, half + offset - 1]],
+            [[half - offset, 0], [half - offset - 1, 0]]
         ];
+        console.log(this._exits);
+        console.log(this._beforeExits);
+    }
+
+    getExitOffsets() {
+        const level = this._calcLevelForOffset();
+        const factor = level * this._blockSize;
+        const offsets = [[0, -1], [1, 0], [0, 1], [-1, 0]].map(vector => this._multiplyVector(vector, factor));
+        console.log(offsets);
+        return offsets;
     }
 
     throughExit(position) {
@@ -88,6 +107,7 @@ export class StateService {
     }
 
     getBricks(retry) {
+        this._setExits();
         this._initializeBricks(retry);
         if (retry) {
             const tempBricks = this._originalBricks;
@@ -323,6 +343,5 @@ export class StateService {
         } else {
             this._registerBricks(this._originalBricks);
         }
-        console.log(this._bricks.length);
     }
 }
