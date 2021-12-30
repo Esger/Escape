@@ -52,7 +52,6 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
-        // this._eventAggregator.publish('throughPositions', []);
     }
 
     _setPusherArea(value) {
@@ -107,12 +106,17 @@ export class StateService {
     }
 
     getBricks(retry) {
+        this._cleanGame();
         this._setExits();
-        this._initializeBricks(retry);
         if (retry) {
-            const tempBricks = this._originalBricks;
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
-            this._originalBricks = tempBricks;
+            this._registerBricks(this._bricks);
+        } else {
+            this._initializeBricks();
+            setTimeout(_ => { // wacht tot bricks blocks hebben
+                this._registerBricks(this._bricks);
+                this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
+            });
         }
         return this._bricks;
     }
@@ -307,41 +311,33 @@ export class StateService {
         return brick;
     }
 
-    async _initializeBricks(retry) {
-        this._cleanGame();
-        if (!retry) {
-            this._setPusherArea(true);
-            // find random places for bricks
-            for (let i = 0; i < this._bricksCount; i++) {
-                const brick = this._newBrick(i);
-                if (this._findAndSetPosition(brick)) {
-                    this._registerBlock(brick.position, true);
-                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                    this._bricks.push(brick);
-                }
+    async _initializeBricks() {
+        this._setPusherArea(true);
+        // find random places for bricks
+        for (let i = 0; i < this._bricksCount; i++) {
+            const brick = this._newBrick(i);
+            if (this._findAndSetPosition(brick)) {
+                this._registerBlock(brick.position, true);
+                this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                this._bricks.push(brick);
             }
-            this._setPusherArea(false);
-            // block the throughs
-            let throughs = [];
+        }
+        this._setPusherArea(false);
+        // block the throughs
+        let throughs = [];
+        throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+        while (throughs && throughs.length) {
+            const brick = this._newBrick(this._bricks.length + 1);
+            brick.position = throughs[0];
+            const direction = this._findDirection(brick.position);
+            if (direction !== false) {
+                brick.direction = direction;
+                this._registerBlock(brick.position, true);
+                this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                this._bricks.push(brick);
+            }
+            throughs = [];
             throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
-            while (throughs && throughs.length) {
-                const brick = this._newBrick(this._bricks.length + 1);
-                brick.position = throughs[0];
-                const direction = this._findDirection(brick.position);
-                if (direction !== false) {
-                    brick.direction = direction;
-                    this._registerBlock(brick.position, true);
-                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                    this._bricks.push(brick);
-                }
-                throughs = [];
-                throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
-            }
-            setTimeout(_ => { // wacht tot bricks blocks hebben
-                this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
-            });
-        } else {
-            this._registerBricks(this._originalBricks);
         }
     }
 }
