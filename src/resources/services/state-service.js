@@ -107,11 +107,11 @@ export class StateService {
 
     getBricks(retry) {
         this._cleanGame();
-        this._setExits();
         if (retry) {
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
             this._registerBricks(this._bricks);
         } else {
+            this._setExits();
             this._initializeBricks();
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._registerBricks(this._bricks);
