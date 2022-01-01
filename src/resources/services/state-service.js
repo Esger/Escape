@@ -66,38 +66,29 @@ export class StateService {
         }
     }
 
-    _calcLevelForOffset() {
-        const halfLevel = Math.floor(this._level / 2);
-        const theLevel = halfLevel > 9 ? halfLevel % 10 - 19 : halfLevel;
-        return theLevel;
-    }
-
     _setExits() {
         const full = this._boardSize;
-        const half = Math.floor(full / 2);
-        const offset = this._calcLevelForOffset();
-        this._exits = [
-            [[full, half - offset], [full, half - offset - 1]],
-            [[half + offset, full], [half + offset - 1, full]],
-            [[-1, half + offset], [-1, half + offset - 1]],
-            [[half - offset, -1], [half - offset - 1, -1]]
+        const offset = (this._level + 1) % 20;
+        this._exits = [ // [[x,y],[x,y]]
+            [[offset, -1], [offset - 1, -1]],
+            [[full + 1, offset], [full + 1, offset - 1]],
+            [[full - offset, full + 1], [full - offset - 1, full + 1]],
+            [[-1, full - offset], [-1, full - offset - 1]]
         ];
         this._beforeExits = [
-            [[full - 1, half - offset], [full - 1, half - offset - 1]],
-            [[half + offset, full - 1], [half + offset - 1, full - 1]],
-            [[0, half + offset], [0, half + offset - 1]],
-            [[half - offset, 0], [half - offset - 1, 0]]
+            [[offset, 0], [offset - 1, 0]],
+            [[full, offset], [full, offset - 1]],
+            [[full - offset, full], [full - offset - 1, full]],
+            [[0, full - offset], [0, full - offset - 1]]
         ];
-        console.log(this._exits);
+        // console.log(this._exits);
         console.log(this._beforeExits);
     }
 
-    getExitOffsets() {
-        const level = this._calcLevelForOffset();
-        const factor = level * this._blockSize;
-        const offsets = [[0, -1], [1, 0], [0, 1], [-1, 0]].map(vector => this._multiplyVector(vector, factor));
-        console.log(offsets);
-        return offsets;
+    getExitPositions() {
+        const positions = this._exits.map(exit => this._multiplyVector(exit[0], this._blockSize));
+        console.log(positions);
+        return positions;
     }
 
     throughExit(position) {

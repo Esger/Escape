@@ -1,25 +1,13 @@
 exits {
-    display        : flex;
-    flex-direction : column;
-    justify-content: space-between;
-    height         : 100%;
-
-    .top,
-    .bottom {
-        display        : flex;
-        justify-content: space-around;
-    }
-
-    .middle {
-        display        : flex;
-        justify-content: space-between;
-    }
+    position: relative;
 }
 
 .exit {
-    --exitSize    : 26vmin;
-    --gradientSize: 45%;
-    overflow      : hidden;
+    position        : absolute;
+    --exitSize      : 26vmin;
+    --gradientSize  : 45%;
+    overflow        : hidden;
+    transform-origin: left top;
 
     &:before,
     &:after {

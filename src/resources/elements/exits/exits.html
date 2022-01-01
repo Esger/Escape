@@ -1,21 +1,8 @@
 <template>
     <require from="./exits.css"></require>
-    <div class="top">
-        <div class="exit exit-3"
-             css="transform:translate(${offsets[3][0]}vmin, ${offsets[3][1]}vmin) rotate(45deg)"
-             touchstart.trigger="move('up')"></div>
-    </div>
-    <div class="middle">
-        <div class="exit exit-2"
-             css="transform:translate(${offsets[2][0]}vmin, ${offsets[2][1]}vmin) rotate(315deg)"
-             touchstart.trigger="move('left')"></div>
-        <div class="exit exit-0"
-             css="transform:translate(${offsets[0][0]}vmin, ${offsets[0][1]}vmin) rotate(135deg)"
-             touchstart.trigger="move('right')"></div>
-    </div>
-    <div class="bottom">
-        <div class="exit exit-1"
-             css="transform:translate(${offsets[1][0]}vmin, ${offsets[1][1]}vmin) rotate(225deg)"
-             touchstart.trigger="move('down')"></div>
-    </div>
+    <div repeat.for="exit of exits"
+         class="exit exit-${$index}"
+         data-angle="${exit.angle}"
+         css="transform:translate(${exit.offset[0]}vmin, ${exit.offset[1]}vmin) rotate(${exit.angle + 'rad'})"
+         touchstart.trigger="move(`${exit.direction}`)"></div>
 </template>
