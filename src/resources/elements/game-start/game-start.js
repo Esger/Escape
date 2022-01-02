@@ -9,10 +9,8 @@ export class GameStart {
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
-        if (this._isMobile) {
-            this.howToPlay = this._isMobile ? 'Tap the exits to move' : 'Move with arrow keys';
-            this.howToStart = this._isMobile ? 'Tap to play' : 'Click to play';
-        }
+        this.howToPlay = this._isMobile ? 'Tap the exits to move' : 'Move with arrow keys';
+        this.howToStart = this._isMobile ? 'Tap to play' : 'Click to play';
     }
 
     attached() {
