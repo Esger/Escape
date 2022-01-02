@@ -11,6 +11,7 @@
            brick.bind="brick">
     </brick>
 
-    <pusher block-size.bind="blockSize"></pusher>
+    <pusher repeat.for="pusher of pushers"
+            block-size.bind="blockSize"></pusher>
 
 </template>

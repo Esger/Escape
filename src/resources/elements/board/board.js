@@ -37,6 +37,7 @@ export class BoardCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._gameStartSubscription.dispose();
             this._getBricks();
+            this._getPushers();
         });
     }
 
@@ -60,6 +61,10 @@ export class BoardCustomElement {
             // wacht tot bricks bepaald zijn en pusher geplaatst is.
             this.bricks = this._stateService.getBricks(retry);
         });
+    }
+
+    _getPushers() {
+        this.pushers = this._stateService.getPushers();
     }
 
 }

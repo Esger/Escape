@@ -12,7 +12,6 @@ export class PusherCustomElement {
     bolts = 0;
 
     constructor(eventAggregator, element, stateService, directionToVectorValueConverter) {
-        this._enter = 0;
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
@@ -33,19 +32,21 @@ export class PusherCustomElement {
             this.lastKey = 'down';
         });
         this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
-            this.position = this._stateService.getPusherPosition();
-            this.isVisible = true;
-            this.direction = 1;
-            setTimeout(() => {
-                this._element.classList.add('flash', 'flash--in');
-                setTimeout(() => {
-                    this._element.classList.remove('flash', 'flash--in');
-                }, 250);
-            });
-            this._addMoveListener();
-            // this.changeGender();
         });
         this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => this.bolts = bolts);
+    }
+
+    attached() {
+        this.position = this._stateService.getPusherPosition();
+        this.isVisible = true;
+        this.direction = 1;
+        setTimeout(() => {
+            this._element.classList.add('flash--in');
+            setTimeout(() => {
+                this._element.classList.remove('flash--in');
+            }, 250);
+        });
+        this._addMoveListener();
     }
 
     detached() {

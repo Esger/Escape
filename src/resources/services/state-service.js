@@ -43,17 +43,18 @@ export class StateService {
     _cleanGame() {
         this._bricks = [];
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
-        this._pusher = {
+        this._pushers = [];
+        this._pushers.push({
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
-        };
+        });
     }
 
     _setPusherArea(value) {
-        const maxLeft = this._pusher.position[0] + 1;
-        const maxTop = this._pusher.position[1] + 1;
-        let left = this._pusher.position[0] - 1;
+        const maxLeft = this._pushers[0].position[0] + 1;
+        const maxTop = this._pushers[0].position[1] + 1;
+        let left = this._pushers[0].position[0] - 1;
         for (; left <= maxLeft; left++) {
-            let top = this._pusher.position[1] - 1;
+            let top = this._pushers[0].position[1] - 1;
             for (; top <= maxTop; top++) {
                 this._registerBlock([left, top], value);
             }
@@ -112,7 +113,11 @@ export class StateService {
     getBlockSize() { return this._blockSize; }
 
     getPusherPosition() {
-        return this._pusher.position;
+        return this._pushers[0].position;
+    }
+
+    getPushers() {
+        return this._pushers;
     }
 
     moveBrick(position, vector, hasBolts = false) {
@@ -313,7 +318,7 @@ export class StateService {
         this._setPusherArea(false);
         // block the throughs
         let throughs = [];
-        throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+        throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pushers[0].position, this._beforeExits);
         while (throughs && throughs.length) {
             const brick = this._newBrick(this._bricks.length + 1);
             brick.position = throughs[0];
@@ -325,7 +330,7 @@ export class StateService {
                 this._bricks.push(brick);
             }
             throughs = [];
-            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pushers[0].position, this._beforeExits);
         }
     }
 }
