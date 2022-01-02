@@ -15,17 +15,25 @@ export class Exits {
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._element.style.setProperty('--exitColor', 'lime');
-            this.offsets = this._stateService.getExitPositions();
+            this.positions = [];
+            setTimeout(() => {
+                this.positions = this._stateService.getExitPositions();
+                this._mapExits();
+            });
         })
-        this.offsets = this._stateService.getExitPositions();
+        this.positions = this._stateService.getExitPositions();
         this.directions = ['up', 'right', 'down', 'left'];
-        this.exits = this.offsets.map((position, index) => {
+        this._mapExits();
+    }
+
+    _mapExits() {
+        this.exits = this.positions.map((position, index) => {
             const positionToUse = index % 2 === 0 ? 0 : 1;
             const negative = index > 1;
             const offset = negative ? 80 - position[positionToUse] : position[positionToUse];
             return {
                 'direction': this.directions[index],
-                'offset': position,
+                'position': position,
                 'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / 80
             }
         });

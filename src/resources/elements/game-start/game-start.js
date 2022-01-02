@@ -5,7 +5,7 @@ export class GameStart {
     gameStartVisible = true;
     animating = false;
     title = 'Escape';
-    howToPlay = 'Move with the arrow keys';
+    howToPlay = 'Move with arrow keys';
     howToStart = 'Click to play';
 
     constructor(eventAggregator) {

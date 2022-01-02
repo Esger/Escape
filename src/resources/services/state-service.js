@@ -68,26 +68,29 @@ export class StateService {
 
     _setExits() {
         const full = this._boardSize;
-        const offset = (this._level + 1) % 20;
-        this._exits = [ // [[x,y],[x,y]]
+        const offset = Math.max(1, (this._level + 10) % 20);
+        this._exits = [ // [[x,y],[x,y],...]
+            [[offset, -1], [offset - 1, -1]],
+            [[full, offset], [full, offset - 1]],
+            [[full - offset, full], [full - offset - 1, full]],
+            [[-1, full - offset], [-1, full - offset - 1]]
+        ];
+        this._beforeExits = [
+            [[offset, 0], [offset - 1, 0]],
+            [[full - 1, offset], [full - 1, offset - 1]],
+            [[full - offset, full - 1], [full - offset - 1, full - 1]],
+            [[0, full - offset], [0, full - offset - 1]]
+        ];
+        this._outsideExits = [ // [[x,y],[x,y],...]
             [[offset, -1], [offset - 1, -1]],
             [[full + 1, offset], [full + 1, offset - 1]],
             [[full - offset, full + 1], [full - offset - 1, full + 1]],
             [[-1, full - offset], [-1, full - offset - 1]]
         ];
-        this._beforeExits = [
-            [[offset, 0], [offset - 1, 0]],
-            [[full, offset], [full, offset - 1]],
-            [[full - offset, full], [full - offset - 1, full]],
-            [[0, full - offset], [0, full - offset - 1]]
-        ];
-        // console.log(this._exits);
-        console.log(this._beforeExits);
     }
 
     getExitPositions() {
-        const positions = this._exits.map(exit => this._multiplyVector(exit[0], this._blockSize));
-        console.log(positions);
+        const positions = this._outsideExits.map(exit => this._multiplyVector(exit[0], this._blockSize));
         return positions;
     }
 
