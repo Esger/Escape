@@ -5,17 +5,19 @@ export class GameStart {
     gameStartVisible = true;
     animating = false;
     title = 'Escape';
-    howToPlay = 'Move with arrow keys';
-    howToStart = 'Click to play';
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
+        this._isMobile = sessionStorage.getItem('isMobile') == 'true';
+        if (this._isMobile) {
+            this.howToPlay = this._isMobile ? 'Tap the exits to move' : 'Move with arrow keys';
+            this.howToStart = this._isMobile ? 'Tap to play' : 'Click to play';
+        }
     }
 
     attached() {
         this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._setIsTouchDevice());
         this._addStartSubscription();
         this._flashHint();
     }
@@ -30,16 +32,10 @@ export class GameStart {
         }, 300);
     }
 
-    _setIsTouchDevice() {
-        this.howToPlay = 'Tap the exits to move';
-        this.howToStart = 'Tap to play';
-    }
-
     detached() {
         this._winSubscribtion.dispose();
         this._giveUpSubscription.dispose();
         this._startSubscription && this._startSubscription.dispose();
-        this._isTouchDeviceSubscription.dispose();
     }
 
     _showWinScreen() {

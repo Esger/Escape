@@ -11,13 +11,15 @@ export class StateService {
     _maxBricksCount = 120;
     _bricksCount = this._initialBricksCount;
     _bricksIncrement = 2;
-    _blockSize = 4;
     _level = 0;
-    _boardSize = Math.round(80 / this._blockSize);
 
     constructor(eventAggregator, mazeWorkerService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAggregator = eventAggregator;
         this._mazeWorkerService = mazeWorkerService
+        this._isMobile = sessionStorage.getItem('isMobile') == 'true';
+        this._realBoardSize = this._isMobile ? 100 : 80;
+        this._blockSize = this._isMobile ? 5 : 4;
+        this._boardSize = Math.round(this._realBoardSize / this._blockSize);
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
@@ -31,19 +33,11 @@ export class StateService {
             this._bricksCount = this._initialBricksCount;
             this._level = 0;
         });
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
 
     detached() {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
-        this._isTouchDeviceSubscription.dispose();
-    }
-
-    _adjustSizes() {
-        this._blockSize = 5;
-        this._boardSize = Math.round(100 / this._blockSize);
-        this._cleanGame();
     }
 
     _cleanGame() {

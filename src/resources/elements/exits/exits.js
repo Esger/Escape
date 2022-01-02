@@ -21,6 +21,7 @@ export class Exits {
                 this._mapExits();
             });
         })
+        this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
         this.positions = this._stateService.getExitPositions();
         this.directions = ['up', 'right', 'down', 'left'];
         this._mapExits();
@@ -30,11 +31,12 @@ export class Exits {
         this.exits = this.positions.map((position, index) => {
             const positionToUse = index % 2 === 0 ? 0 : 1;
             const negative = index > 1;
-            const offset = negative ? 80 - position[positionToUse] : position[positionToUse];
+            const boardSize = this._isTouchDevice ? 100 : 80;
+            const offset = negative ? boardSize - position[positionToUse] : position[positionToUse];
             return {
                 'direction': this.directions[index],
                 'position': position,
-                'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / 80
+                'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
             }
         });
     }
