@@ -45,7 +45,12 @@ export class StateService {
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._pushers = [];
         this._pushers.push({
-            position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
+            position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)],
+            type: 'player'
+        });
+        this._pushers.push({
+            position: [Math.round(this._boardSize / 2), 1],
+            type: 'faassen'
         });
     }
 
@@ -112,7 +117,7 @@ export class StateService {
 
     getBlockSize() { return this._blockSize; }
 
-    getPusherPosition() {
+    getPlayerPosition() {
         return this._pushers[0].position;
     }
 
