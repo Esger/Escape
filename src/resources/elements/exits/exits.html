@@ -1,17 +1,8 @@
 <template>
     <require from="./exits.css"></require>
-    <div class="top">
-        <div class="exit exit-3"
-             touchstart.trigger="move('up')"></div>
-    </div>
-    <div class="middle">
-        <div class="exit exit-2"
-             touchstart.trigger="move('left')"></div>
-        <div class="exit exit-0"
-             touchstart.trigger="move('right')"></div>
-    </div>
-    <div class="bottom">
-        <div class="exit exit-1"
-             touchstart.trigger="move('down')"></div>
-    </div>
+    <div repeat.for="exit of exits"
+         class="exit exit-${$index}"
+         data-position="${exit.position}"
+         css="transform:translate3d(${exit.position[0]}vmin, ${exit.position[1]}vmin, 0) rotate(${exit.angle + 'rad'})"
+         touchstart.trigger="move(`${exit.direction}`)"></div>
 </template>

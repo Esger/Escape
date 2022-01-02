@@ -11,36 +11,33 @@ export class StateService {
     _maxBricksCount = 120;
     _bricksCount = this._initialBricksCount;
     _bricksIncrement = 2;
-    _blockSize = 4;
-    _boardSize = Math.round(80 / this._blockSize);
+    _level = 0;
 
     constructor(eventAggregator, mazeWorkerService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAggregator = eventAggregator;
         this._mazeWorkerService = mazeWorkerService
+        this._isMobile = sessionStorage.getItem('isMobile') == 'true';
+        this._realBoardSize = this._isMobile ? 100 : 80;
+        this._blockSize = this._isMobile ? 5 : 4;
+        this._boardSize = Math.round(this._realBoardSize / this._blockSize);
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
+            this._level++;
             console.log(this._bricksCount);
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
+            this._level = 0;
         });
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
 
     detached() {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
-        this._isTouchDeviceSubscription.dispose();
-    }
-
-    _adjustSizes() {
-        this._blockSize = 5;
-        this._boardSize = Math.round(100 / this._blockSize);
-        this._cleanGame();
     }
 
     _cleanGame() {
@@ -49,7 +46,6 @@ export class StateService {
         this._pusher = {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)]
         };
-        // this._eventAggregator.publish('throughPositions', []);
     }
 
     _setPusherArea(value) {
@@ -66,20 +62,30 @@ export class StateService {
 
     _setExits() {
         const full = this._boardSize;
-        const half = Math.floor(full / 2);
-        const extra = half + 1;
-        this._exits = [
-            [[full, half], [full, half - 1]],
-            [[half, full], [half - 1, full]],
-            [[-1, half], [-1, half - 1]],
-            [[half, -1], [half - 1, -1]]
+        const offset = Math.max(1, (this._level + 10) % 20);
+        this._exits = [ // [[x,y],[x,y],...]
+            [[offset, -1], [offset - 1, -1]],
+            [[full, offset], [full, offset - 1]],
+            [[full - offset, full], [full - offset - 1, full]],
+            [[-1, full - offset], [-1, full - offset - 1]]
         ];
         this._beforeExits = [
-            [[full - 1, half], [full - 1, half - 1]],
-            [[half, full - 1], [half - 1, full - 1]],
-            [[0, half], [0, half - 1]],
-            [[half, 0], [half - 1, 0]]
+            [[offset, 0], [offset - 1, 0]],
+            [[full - 1, offset], [full - 1, offset - 1]],
+            [[full - offset, full - 1], [full - offset - 1, full - 1]],
+            [[0, full - offset], [0, full - offset - 1]]
         ];
+        this._outsideExits = [ // [[x,y],[x,y],...]
+            [[offset, -1], [offset - 1, -1]],
+            [[full + 1, offset], [full + 1, offset - 1]],
+            [[full - offset, full + 1], [full - offset - 1, full + 1]],
+            [[-1, full - offset], [-1, full - offset - 1]]
+        ];
+    }
+
+    getExitPositions() {
+        const positions = this._outsideExits.map(exit => this._multiplyVector(exit[0], this._blockSize));
+        return positions;
     }
 
     throughExit(position) {
@@ -88,11 +94,17 @@ export class StateService {
     }
 
     getBricks(retry) {
-        this._initializeBricks(retry);
+        this._cleanGame();
         if (retry) {
-            const tempBricks = this._originalBricks;
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
-            this._originalBricks = tempBricks;
+            this._registerBricks(this._bricks);
+        } else {
+            this._setExits();
+            this._initializeBricks();
+            setTimeout(_ => { // wacht tot bricks blocks hebben
+                this._registerBricks(this._bricks);
+                this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
+            });
         }
         return this._bricks;
     }
@@ -123,8 +135,8 @@ export class StateService {
                 this._registerBothBlocks(brick, true);
                 return true;
             } else {
-                if (brick.bumpedIn) {
-                    hasBolts && this._throwBolt(position);
+                if (brick.bumpedIn && hasBolts) {
+                    this._throwBolt(position);
                 } else {
                     brick.bumpedIn = true;
                 }
@@ -287,42 +299,33 @@ export class StateService {
         return brick;
     }
 
-    async _initializeBricks(retry) {
-        this._cleanGame();
-        if (!retry) {
-            this._setPusherArea(true);
-            // find random places for bricks
-            for (let i = 0; i < this._bricksCount; i++) {
-                const brick = this._newBrick(i);
-                if (this._findAndSetPosition(brick)) {
-                    this._registerBlock(brick.position, true);
-                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                    this._bricks.push(brick);
-                }
+    async _initializeBricks() {
+        this._setPusherArea(true);
+        // find random places for bricks
+        for (let i = 0; i < this._bricksCount; i++) {
+            const brick = this._newBrick(i);
+            if (this._findAndSetPosition(brick)) {
+                this._registerBlock(brick.position, true);
+                this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                this._bricks.push(brick);
             }
-            this._setPusherArea(false);
-            // block the throughs
-            let throughs = [];
-            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
-            while (throughs && throughs.length) {
-                const brick = this._newBrick(this._bricks.length + 1);
-                brick.position = throughs[0];
-                const direction = this._findDirection(brick.position);
-                if (direction !== false) {
-                    brick.direction = direction;
-                    this._registerBlock(brick.position, true);
-                    this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
-                    this._bricks.push(brick);
-                }
-                throughs = [];
-                throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
-            }
-            setTimeout(_ => { // wacht tot bricks blocks hebben
-                this._originalBricks = JSON.parse(JSON.stringify(this._bricks)); // deep copy
-            });
-        } else {
-            this._registerBricks(this._originalBricks);
         }
-        console.log(this._bricks.length);
+        this._setPusherArea(false);
+        // block the throughs
+        let throughs = [];
+        throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+        while (throughs && throughs.length) {
+            const brick = this._newBrick(this._bricks.length + 1);
+            brick.position = throughs[0];
+            const direction = this._findDirection(brick.position);
+            if (direction !== false) {
+                brick.direction = direction;
+                this._registerBlock(brick.position, true);
+                this._registerBlock(this._getBlockPosition(brick.position, brick.direction), true);
+                this._bricks.push(brick);
+            }
+            throughs = [];
+            throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pusher.position, this._beforeExits);
+        }
     }
 }

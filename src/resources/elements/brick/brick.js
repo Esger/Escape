@@ -35,7 +35,7 @@ export class BrickCustomElement {
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             if (indices.includes(this.brick.index)) {
                 this.brick.content = '💥';
-                setTimeout(_ => this._stateService.removeBrick(this.brick.index)), 300;
+                setTimeout(_ => this._stateService.removeBrick(this.brick.index), 300);
             }
         });
         setTimeout(() => {

@@ -1,24 +1,46 @@
 exits {
-    display        : flex;
-    flex-direction : column;
-    justify-content: space-between;
-    height         : 100%;
-
-    .top,
-    .bottom {
-        display        : flex;
-        justify-content: space-around;
-    }
-
-    .middle {
-        display        : flex;
-        justify-content: space-between;
-    }
+    position: relative;
 }
 
 .exit {
-    --exitSize    : 26vmin;
-    --gradientSize: 45%;
+    position        : absolute;
+    --exitSize      : 26vmin;
+    --gradientSize  : 45%;
+    overflow        : hidden;
+    transform-origin: left top;
+
+    &:before,
+    &:after {
+        content      : '';
+        display      : block;
+        position     : absolute;
+        left         : -50%;
+        top          : -50%;
+        width        : 30%;
+        aspect-ratio : 1;
+        border-radius: 50%;
+        border       : 1vmin solid var(--exitColor);
+        animation    : ripple 6s ease-out infinite forwards;
+    }
+
+    &:after {
+        animation-delay: 3s;
+    }
+
+    @keyframes ripple {
+        0% {
+            opacity: 0;
+            width  : 120%;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            width: 30%;
+        }
+    }
 
     .isMobile & {
         --gradientSize: 60%;
@@ -26,23 +48,8 @@ exits {
 
     width     : var(--exitSize);
     height    : var(--exitSize);
-    transform : rotate(var(--angle, 45deg));
     background: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
+    transition: transform 200ms ease-in-out;
     filter    : blur(.5vmin);
 
-    &.exit-0 {
-        --angle: 135deg;
-    }
-
-    &.exit-1 {
-        --angle: 225deg;
-    }
-
-    &.exit-2 {
-        --angle: 315deg;
-    }
-
-    &.exit-3 {
-        --angle: 45deg;
-    }
 }
