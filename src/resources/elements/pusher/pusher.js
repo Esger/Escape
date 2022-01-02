@@ -7,6 +7,8 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 export class PusherCustomElement {
     @bindable blockSize;
     @bindable position;
+    @bindable playerType;
+
     isVisible = false;
     step = false;
     direction = 1;
@@ -39,6 +41,7 @@ export class PusherCustomElement {
     attached() {
         this.isVisible = true;
         this.direction = 1;
+        this._element.classList.add(this.playerType);
         setTimeout(() => {
             this._element.classList.add('flash--in');
             setTimeout(() => {
