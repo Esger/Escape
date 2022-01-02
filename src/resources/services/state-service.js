@@ -11,36 +11,33 @@ export class StateService {
     _maxBricksCount = 120;
     _bricksCount = this._initialBricksCount;
     _bricksIncrement = 2;
-    _blockSize = 4;
-    _boardSize = Math.round(80 / this._blockSize);
+    _level = 0;
 
     constructor(eventAggregator, mazeWorkerService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
         this._eventAggregator = eventAggregator;
         this._mazeWorkerService = mazeWorkerService
+        this._isMobile = sessionStorage.getItem('isMobile') == 'true';
+        this._realBoardSize = this._isMobile ? 100 : 80;
+        this._blockSize = this._isMobile ? 5 : 4;
+        this._boardSize = Math.round(this._realBoardSize / this._blockSize);
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
         this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
+            this._level++;
             console.log(this._bricksCount);
         });
         this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
+            this._level = 0;
         });
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => this._adjustSizes());
     }
 
     detached() {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
-        this._isTouchDeviceSubscription.dispose();
-    }
-
-    _adjustSizes() {
-        this._blockSize = 5;
-        this._boardSize = Math.round(100 / this._blockSize);
-        this._cleanGame();
     }
 
     _cleanGame() {
@@ -65,20 +62,30 @@ export class StateService {
 
     _setExits() {
         const full = this._boardSize;
-        const half = Math.floor(full / 2);
-        const extra = half + 1;
-        this._exits = [
-            [[full, half], [full, half - 1]],
-            [[half, full], [half - 1, full]],
-            [[-1, half], [-1, half - 1]],
-            [[half, -1], [half - 1, -1]]
+        const offset = Math.max(1, (this._level + 10) % 20);
+        this._exits = [ // [[x,y],[x,y],...]
+            [[offset, -1], [offset - 1, -1]],
+            [[full, offset], [full, offset - 1]],
+            [[full - offset, full], [full - offset - 1, full]],
+            [[-1, full - offset], [-1, full - offset - 1]]
         ];
         this._beforeExits = [
-            [[full - 1, half], [full - 1, half - 1]],
-            [[half, full - 1], [half - 1, full - 1]],
-            [[0, half], [0, half - 1]],
-            [[half, 0], [half - 1, 0]]
+            [[offset, 0], [offset - 1, 0]],
+            [[full - 1, offset], [full - 1, offset - 1]],
+            [[full - offset, full - 1], [full - offset - 1, full - 1]],
+            [[0, full - offset], [0, full - offset - 1]]
         ];
+        this._outsideExits = [ // [[x,y],[x,y],...]
+            [[offset, -1], [offset - 1, -1]],
+            [[full + 1, offset], [full + 1, offset - 1]],
+            [[full - offset, full + 1], [full - offset - 1, full + 1]],
+            [[-1, full - offset], [-1, full - offset - 1]]
+        ];
+    }
+
+    getExitPositions() {
+        const positions = this._outsideExits.map(exit => this._multiplyVector(exit[0], this._blockSize));
+        return positions;
     }
 
     throughExit(position) {
@@ -92,6 +99,7 @@ export class StateService {
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
             this._registerBricks(this._bricks);
         } else {
+            this._setExits();
             this._initializeBricks();
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._registerBricks(this._bricks);

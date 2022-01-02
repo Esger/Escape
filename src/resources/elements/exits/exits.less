@@ -1,25 +1,13 @@
 exits {
-    display        : flex;
-    flex-direction : column;
-    justify-content: space-between;
-    height         : 100%;
-
-    .top,
-    .bottom {
-        display        : flex;
-        justify-content: space-around;
-    }
-
-    .middle {
-        display        : flex;
-        justify-content: space-between;
-    }
+    position: relative;
 }
 
 .exit {
-    --exitSize    : 26vmin;
-    --gradientSize: 45%;
-    overflow      : hidden;
+    position        : absolute;
+    --exitSize      : 26vmin;
+    --gradientSize  : 45%;
+    overflow        : hidden;
+    transform-origin: left top;
 
     &:before,
     &:after {
@@ -60,23 +48,8 @@ exits {
 
     width     : var(--exitSize);
     height    : var(--exitSize);
-    transform : rotate(var(--angle, 45deg));
     background: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
+    transition: transform 200ms ease-in-out;
     filter    : blur(.5vmin);
 
-    &.exit-0 {
-        --angle: 135deg;
-    }
-
-    &.exit-1 {
-        --angle: 225deg;
-    }
-
-    &.exit-2 {
-        --angle: 315deg;
-    }
-
-    &.exit-3 {
-        --angle: 45deg;
-    }
 }

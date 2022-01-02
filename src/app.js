@@ -11,9 +11,7 @@ export class App {
     }
 
     attached() {
-        setTimeout(() => {
-            this._detectTouchDevice();
-        }, 100);
+        this._detectTouchDevice();
     }
 
     _detectTouchDevice() {
@@ -22,8 +20,9 @@ export class App {
                 (navigator.maxTouchPoints > 0) ||
                 (navigator.msMaxTouchPoints > 0));
         const isSmallScreen = Math.min(window.innerHeight, window.innerWidth) < 800;
-        if (isTouchDevice && isSmallScreen) {
-            this._eventAggregator.publish('isTouchDevice');
+        const isMobile = isTouchDevice && isSmallScreen;
+        sessionStorage.setItem('isMobile', isMobile);
+        if (isMobile) {
             document.body.style.setProperty('--maxWidth', 100 + "vmin");
             document.body.classList.add('isMobile');
         }

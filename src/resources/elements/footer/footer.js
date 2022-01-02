@@ -7,9 +7,10 @@ export class Footer {
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this._messageIndex = 0;
+        this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this._messages = [
             'escape through the <span class="green">exits</span>',
-            'Press Escape when stuck',
+            this._isMobile ? 'Tap here when stuck' : 'Press Escape when stuck',
             'press r to restart level',
             'exiting is rewarded with 💚',
             'push blocking bricks away',
@@ -23,9 +24,6 @@ export class Footer {
 
     attached() {
         this._setNextHint();
-        this._isTouchDeviceSubscription = this._eventAggregator.subscribe('isTouchDevice', _ => {
-            this._messages[1] = 'Tap here when stuck';
-        });
         this._addGameStartSubscription();
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._addGameStartSubscription();
@@ -47,7 +45,6 @@ export class Footer {
     }
 
     detached() {
-        this._isTouchDeviceSubscription.dispose();
         this._gameStartSubscrption.dispose();
         this._giveUpSubscription && this._giveUpSubscription.dispose();
         this._winSubscription.dispose();
