@@ -11,7 +11,6 @@ export class PusherCustomElement {
 
     isVisible = false;
     step = false;
-    direction = 1;
     bolts = 0;
 
     constructor(eventAggregator, element, stateService, directionToVectorValueConverter) {
@@ -40,7 +39,7 @@ export class PusherCustomElement {
 
     attached() {
         this.isVisible = true;
-        this.direction = 1;
+        this.direction = this.playerType == 'faassen' ? 0 : 1;
         this._element.classList.add(this.playerType);
         setTimeout(() => {
             this._element.classList.add('flash--in');
