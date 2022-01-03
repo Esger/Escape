@@ -39,7 +39,7 @@ export class PusherCustomElement {
 
     attached() {
         this.isVisible = true;
-        this.direction = this.playerType == 'faassen' ? 0 : 1;
+        this.isFaassen = this.playerType == 'faassen';
         this._element.classList.add(this.playerType);
         setTimeout(() => {
             this._element.classList.add('flash--in');
@@ -72,7 +72,7 @@ export class PusherCustomElement {
 
     _step() {
         this.step = (this.step == 'step') ? '' : 'step';
-        this._eventAggregator.publish('move');
+        this.isFaassen || this._eventAggregator.publish('move');
     }
 
     _doMove(newPosition) {
@@ -86,7 +86,7 @@ export class PusherCustomElement {
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
             const newPosition = this._stateService.sumVectors(this.position, vector);
-            if (this._stateService.throughExit(newPosition)) {
+            if (!this.isFaassen && this._stateService.throughExit(newPosition)) {
                 this._doMove(newPosition);
                 setTimeout(() => {
                     this._eventAggregator.publish('win');
