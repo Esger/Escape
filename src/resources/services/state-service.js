@@ -77,25 +77,25 @@ export class StateService {
     }
 
     _setExits() {
-        const full = this._boardSize;
-        const offset = Math.max(1, (this._level + 10) % 20);
+        const max = this._boardSize;
+        const offset = 1 + ((this._level + 9) % 18); // 1..19
         this._exits = [ // [[x,y],[x,y],...]
             [[offset, -1], [offset - 1, -1]],
-            [[full, offset], [full, offset - 1]],
-            [[full - offset, full], [full - (offset - 1), full]],
-            [[-1, full - offset], [-1, full - (offset - 1)]]
+            [[max, offset], [max, offset - 1]],
+            [[max - offset, max], [max - offset - 1, max]],
+            [[-1, max - offset], [-1, max - offset - 1]]
         ];
         this._beforeExits = [
             [[offset, 0], [offset - 1, 0]],
-            [[full - 1, offset], [full - 1, offset - 1]],
-            [[full - offset, full - 1], [full - (offset - 1), full - 1]],
-            [[0, full - offset], [0, full - (offset - 1)]]
+            [[max - 1, offset], [max - 1, offset - 1]],
+            [[max - offset, max - 1], [max - offset - 1, max - 1]],
+            [[0, max - offset], [0, max - offset - 1]]
         ];
         this._outsideExits = [ // [[x,y],[x,y],...]
             [[offset, -1], [offset - 1, -1]],
-            [[full + 1, offset], [full + 1, offset - 1]],
-            [[full - offset, full + 1], [full - (offset - 1), full + 1]],
-            [[-1, full - offset], [-1, full - (offset - 1)]]
+            [[max + 1, offset], [max + 1, offset - 1]],
+            [[max - offset, max + 1], [max - offset - 1, max + 1]],
+            [[-1, max - offset], [-1, max - offset - 1]]
         ];
         this._addFaassen();
     }
