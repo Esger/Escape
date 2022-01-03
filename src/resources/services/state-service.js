@@ -33,11 +33,15 @@ export class StateService {
             this._bricksCount = this._initialBricksCount;
             this._level = 0;
         });
+        this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => {
+            this._bolts = bolts;
+        });
     }
 
     detached() {
         this._winSubscriber.dispose();
         this._giveUpSubscriber.dispose();
+        this._boltsCountSubscriber.dispose();
     }
 
     _cleanGame() {
@@ -48,8 +52,14 @@ export class StateService {
             position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)],
             type: 'player'
         });
+    }
+
+    _addFaassen() {
+        const exitNumber = this._randomNumberWithin(4);
+        const direction = ['down', 'left', 'up', 'right'][exitNumber];
         this._pushers.push({
-            position: [Math.round(this._boardSize / 2), 1],
+            position: this._exits[exitNumber][0],
+            direction: direction,
             type: 'faassen'
         });
     }
@@ -87,6 +97,7 @@ export class StateService {
             [[full - offset, full + 1], [full - offset - 1, full + 1]],
             [[-1, full - offset], [-1, full - offset - 1]]
         ];
+        this._addFaassen();
     }
 
     getExitPositions() {
@@ -116,6 +127,8 @@ export class StateService {
     }
 
     getBlockSize() { return this._blockSize; }
+
+    getBolts() { return this._bolts; }
 
     getPlayerPosition() {
         return this._pushers[0].position;
