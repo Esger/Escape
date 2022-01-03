@@ -82,20 +82,20 @@ export class StateService {
         this._exits = [ // [[x,y],[x,y],...]
             [[offset, -1], [offset - 1, -1]],
             [[full, offset], [full, offset - 1]],
-            [[full - offset, full], [full - offset - 1, full]],
-            [[-1, full - offset], [-1, full - offset - 1]]
+            [[full - offset, full], [full - (offset - 1), full]],
+            [[-1, full - offset], [-1, full - (offset - 1)]]
         ];
         this._beforeExits = [
             [[offset, 0], [offset - 1, 0]],
             [[full - 1, offset], [full - 1, offset - 1]],
-            [[full - offset, full - 1], [full - offset - 1, full - 1]],
-            [[0, full - offset], [0, full - offset - 1]]
+            [[full - offset, full - 1], [full - (offset - 1), full - 1]],
+            [[0, full - offset], [0, full - (offset - 1)]]
         ];
         this._outsideExits = [ // [[x,y],[x,y],...]
             [[offset, -1], [offset - 1, -1]],
             [[full + 1, offset], [full + 1, offset - 1]],
-            [[full - offset, full + 1], [full - offset - 1, full + 1]],
-            [[-1, full - offset], [-1, full - offset - 1]]
+            [[full - offset, full + 1], [full - (offset - 1), full + 1]],
+            [[-1, full - offset], [-1, full - (offset - 1)]]
         ];
         this._addFaassen();
     }

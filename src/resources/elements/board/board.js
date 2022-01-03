@@ -21,6 +21,7 @@ export class BoardCustomElement {
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this._getBricks(true);
+            this._getPushers();
         });
         this._giveUpSubscristion = this._eventAggregator.subscribe('giveUp', _ => {
             this._removeBricks();
