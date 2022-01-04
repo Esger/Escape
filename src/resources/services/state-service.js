@@ -23,15 +23,16 @@ export class StateService {
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
-        this._setExits();
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
+            this._cleanGame();
             console.log(this._bricksCount);
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
             this._level = 0;
+            this._cleanGame();
         });
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this._bolts = bolts;
@@ -76,33 +77,17 @@ export class StateService {
         }
     }
 
-    _setExits() {
-        const max = this._boardSize;
-        const offset = 1 + ((this._level + 9) % 18); // 1..19
-        this._exits = [ // [[x,y],[x,y],...]
-            [[offset, -1], [offset - 1, -1]],
-            [[max, offset], [max, offset - 1]],
-            [[max - offset, max], [max - offset - 1, max]],
-            [[-1, max - offset], [-1, max - offset - 1]]
-        ];
-        this._beforeExits = [
-            [[offset, 0], [offset - 1, 0]],
-            [[max - 1, offset], [max - 1, offset - 1]],
-            [[max - offset, max - 1], [max - offset - 1, max - 1]],
-            [[0, max - offset], [0, max - offset - 1]]
-        ];
-        this._outsideExits = [ // [[x,y],[x,y],...]
-            [[offset, -1], [offset - 1, -1]],
-            [[max + 1, offset], [max + 1, offset - 1]],
-            [[max - offset, max + 1], [max - offset - 1, max + 1]],
-            [[-1, max - offset], [-1, max - offset - 1]]
-        ];
-        this._addFaassen();
+    getLevel() {
+        return this._level;
     }
 
-    getExitPositions() {
-        const positions = this._outsideExits.map(exit => this._multiplyVector(exit[0], this._blockSize));
-        return positions;
+    getBoardSize() {
+        return this._boardSize;
+    }
+
+    setExits(exits, before) {
+        this._exits = exits;
+        this._beforeExits = before;
     }
 
     throughExit(position) {
@@ -111,12 +96,11 @@ export class StateService {
     }
 
     getBricks(retry) {
-        this._cleanGame();
         if (retry) {
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
             this._registerBricks(this._bricks);
         } else {
-            this._setExits();
+            this._addFaassen();
             this._initializeBricks();
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._registerBricks(this._bricks);
@@ -228,6 +212,15 @@ export class StateService {
         return sumVector;
     }
 
+
+    areEqual(vectors) { // array of positions [x,y]
+        const areEqual = vectors.every(position => {
+            const areEqual = position[0] == vectors[0][0] && position[1] == vectors[0][1];
+            return areEqual;
+        });
+        return areEqual;
+    }
+
     _randomNumberWithin(max) {
         return Math.floor(Math.random() * max);
     }
@@ -244,9 +237,7 @@ export class StateService {
     }
 
     _withinBounds(position) {
-        const withinBounds =
-            position[0] >= 0 && position[0] < this._boardSize &&
-            position[1] >= 0 && position[1] < this._boardSize;
+        const withinBounds = position.every(coordinate => coordinate >= 0 && coordinate < this._boardSize);
         return withinBounds;
     }
 
@@ -256,14 +247,6 @@ export class StateService {
             return isFree;
         }
         return false;
-    }
-
-    areEqual(positions) { // array of positions [x,y]
-        const areEqual = positions.every(position => {
-            const areEqual = position[0] == positions[0][0] && position[1] == positions[0][1];
-            return areEqual;
-        });
-        return areEqual;
     }
 
     _isBlockingExit(positions) {  // array of positions [x,y]

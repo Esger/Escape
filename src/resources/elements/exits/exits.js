@@ -9,7 +9,14 @@ export class Exits {
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
-        this.color = 'lime';
+        this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
+        this._level = this._stateService.getLevel();
+        this._boardSize = this._stateService.getBoardSize();
+        this._blockSize = this._stateService.getBlockSize();
+    }
+
+    attached() {
+        this._setExits();
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._element.style.setProperty('--exitColor', 'red');
         });
@@ -17,17 +24,41 @@ export class Exits {
             this._element.style.setProperty('--exitColor', 'lime');
             this.positions = [];
             setTimeout(() => {
-                this.positions = this._stateService.getExitPositions();
-                this._mapExits();
+                this._setExits();
             });
-        })
-        this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
-        this.positions = this._stateService.getExitPositions();
-        this._mapExits();
+        });
     }
 
-    _mapExits() {
-        this.exits = this.positions.map((position, index) => {
+    detached() {
+        this._giveUpSubscription.dispose();
+        this._gameStartSubscription.dispose();
+    }
+
+    _setExits() {
+        const max = this._boardSize;
+        const offset = 1 + ((this._level + 9) % 18); // 1..19
+        this._beforeExits = [
+            [[offset, 0], [offset - 1, 0]],
+            [[max - 1, offset], [max - 1, offset - 1]],
+            [[max - offset, max - 1], [max - offset - 1, max - 1]],
+            [[0, max - offset], [0, max - offset - 1]]
+        ];
+
+        let outwardsVectors = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+        this._exits = this._beforeExits.map((beforeExit, index) => beforeExit.map(vector => {
+            const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
+            return newVector;
+        }));
+        this._stateService.setExits(this._exits, this._beforeExits);
+
+        outwardsVectors = [[0, 0], [1, 0], [0, 1], [0, 0]];
+        const exitPositions = this._exits.map((exit, index) => exit.map(vector => {
+            const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
+            return newVector;
+        }));
+        const positions = exitPositions.map(exit => this._stateService._multiplyVector(exit[0], this._blockSize));
+
+        this.exits = positions.map((position, index) => {
             const positionToUse = index % 2 === 0 ? 0 : 1;
             const negative = index > 1;
             const boardSize = this._isTouchDevice ? 100 : 80;
@@ -37,10 +68,5 @@ export class Exits {
                 'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
             }
         });
-    }
-
-    detached() {
-        this._giveUpSubscription.dispose();
-        this._gameStartSubscription.dispose();
     }
 }

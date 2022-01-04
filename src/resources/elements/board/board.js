@@ -59,10 +59,7 @@ export class BoardCustomElement {
     }
 
     _getBricks(retry = false) {
-        setTimeout(_ => {
-            // wacht tot bricks bepaald zijn en pusher geplaatst is.
-            this.bricks = this._stateService.getBricks(retry);
-        });
+        this.bricks = this._stateService.getBricks(retry);
     }
 
     _getPushers() {
