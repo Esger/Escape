@@ -1,0 +1,46 @@
+buttons {
+    display              : grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows   : 1fr 1fr;
+    gap                  : 1vmin;
+    position             : absolute;
+    inset                : 0;
+    transform            : rotate(45deg) scale(1.41);
+    opacity              : 0;
+    transition           : opacity .25s ease-in-out;
+
+    &.flash {
+        opacity: 1;
+    }
+
+    button {
+        color  : var(--white);
+        border : 1px dashed var(--white);
+        opacity: .7;
+
+        div {
+            display        : flex;
+            justify-content: center;
+            align-items    : center;
+            font-size      : 10vmin;
+            font-family    : sans-serif;
+            height         : 100%;
+        }
+
+        &.right div {
+            transform: translate(-7vmin, 7vmin) rotate(-45deg);
+        }
+
+        &.down div {
+            transform: translate(-7vmin, -7vmin) rotate(-45deg);
+        }
+
+        &.left div {
+            transform: translate(7vmin, -7vmin) rotate(-45deg);
+        }
+
+        &.up div {
+            transform: translate(7vmin, 7vmin) rotate(-45deg);
+        }
+    }
+}
