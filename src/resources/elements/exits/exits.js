@@ -23,7 +23,6 @@ export class Exits {
         })
         this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
         this.positions = this._stateService.getExitPositions();
-        this.directions = ['up', 'right', 'down', 'left'];
         this._mapExits();
     }
 
@@ -34,7 +33,6 @@ export class Exits {
             const boardSize = this._isTouchDevice ? 100 : 80;
             const offset = negative ? boardSize - position[positionToUse] : position[positionToUse];
             return {
-                'direction': this.directions[index],
                 'position': position,
                 'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
             }
@@ -44,9 +42,5 @@ export class Exits {
     detached() {
         this._giveUpSubscription.dispose();
         this._gameStartSubscription.dispose();
-    }
-
-    move(direction) {
-        this._eventAggregator.publish('keyPressed', direction);
     }
 }

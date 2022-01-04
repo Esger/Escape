@@ -10,6 +10,7 @@ export class BoardCustomElement {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this.blockSize = this._stateService.getBlockSize();
+        this.isMobile = sessionStorage.getItem('isMobile') == 'true';
     }
 
     attached() {

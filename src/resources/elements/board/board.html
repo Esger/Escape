@@ -3,6 +3,7 @@
     <require from="elements/brick/brick"></require>
     <require from="elements/pusher/pusher"></require>
     <require from="elements/exits/exits"></require>
+    <require from="elements/buttons/buttons"></require>
 
     <exits></exits>
 
@@ -16,5 +17,7 @@
             direction.bind="pusher.direction"
             player-type.bind="pusher.type"
             block-size.bind="blockSize"></pusher>
+
+    <buttons if.bind="isMobile"></buttons>
 
 </template>
