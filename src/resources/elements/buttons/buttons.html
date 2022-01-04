@@ -2,7 +2,7 @@
     <require from="./buttons.css"></require>
     <button repeat.for="button of buttons"
             class="${button.direction}"
-            touchstart.trigger="move(`${button.direction}`)">
+            touchstart.trigger="move(button.direction)">
             <div>${button.symbol}</div>
     </button>
 </template>
