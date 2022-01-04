@@ -15,7 +15,7 @@ export class GameStart {
 
     attached() {
         this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', message => this._showStuckScreen(message));
         this._addStartSubscription();
         this._flashHint();
     }
@@ -43,9 +43,9 @@ export class GameStart {
         this._flashHint();
     }
 
-    _showStuckScreen() {
+    _showStuckScreen(message = 'Stuck') {
         this.gameStartVisible = true;
-        this.title = 'Stuck'
+        this.title = message;
         this._addStartSubscription();
         this._flashHint();
     }

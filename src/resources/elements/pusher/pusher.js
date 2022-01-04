@@ -51,6 +51,12 @@ export class PusherCustomElement {
             }, 250);
         });
         this._addMoveListener();
+        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
+            if (message.type !== this.playerType) {
+                const samePosition = this._stateService.areEqual([message.position, this.position]);
+                if (samePosition) setTimeout(() => this._eventAggregator.publish('giveUp', 'caught'), 250);
+            }
+        });
     }
 
     detached() {
@@ -60,6 +66,7 @@ export class PusherCustomElement {
         this._giveUpSubscription.dispose();
         this._gameStartSubscription.dispose();
         this._boltsCountSubscription.dispose();
+        this._moveSubscription.dispose();
     }
 
     changeGender() {
@@ -83,7 +90,11 @@ export class PusherCustomElement {
 
     _step() {
         this.step = (this.step == 'step') ? '' : 'step';
-        this.isFaassen || this._eventAggregator.publish('move');
+        const message = {
+            'type': this.playerType,
+            'position': this.position
+        }
+        this._eventAggregator.publish('move', message);
     }
 
     _doMove(newPosition) {

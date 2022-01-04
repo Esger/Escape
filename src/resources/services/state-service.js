@@ -258,7 +258,7 @@ export class StateService {
         return false;
     }
 
-    _areEqual(positions) { // array of positions [x,y]
+    areEqual(positions) { // array of positions [x,y]
         const areEqual = positions.every(position => {
             const areEqual = position[0] == positions[0][0] && position[1] == positions[0][1];
             return areEqual;
@@ -267,7 +267,7 @@ export class StateService {
     }
 
     _isBlockingExit(positions) {  // array of positions [x,y]
-        const isBlockingExit = positions.some((pos) => this._beforeExits.some((exit) => exit.some(ePos => this._areEqual([ePos, pos]))));
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((exit) => exit.some(ePos => this.areEqual([ePos, pos]))));
         return isBlockingExit;
     }
 
