@@ -19,7 +19,7 @@ export class PusherCustomElement {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
-        this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription?.dispose();
             this.isVisible = false;
             this.lastKey = 'down';
@@ -27,14 +27,14 @@ export class PusherCustomElement {
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this.lastKey = 'down';
         });
-        this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._moveSubscription?.dispose();
             this.isVisible = false;
             this.lastKey = 'down';
         });
-        this._gameStartSubscriber = this._eventAggregator.subscribe('gameStart', _ => {
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
         });
-        this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => {
+        this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
         });
     }
@@ -55,11 +55,11 @@ export class PusherCustomElement {
 
     detached() {
         this._moveSubscription && this._moveSubscription.dispose();
-        this._winSubscriber.dispose();
+        this._winSubscription.dispose();
         this._retrySubscription.dispose();
-        this._giveUpSubscriber.dispose();
-        this._gameStartSubscriber.dispose();
-        this._boltsCountSubscriber.dispose();
+        this._giveUpSubscription.dispose();
+        this._gameStartSubscription.dispose();
+        this._boltsCountSubscription.dispose();
     }
 
     changeGender() {

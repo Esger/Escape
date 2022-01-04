@@ -24,24 +24,24 @@ export class StateService {
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._setExits();
-        this._winSubscriber = this._eventAggregator.subscribe('win', _ => {
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
             console.log(this._bricksCount);
         });
-        this._giveUpSubscriber = this._eventAggregator.subscribe('giveUp', _ => {
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
             this._level = 0;
         });
-        this._boltsCountSubscriber = this._eventAggregator.subscribe('boltsCount', bolts => {
+        this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this._bolts = bolts;
         });
     }
 
     detached() {
-        this._winSubscriber.dispose();
-        this._giveUpSubscriber.dispose();
-        this._boltsCountSubscriber.dispose();
+        this._winSubscription.dispose();
+        this._giveUpSubscription.dispose();
+        this._boltsCountSubscription.dispose();
     }
 
     _cleanGame() {
