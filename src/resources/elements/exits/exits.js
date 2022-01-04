@@ -10,7 +10,6 @@ export class Exits {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
-        this._level = this._stateService.getLevel();
         this._boardSize = this._stateService.getBoardSize();
         this._blockSize = this._stateService.getBlockSize();
     }
@@ -35,8 +34,9 @@ export class Exits {
     }
 
     _setExits() {
+        const level = this._stateService.getLevel();
         const max = this._boardSize;
-        const offset = 1 + ((this._level + 9) % 18); // 1..19
+        const offset = 1 + ((level + 9) % 18); // 1..19
         this._beforeExits = [
             [[offset, 0], [offset - 1, 0]],
             [[max - 1, offset], [max - 1, offset - 1]],
