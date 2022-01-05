@@ -34,13 +34,13 @@ export class BoardCustomElement {
 
     _addGameStartSubscription() {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._gameStartSubscription.dispose();
+            this._gameStartSubscription?.dispose();
             this._getPushers();
         });
     }
 
     detached() {
-        this._gameStartSubscription.dispose();
+        this._gameStartSubscription?.dispose();
         this._giveUpSubscristion.dispose();
         this._retrySubscription.dispose();
         this._isTouchDeviceSubscription.dispose();

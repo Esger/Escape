@@ -18,6 +18,18 @@ export class PusherCustomElement {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
+    }
+
+    attached() {
+        this.isFaassen = this.playerType == 'faassen';
+        this.bolts = this._stateService.getBolts();
+        this._element.classList.add(this.playerType);
+        setTimeout(() => {
+            this._element.classList.add('flash--in');
+            setTimeout(() => {
+                this._element.classList.remove('flash--in');
+            }, 250);
+        });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription?.dispose();
             this.lastKey = 'down';
@@ -32,20 +44,8 @@ export class PusherCustomElement {
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
         });
-    }
-
-    attached() {
-        this.isFaassen = this.playerType == 'faassen';
-        this.bolts = this._stateService.getBolts();
-        this._element.classList.add(this.playerType);
-        setTimeout(() => {
-            this._element.classList.add('flash--in');
-            setTimeout(() => {
-                this._element.classList.remove('flash--in');
-            }, 250);
-        });
-        this._addMoveListener();
-        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
+        this._addMoveSubscription();
+        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', message => {
             if (message.type !== this.playerType) {
                 const samePosition = this._stateService.areEqual([message.position, this.position]);
                 if (samePosition) {
@@ -57,7 +57,8 @@ export class PusherCustomElement {
     }
 
     detached() {
-        this._moveSubscription && this._moveSubscription.dispose();
+        this._moveSubscription?.dispose();
+        this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
         this._retrySubscription.dispose();
         this._giveUpSubscription.dispose();
@@ -68,18 +69,18 @@ export class PusherCustomElement {
         this.gender = (this.gender == 'male') ? 'female' : 'male';
     }
 
-    _addMoveListener() {
-        this._moveSubscription && this._moveSubscription.dispose();
+    _addMoveSubscription() {
         this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
-            if (this.isFaassen) {
-                let canMove = this._moveIfPossible(this.direction || key);
-                while (canMove) {
-                    canMove = this._moveIfPossible(key);
-                }
-                this.direction = undefined;
-            } else {
-                this._moveIfPossible(key);
-            }
+            this._moveIfPossible(key);
+            // if (this.isFaassen) {
+            //     let canMove = this._moveIfPossible(this.direction || key);
+            //     while (canMove) {
+            //         canMove = this._moveIfPossible(key);
+            //     }
+            //     this.direction = undefined;
+            // } else {
+            //     this._moveIfPossible(key);
+            // }
         });
     }
 

@@ -16,7 +16,7 @@ export class KeyInputService {
             'down': 40,
             'r': 82
         };
-        document.addEventListener('keydown', (event) => { this.handleKeyInput(event); }, true);
+        document.addEventListener('keydown', event => this.handleKeyInput(event), true);
     }
 
     handleKeyInput(event) {

@@ -53,24 +53,6 @@ export class StateService {
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
     }
 
-    registerPusherArea(value) {
-        if (this._pushers.length) {
-            const maxLeft = this._pushers[0].position[0] + 1;
-            const maxTop = this._pushers[0].position[1] + 1;
-            let left = this._pushers[0].position[0] - 1;
-            for (; left <= maxLeft; left++) {
-                let top = this._pushers[0].position[1] - 1;
-                for (; top <= maxTop; top++) {
-                    this._registerBlock([left, top], value);
-                }
-            }
-        } else {
-            setTimeout(() => {
-                this.registerPusherArea(value); // TODO: is dit nodig ???
-            }, 50);
-        }
-    }
-
     getBricksCount() {
         return this._bricksCount;
     }
@@ -176,6 +158,24 @@ export class StateService {
             return blockPosition[0] == position[0] && blockPosition[1] == position[1];
         }));
         return brick;
+    }
+
+    registerPusherArea(value) {
+        if (this._pushers.length) {
+            const maxLeft = this._pushers[0].position[0] + 1;
+            const maxTop = this._pushers[0].position[1] + 1;
+            let left = this._pushers[0].position[0] - 1;
+            for (; left <= maxLeft; left++) {
+                let top = this._pushers[0].position[1] - 1;
+                for (; top <= maxTop; top++) {
+                    this._registerBlock([left, top], value);
+                }
+            }
+        } else {
+            setTimeout(() => {
+                this.registerPusherArea(value); // TODO: is dit nodig ???
+            }, 50);
+        }
     }
 
     registerBricks(bricks) {
