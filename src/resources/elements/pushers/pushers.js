@@ -24,12 +24,14 @@ export class PushersCustomElement {
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this.isVisible = false;
         });
+        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => this._initialize());
     }
 
     detached() {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription.dispose();
+        this._retrySubscription.dispose();
     }
 
     _initialize() {

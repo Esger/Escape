@@ -180,11 +180,8 @@ export class StateService {
 
     registerBricks(bricks) {
         this._bricks = bricks;
-        if (bricks.length) {
-            bricks.forEach(brick => this.registerBothBlocks(brick, true));
-        } else {
-            this._cleanBlocks();
-        }
+        this._cleanBlocks();
+        bricks?.forEach(brick => this.registerBothBlocks(brick, true));
     }
 
     _registerBlock(position, occupied) {
