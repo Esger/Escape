@@ -33,6 +33,7 @@ export class PusherCustomElement {
             this.lastKey = 'down';
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this.isVisible = true;
         });
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
@@ -40,7 +41,6 @@ export class PusherCustomElement {
     }
 
     attached() {
-        this.isVisible = true;
         this.isFaassen = this.playerType == 'faassen';
         this.bolts = this._stateService.getBolts();
         this._element.classList.add(this.playerType);
