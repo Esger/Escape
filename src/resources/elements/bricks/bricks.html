@@ -1,0 +1,10 @@
+<template>
+    <!-- <require from="./bricks.css"></require> -->
+    <require from="elements/brick/brick"></require>
+
+    <brick repeat.for="brick of bricks"
+           block-size.bind="blockSize"
+           brick.bind="brick">
+    </brick>
+
+</template>

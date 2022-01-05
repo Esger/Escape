@@ -22,9 +22,7 @@ export class Exits {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._element.style.setProperty('--exitColor', 'lime');
             this.positions = [];
-            setTimeout(() => {
-                this._setExits();
-            });
+            this._setExits();
         });
     }
 
@@ -56,7 +54,7 @@ export class Exits {
             const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
-        const positions = exitPositions.map(exit => this._stateService._multiplyVector(exit[0], this._blockSize));
+        const positions = exitPositions.map(exit => this._stateService.multiplyVector(exit[0], this._blockSize));
 
         this.exits = positions.map((position, index) => {
             const positionToUse = index % 2 === 0 ? 0 : 1;
@@ -68,5 +66,7 @@ export class Exits {
                 'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
             }
         });
+
+        this._eventAggregator.publish('exitsReady');
     }
 }

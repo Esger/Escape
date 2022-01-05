@@ -6,15 +6,12 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 export class MazeWorkerService {
 
     constructor(eventAggregator) {
-        this._results = [];
         this._eventAggregator = eventAggregator;
         this._mazeWorker = new Worker('./assets/workers/maze-worker.js');
         this._outsideResolve;
         this._mazeWorker.onmessage = (event) => {
             if (event.data.message == 'throughPositions' && event.data.positions.length) {
                 this._outsideResolve(event.data.positions);
-                this._results.push(event.data.positions);
-                // this._eventAggregator.publish('throughPositions', event.data.positions);
             }
         };
     }

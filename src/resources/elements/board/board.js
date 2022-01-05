@@ -17,15 +17,12 @@ export class BoardCustomElement {
         this._setBlockSize();
         this._addGameStartSubscription();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
-            this._removeBricks();
             this._addGameStartSubscription();
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
-            this._getBricks(true);
             this._getPushers();
         });
         this._giveUpSubscristion = this._eventAggregator.subscribe('giveUp', _ => {
-            this._removeBricks();
             this._addGameStartSubscription();
         });
     }
@@ -38,7 +35,6 @@ export class BoardCustomElement {
     _addGameStartSubscription() {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._gameStartSubscription.dispose();
-            this._getBricks();
             this._getPushers();
         });
     }
@@ -48,18 +44,6 @@ export class BoardCustomElement {
         this._giveUpSubscristion.dispose();
         this._retrySubscription.dispose();
         this._isTouchDeviceSubscription.dispose();
-    }
-
-    _removeBricks() {
-        this.bricks?.forEach(brick => {
-            setTimeout(() => {
-                brick.removed = true;
-            }, Math.random() * 300)
-        })
-    }
-
-    _getBricks(retry = false) {
-        this.bricks = this._stateService.getBricks(retry);
     }
 
     _getPushers() {
