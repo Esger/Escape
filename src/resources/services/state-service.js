@@ -49,31 +49,23 @@ export class StateService {
         this._bricks = [];
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
         this._pushers = [];
-        this._pushers.push({
-            position: [Math.round(this._boardSize / 2), Math.round(this._boardSize / 2)],
-            type: 'player'
-        });
     }
 
-    _addFaassen() {
-        const exitNumber = this._randomNumberWithin(4);
-        const direction = ['down', 'left', 'up', 'right'][exitNumber];
-        this._pushers.push({
-            position: this._exits[exitNumber][0],
-            direction: direction,
-            type: 'faassen'
-        });
-    }
-
-    _setPusherArea(value) {
-        const maxLeft = this._pushers[0].position[0] + 1;
-        const maxTop = this._pushers[0].position[1] + 1;
-        let left = this._pushers[0].position[0] - 1;
-        for (; left <= maxLeft; left++) {
-            let top = this._pushers[0].position[1] - 1;
-            for (; top <= maxTop; top++) {
-                this._registerBlock([left, top], value);
+    _registerPusherArea(value) {
+        if (this._pushers.length) {
+            const maxLeft = this._pushers[0].position[0] + 1;
+            const maxTop = this._pushers[0].position[1] + 1;
+            let left = this._pushers[0].position[0] - 1;
+            for (; left <= maxLeft; left++) {
+                let top = this._pushers[0].position[1] - 1;
+                for (; top <= maxTop; top++) {
+                    this._registerBlock([left, top], value);
+                }
             }
+        } else {
+            setTimeout(() => {
+                this._registerPusherArea(value);
+            }, 50);
         }
     }
 
@@ -90,6 +82,10 @@ export class StateService {
         this._beforeExits = before;
     }
 
+    getExits() {
+        return this._exits;
+    }
+
     throughExit(position) {
         const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
         return exited;
@@ -100,7 +96,6 @@ export class StateService {
             this._bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
             this._registerBricks(this._bricks);
         } else {
-            this._addFaassen();
             this._initializeBricks();
             setTimeout(_ => { // wacht tot bricks blocks hebben
                 this._registerBricks(this._bricks);
@@ -116,6 +111,10 @@ export class StateService {
 
     getPlayerPosition() {
         return this._pushers[0].position;
+    }
+
+    setPushers(pushers) {
+        this._pushers = pushers;
     }
 
     getPushers() {
@@ -221,7 +220,7 @@ export class StateService {
         return areEqual;
     }
 
-    _randomNumberWithin(max) {
+    randomNumberWithin(max) {
         return Math.floor(Math.random() * max);
     }
 
@@ -268,10 +267,10 @@ export class StateService {
         let direction;
         do {
             count++;
-            direction = this._randomNumberWithin(4);
+            direction = this.randomNumberWithin(4);
             position = [];
-            position.push(this._randomNumberWithin(this._boardSize));
-            position.push(this._randomNumberWithin(this._boardSize));
+            position.push(this.randomNumberWithin(this._boardSize));
+            position.push(this.randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
             !positionFound && count++;
         } while (!positionFound && count < maxPositions); // geen goede check
@@ -306,7 +305,7 @@ export class StateService {
     }
 
     async _initializeBricks() {
-        this._setPusherArea(true);
+        this._registerPusherArea(true);
         // find random places for bricks
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = this._newBrick(i);
@@ -316,7 +315,7 @@ export class StateService {
                 this._bricks.push(brick);
             }
         }
-        this._setPusherArea(false);
+        this._registerPusherArea(false);
         // block the throughs
         let throughs = [];
         throughs = await this._mazeWorkerService.findThrough(this._blocks, this._pushers[0].position, this._beforeExits);

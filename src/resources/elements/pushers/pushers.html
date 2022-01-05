@@ -1,0 +1,9 @@
+<template>
+    <require from="./pushers.css"></require>
+    <require from="elements/pusher/pusher"></require>
+    <pusher repeat.for="pusher of pushers"
+            position.bind="pusher.position"
+            direction.bind="pusher.direction"
+            player-type.bind="pusher.type"
+            block-size.bind="blockSize"></pusher>
+</template>

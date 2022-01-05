@@ -54,7 +54,10 @@ export class PusherCustomElement {
         this._moveSubscription = this._eventAggregator.subscribe('move', message => {
             if (message.type !== this.playerType) {
                 const samePosition = this._stateService.areEqual([message.position, this.position]);
-                if (samePosition) setTimeout(() => this._eventAggregator.publish('giveUp', 'caught'), 250);
+                if (samePosition) {
+                    setTimeout(() => this._eventAggregator.publish('giveUp', 'caught'), 250);
+                    console.log(message.position, this.position);
+                }
             }
         });
     }
@@ -88,18 +91,14 @@ export class PusherCustomElement {
         });
     }
 
-    _step() {
+    _doMove(newPosition) {
+        this.position = newPosition;
         this.step = (this.step == 'step') ? '' : 'step';
         const message = {
             'type': this.playerType,
             'position': this.position
         }
         this._eventAggregator.publish('move', message);
-    }
-
-    _doMove(newPosition) {
-        this.position = newPosition;
-        this._step();
     }
 
     _addTransitionendListenter() {
@@ -118,7 +117,9 @@ export class PusherCustomElement {
         if (direction > -1) {
             const vector = this._directionToVector.toView(direction);
             const newPosition = this._stateService.sumVectors(this.position, vector);
-            if (!this.isFaassen && this._stateService.throughExit(newPosition)) {
+            const exited = this._stateService.throughExit(newPosition);
+            if (!this.isFaassen && exited) {
+                console.log('exited: ', newPosition);
                 this._doMove(newPosition);
                 setTimeout(() => {
                     this._eventAggregator.publish('win');
