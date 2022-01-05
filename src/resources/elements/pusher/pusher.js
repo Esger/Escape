@@ -10,7 +10,6 @@ export class PusherCustomElement {
     @bindable direction;
     @bindable playerType;
 
-    isVisible = false;
     step = false;
     bolts = 0;
 
@@ -21,7 +20,6 @@ export class PusherCustomElement {
         this._directionToVector = directionToVectorValueConverter;
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription?.dispose();
-            this.isVisible = false;
             this.lastKey = 'down';
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
@@ -29,11 +27,7 @@ export class PusherCustomElement {
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._moveSubscription?.dispose();
-            this.isVisible = false;
             this.lastKey = 'down';
-        });
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this.isVisible = true;
         });
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
@@ -67,9 +61,7 @@ export class PusherCustomElement {
         this._winSubscription.dispose();
         this._retrySubscription.dispose();
         this._giveUpSubscription.dispose();
-        this._gameStartSubscription.dispose();
         this._boltsCountSubscription.dispose();
-        this._moveSubscription.dispose();
     }
 
     changeGender() {

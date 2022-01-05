@@ -5,6 +5,7 @@ import { StateService } from 'services/state-service';
 @inject(EventAggregator, StateService)
 
 export class PushersCustomElement {
+    isVisible = false;
 
     constructor(eventAggregator, stateService) {
         this._eventAggregator = eventAggregator;
@@ -13,9 +14,22 @@ export class PushersCustomElement {
 
     attached() {
         this._initialize();
-        this._startGameSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._initialize();
+            this.isVisible = true;
         });
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
+            this.isVisible = false;
+        });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this.isVisible = false;
+        });
+    }
+
+    detached() {
+        this._gameStartSubscription.dispose();
+        this._winSubscription.dispose();
+        this._giveUpSubscription.dispose();
     }
 
     _initialize() {

@@ -2,6 +2,7 @@
     <require from="./pushers.css"></require>
     <require from="elements/pusher/pusher"></require>
     <pusher repeat.for="pusher of pushers"
+            show.bind="isVisible"
             position.bind="pusher.position"
             direction.bind="pusher.direction"
             player-type.bind="pusher.type"
