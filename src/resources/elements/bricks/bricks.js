@@ -15,6 +15,7 @@ export class BricksCustomElement {
     }
 
     attached() {
+        this.showBricks = false;
         this.blockSize = this._stateService.getBlockSize();
         this._boardSize = this._stateService.getBoardSize();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
@@ -29,6 +30,7 @@ export class BricksCustomElement {
         this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
             this._setBricks();
         });
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this.showBricks = true)
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             this.bricks.find(brick => {
                 if (indices.includes(brick.index)) {
@@ -45,18 +47,19 @@ export class BricksCustomElement {
         this._retrySubscription.dispose();
         this._exitsReadySubscription.dispose();
         this._removeSubscription.dispose();
+        this._gameStartSubscription.dispose();
     }
 
     _removeBrick(brick) {
         this._stateService.registerBothBlocks(brick, false);
         this.bricks.splice(index, 1);
         this.bricks.forEach((brick, i) => brick.index = i);
-        // this._stateService.registerBricks(this.bricks);
     }
 
     _removeBricks() {
         this.bricks = [];
         this._stateService.registerBricks(this.bricks);
+        this.showBricks = false;
     }
 
     _setBricks(retry) {
