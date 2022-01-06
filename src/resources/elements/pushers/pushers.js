@@ -52,8 +52,12 @@ export class PushersCustomElement {
     }
 
     _addFaassen() {
-        const exitNumber = this._stateService.randomNumberWithin(4);
-        const direction = ['down', 'left', 'up', 'right'][exitNumber];
+        const exitNumber = this._stateService.randomNumberWithin(4); // 0..3
+        // 0 -> 1
+        // 1 -> 2
+        // 2 -> 3
+        // 3 -> 0
+        const direction = ['1', '2', '3', '0'][exitNumber];
         const exits = this._stateService.getExits();
         this.pushers.push({
             position: exits[exitNumber][0],

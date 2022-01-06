@@ -44,7 +44,18 @@ export class PusherCustomElement {
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
         });
-        this._addMoveSubscription();
+        this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
+            const directions = ['right', 'down', 'left', 'up'];
+            let direction;
+            if (this.isFaassen && this.direction) {
+                direction = this.direction;
+                this.lastKey = directions[direction];
+            } else {
+                direction = directions.indexOf(key);
+                this.lastKey = key;
+            }
+            direction > -1 && this._moveIfPossible(direction);
+        });
         this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', message => {
             if (message.type !== this.playerType) {
                 const samePosition = this._stateService.areEqual([message.position, this.position]);
@@ -57,7 +68,7 @@ export class PusherCustomElement {
     }
 
     detached() {
-        this._moveSubscription?.dispose();
+        this._moveSubscription.dispose();
         this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
         this._retrySubscription.dispose();
@@ -67,21 +78,6 @@ export class PusherCustomElement {
 
     changeGender() {
         this.gender = (this.gender == 'male') ? 'female' : 'male';
-    }
-
-    _addMoveSubscription() {
-        this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
-            this._moveIfPossible(key);
-            // if (this.isFaassen) {
-            //     let canMove = this._moveIfPossible(this.direction || key);
-            //     while (canMove) {
-            //         canMove = this._moveIfPossible(key);
-            //     }
-            //     this.direction = undefined;
-            // } else {
-            //     this._moveIfPossible(key);
-            // }
-        });
     }
 
     _doMove(newPosition) {
@@ -100,38 +96,36 @@ export class PusherCustomElement {
         }, { 'once': true });
     }
 
-    _moveIfPossible(key) {
-        this.lastKey = key;
-        const direction = ['right', 'down', 'left', 'up'].indexOf(key);
+    _moveIfPossible(direction) {
         this._addTransitionendListenter();
         let afterMove = new Promise((resolve, reject) => {
             this._outsideResolve = resolve;
         });
-        if (direction > -1) {
-            const vector = this._directionToVector.toView(direction);
-            const newPosition = this._stateService.sumVectors(this.position, vector);
-            const exited = this._stateService.throughExit(newPosition);
-            if (!this.isFaassen && exited) {
-                console.log('exited: ', newPosition);
+        const vector = this._directionToVector.toView(direction);
+        const newPosition = this._stateService.sumVectors(this.position, vector);
+        const exited = !this.isFaassen && this._stateService.throughExit(newPosition);
+        if (exited) {
+            console.log('exited: ', newPosition);
+            this._doMove(newPosition);
+            setTimeout(() => {
+                this._eventAggregator.publish('win');
+            }, 200);
+            return true;
+        } else {
+            if (this._stateService.isFree(newPosition)) {
                 this._doMove(newPosition);
-                setTimeout(() => {
-                    this._eventAggregator.publish('win');
-                }, 200);
-                return true;
+                afterMove.then(() => {
+                    this.isFaassen && this._moveIfPossible(this.direction || direction);
+                });
             } else {
-                if (this._stateService.isFree(newPosition)) {
+                const canThrowBolts = !this.isFaassen && this.bolts > 0;
+                if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
                     this._doMove(newPosition);
                     afterMove.then(() => {
-                        this.isFaassen && this._moveIfPossible(key);
+                        this.isFaassen && this._moveIfPossible(this.direction || direction);
                     });
                 } else {
-                    const canThrowBolts = !this.isFaassen && this.bolts > 0;
-                    if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
-                        this._doMove(newPosition);
-                        afterMove.then(() => {
-                            this.isFaassen && this._moveIfPossible(key);
-                        });
-                    }
+                    this.direction = undefined;
                 }
             }
         }
