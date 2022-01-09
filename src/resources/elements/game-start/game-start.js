@@ -21,10 +21,10 @@ export class GameStart {
     }
 
     _flashHint() {
-        setTimeout(() => {
+        setTimeout(_ => {
             const keysHint = document.querySelectorAll('.keysHint')[0];
             keysHint.classList.add('flash', 'flash--in');
-            setTimeout(() => {
+            setTimeout(_ => {
                 keysHint.classList.remove('flash', 'flash--in');
             }, 200);
         }, 300);
@@ -59,7 +59,7 @@ export class GameStart {
 
     startGame() {
         this.animating = true;
-        setTimeout(() => {
+        setTimeout(_ => {
             this.gameStartVisible = false;
             this._eventAggregator.publish('gameStart');
             this.animating = false;

@@ -37,7 +37,7 @@ export class Buttons {
 
     _flashButtons() {
         this.flash = true;
-        setTimeout(() => this.flash = false, 300);
+        setTimeout(_ => this.flash = false, 300);
     }
 
     move(direction) {

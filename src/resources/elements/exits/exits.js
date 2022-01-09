@@ -35,21 +35,31 @@ export class Exits {
         const level = this._stateService.getLevel();
         const max = this._boardSize;
         const offset = 1 + ((level + 9) % 18); // 1..19
+        // this._beforeExits are just inside the board, in front of the exits.
         this._beforeExits = [
             [[offset, 0], [offset - 1, 0]],
             [[max - 1, offset], [max - 1, offset - 1]],
             [[max - offset, max - 1], [max - offset - 1, max - 1]],
             [[0, max - offset], [0, max - offset - 1]]
         ];
+        // wait for other elements to be attached.
+        setTimeout(_ => {
+            this._eventAggregator.publish('beforeExitsReady', this._beforeExits);
+        });
 
         let outwardsVectors = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+        // this._exits are just outside the board.
         this._exits = this._beforeExits.map((beforeExit, index) => beforeExit.map(vector => {
             const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
-        this._stateService.setExits(this._exits, this._beforeExits);
+        // wait for other elements to be attached.
+        setTimeout(_ => {
+            this._eventAggregator.publish('exitsReady', this._exits);
+        });
 
         outwardsVectors = [[0, 0], [1, 0], [0, 1], [0, 0]];
+        // positions for visual exits one further out on the far sides
         const exitPositions = this._exits.map((exit, index) => exit.map(vector => {
             const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
             return newVector;
@@ -66,7 +76,5 @@ export class Exits {
                 'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
             }
         });
-
-        this._eventAggregator.publish('exitsReady');
     }
 }

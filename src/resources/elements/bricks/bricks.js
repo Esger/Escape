@@ -27,7 +27,8 @@ export class BricksCustomElement {
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this._setBricks(true);
         });
-        this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
+        this._beforeExitsReadySubscription = this._eventAggregator.subscribe('beforeExitsReady', beforeExits => {
+            this._beforeExits = beforeExits;
             this._setBricks();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this.showBricks = true)
@@ -45,7 +46,7 @@ export class BricksCustomElement {
         this._winSubscristion.dispose();
         this._giveUpSubscristion.dispose();
         this._retrySubscription.dispose();
-        this._exitsReadySubscription.dispose();
+        this._beforeExitsReadySubscription.dispose();
         this._removeSubscription.dispose();
         this._gameStartSubscription.dispose();
     }
@@ -122,7 +123,7 @@ export class BricksCustomElement {
         return positionFound;
     }
 
-    async _initializeBricks() {
+    _fillRandom() {
         this.bricks = [];
         this._stateService.registerBricks(this.bricks);
         this._stateService.registerPusherArea(true);
@@ -137,6 +138,10 @@ export class BricksCustomElement {
             }
         }
         this._stateService.registerPusherArea(false);
+    }
+
+    async _initializeBricks() {
+        this._fillRandom();
         // block the throughs
         let throughs = [];
         const playerPosition = this._stateService.getPlayerPosition();

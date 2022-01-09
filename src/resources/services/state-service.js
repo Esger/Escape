@@ -35,6 +35,9 @@ export class StateService {
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this._bolts = bolts;
         });
+        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
+            this._pushers[message.index] = message.position;
+        });
     }
 
     detached() {
@@ -65,24 +68,6 @@ export class StateService {
         return this._boardSize;
     }
 
-    setExits(exits, before) {
-        this._exits = exits;
-        this._beforeExits = before;
-    }
-
-    getExits() {
-        return this._exits;
-    }
-
-    getBeforeExits() {
-        return this._beforeExits;
-    }
-
-    throughExit(position) {
-        const exited = this._exits.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
-        return exited;
-    }
-
     getBlockSize() {
         return this._blockSize;
     }
@@ -96,15 +81,11 @@ export class StateService {
     }
 
     getPlayerPosition() {
-        return this._pushers[0].position;
+        return this._playerPosition;
     }
 
-    setPushers(pushers) {
-        this._pushers = pushers;
-    }
-
-    getPushers() {
-        return this._pushers;
+    setPlayerPosition(position) {
+        this._playerPosition = position;
     }
 
     moveBrick(position, vector, hasBolts = false) {
@@ -116,10 +97,10 @@ export class StateService {
             if (moveLongitudonal) {
                 const doubleVector = this.multiplyVector(vector, 2);
                 const spaceBehindBrick = this.sumVectors(position, doubleVector);
-                spaceBehindBrickIsFree = this.isFree(spaceBehindBrick);
+                spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
             } else {
                 const spacesBehindBrick = brick.blocks.map(block => this.sumVectors([brick.position[0], brick.position[1]], block, vector));
-                spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space));
+                spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
             }
             if (spaceBehindBrickIsFree) {
                 this.registerBothBlocks(brick, false);
@@ -172,7 +153,7 @@ export class StateService {
                 }
             }
         } else {
-            setTimeout(() => {
+            setTimeout(_ => {
                 this.registerPusherArea(value); // TODO: is dit nodig ???
             }, 50);
         }
@@ -214,8 +195,10 @@ export class StateService {
 
     areEqual(vectors) { // array of positions [x,y]
         const areEqual = vectors.every(position => {
-            const areEqual = position[0] == vectors[0][0] && position[1] == vectors[0][1];
-            return areEqual;
+            if (vectors[0]) {
+                const areEqual = position[0] == vectors[0][0] && position[1] == vectors[0][1];
+                return areEqual;
+            } else return false;
         });
         return areEqual;
     }
@@ -240,10 +223,11 @@ export class StateService {
         return withinBounds;
     }
 
-    isFree(position) {
+    isFree(position, ignorePusher = true) {
         if (this._withinBounds(position)) {
-            const isFree = !this._blocks[position[1]][position[0]];
-            return isFree;
+            const brickAtPosition = this._blocks[position[1]][position[0]];
+            const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this.areEqual([position, pusher.position]));
+            return !brickAtPosition && !playerAtPosition;
         }
         return false;
     }

@@ -32,7 +32,7 @@ export class BrickCustomElement {
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this.gameOver = true;
         });
-        setTimeout(() => {
+        setTimeout(_ => {
             this.visible = true;
         }, Math.random() * 1000);
     }
