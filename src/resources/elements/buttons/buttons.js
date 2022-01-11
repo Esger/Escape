@@ -41,6 +41,6 @@ export class Buttons {
     }
 
     move(direction) {
-        this._eventAggregator.publish('keyPressed', direction);
+        this._eventAggregator.publish('moveKeyPressed', direction);
     }
 }

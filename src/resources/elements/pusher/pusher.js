@@ -6,8 +6,10 @@ import { DirectionToVectorValueConverter } from "resources/value-converters/dire
 @inject(EventAggregator, Element, StateService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable pusher;
+    @bindable exits;
 
-    step = false;
+    step = '';
+    gender = '';
     bolts = 0;
     positionStyle = '';
 
@@ -16,10 +18,12 @@ export class PusherCustomElement {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._directionToVector = directionToVectorValueConverter;
+        this.directions = ['right', 'down', 'left', 'up'];
     }
 
     attached() {
         this._isFaassen = this.pusher.type == 'faassen';
+        !this._isFaassen && (this.gender = 'female');
         this.bolts = this._stateService.getBolts();
         this._element.classList.add(this.pusher.type);
         this._setPositionStyle();
@@ -28,9 +32,6 @@ export class PusherCustomElement {
             setTimeout(_ => {
                 this._element.classList.remove('flash--in');
             }, 250);
-        });
-        this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', exits => {
-            this._exits = exits;
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription?.dispose();
@@ -49,14 +50,13 @@ export class PusherCustomElement {
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this.bolts = bolts;
         });
-        this._moveSubscription = this._eventAggregator.subscribe('keyPressed', key => {
-            const directions = ['right', 'down', 'left', 'up'];
+        this._moveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => {
             let direction;
-            if (this._isFaassen && this.pusher.direction) {
+            if (this._isFaassen && this.pusher.direction !== undefined) {
                 direction = this.pusher.direction;
-                this.lastKey = directions[direction];
+                this.lastKey = this.directions[direction];
             } else {
-                direction = directions.indexOf(key);
+                direction = this.directions.indexOf(key);
                 this.lastKey = key;
             }
             direction > -1 && this._moveIfPossible(direction);
@@ -66,14 +66,12 @@ export class PusherCustomElement {
                 const samePosition = this._stateService.areEqual([message.position, this.pusher.position]);
                 if (samePosition) {
                     setTimeout(_ => this._eventAggregator.publish('giveUp', 'caught'), 250);
-                    console.log(message.position, this.pusher.position);
                 }
             }
         });
     }
 
     detached() {
-        this._exitsReadySubscription.dispose();
         this._moveSubscription.dispose();
         this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
@@ -87,35 +85,40 @@ export class PusherCustomElement {
         const offset = this._isFaassen ? -0.3 : 0;
         const left = blockSize * this.pusher.position[0] + offset;
         const top = blockSize * this.pusher.position[1] + offset;
-        requestAnimationFrame(_ => this.positionStyle = 'left:' + left + 'vmin; top:' + top + 'vmin;');
-        console.log(this.positionStyle);
+        requestAnimationFrame(_ => {
+            if (this._isFaassen) {
+                this.lastKey = this.pusher.direction !== undefined ? this.directions[this.pusher.direction] : this.lastKey;
+            } else {
+                this.step = (!this._isFaassen && this.step == '') ? 'step' : '';
+            }
+            this.positionStyle = 'left:' + left + 'vmin; top:' + top + 'vmin;';
+        });
     }
 
     changeGender() {
-        this.gender = (this.gender == 'male') ? 'female' : 'male';
+        if (!this._isFaassen) {
+            this.gender = (this.gender == 'male') ? 'female' : 'male';
+        }
     }
 
     _throughExit(position) {
-        const exited = this._exits?.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
+        const exited = this.exits?.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
         return exited;
     }
 
     _doMove(newPosition) {
         this.pusher.position = newPosition;
-        this.step = (this.step == 'step') ? '' : 'step';
+        this._setPositionStyle();
         const message = {
             'index': this.pusher.index,
             'type': this.pusher.type,
             'position': this.pusher.position
         }
-        this._setPositionStyle();
         this._eventAggregator.publish('move', message);
     }
 
     _addTransitionendListenter() {
-        this._element.addEventListener('transitionend', e => {
-            this._outsideResolve(e);
-        }, { 'once': true });
+        this._element.addEventListener('transitionend', this._outsideResolve, { 'once': true });
     }
 
     _moveIfPossible(direction) {
@@ -127,7 +130,6 @@ export class PusherCustomElement {
         const newPosition = this._stateService.sumVectors(this.pusher.position, vector);
         const exited = !this._isFaassen && this._throughExit(newPosition);
         if (exited) {
-            console.log('exited: ', newPosition);
             this._doMove(newPosition);
             setTimeout(_ => {
                 this._eventAggregator.publish('win');

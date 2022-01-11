@@ -14,7 +14,7 @@ export class PushersCustomElement {
 
     attached() {
         this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', exits => {
-            this._exits = exits;
+            this.exits = exits;
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
@@ -48,7 +48,7 @@ export class PushersCustomElement {
             this._addPlayer();
             this._addFaassen();
         }
-        this._stateService.setPushers(this.pushers); // TODO niet via stateService
+        this._stateService.setPlayerPosition(this.pushers[0].position);
     }
 
     _newPusher(type, position, direction) {
@@ -76,8 +76,8 @@ export class PushersCustomElement {
         // 1 -> 2
         // 2 -> 3
         // 3 -> 0
-        const direction = ['1', '2', '3', '0'][exitNumber];
-        const position = this._exits[exitNumber][0];
+        const direction = [1, 2, 3, 0][exitNumber];
+        const position = this.exits[exitNumber][0];
         const pusher = this._newPusher('faassen', position, direction);
         this.pushers.push(pusher);
     }

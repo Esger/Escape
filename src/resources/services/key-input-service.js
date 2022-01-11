@@ -23,16 +23,16 @@ export class KeyInputService {
         let keycode = event.keyCode;
         switch (keycode) {
             case this._keys.left:
-                this._eventAggregator.publish('keyPressed', 'left');
+                this._eventAggregator.publish('moveKeyPressed', 'left');
                 break;
             case this._keys.up:
-                this._eventAggregator.publish('keyPressed', 'up');
+                this._eventAggregator.publish('moveKeyPressed', 'up');
                 break;
             case this._keys.right:
-                this._eventAggregator.publish('keyPressed', 'right');
+                this._eventAggregator.publish('moveKeyPressed', 'right');
                 break;
             case this._keys.down:
-                this._eventAggregator.publish('keyPressed', 'down');
+                this._eventAggregator.publish('moveKeyPressed', 'down');
                 break;
             case this._keys.enter:
                 this._eventAggregator.publish('start');
@@ -47,7 +47,7 @@ export class KeyInputService {
                 this._eventAggregator.publish('retry');
                 break;
             default:
-                this._eventAggregator.publish('keyPressed', 'somekey');
+                this._eventAggregator.publish('KeyPressed', 'somekey');
         }
         return true;
     }
