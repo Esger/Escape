@@ -34,7 +34,7 @@ export class Exits {
     _setExits() {
         const level = this._stateService.getLevel();
         const max = this._boardSize;
-        const offset = 1 + ((level + 9) % 18); // 1..19
+        const offset = 2 + ((level + 8) % 17); // 1..18
         // this._beforeExits are just inside the board, in front of the exits.
         this._beforeExits = [
             [[offset, 0], [offset - 1, 0]],
