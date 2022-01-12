@@ -29,6 +29,8 @@ export class BricksCustomElement {
         });
         this._beforeExitsReadySubscription = this._eventAggregator.subscribe('beforeExitsReady', beforeExits => {
             this._beforeExits = beforeExits;
+        });
+        this._pushersReadySubscription = this._eventAggregator.subscribe('pushersReady', _ => {
             this._setBricks();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this.showBricks = true)
@@ -47,6 +49,7 @@ export class BricksCustomElement {
         this._giveUpSubscristion.dispose();
         this._retrySubscription.dispose();
         this._beforeExitsReadySubscription.dispose();
+        this._pushersReadySubscription.dispose();
         this._removeSubscription.dispose();
         this._gameStartSubscription.dispose();
     }
@@ -86,9 +89,14 @@ export class BricksCustomElement {
         return brick;
     }
 
+    _isBlockingExit(positions) {  // array of positions [x,y]
+        const isBlockingExit = positions.some((pos) => this._beforeExits.some((exit) => exit.some(ePos => this._stateService.areEqual([ePos, pos]))));
+        return isBlockingExit;
+    }
+
     _brickSpaceIsFree(position, direction) {
         const position2 = this._stateService.getBlockPosition(position, direction);
-        const isBlockingExit = this._stateService.isBlockingExit([position, position2]);
+        const isBlockingExit = this._isBlockingExit([position, position2]);
         const isFree = this._stateService.isFree(position) && this._stateService.isFree(position2);
         return !isBlockingExit && isFree;
     }
@@ -123,43 +131,42 @@ export class BricksCustomElement {
         return positionFound;
     }
 
+    _initializeBricks() {
+        this._fillRandom();
+        this._eventAggregator.publish('bricksReady');
+        setTimeout(_ => this._closeThroughs()); // wacht tot player 'unregistered' is
+    }
+
     _fillRandom() {
-        this.bricks = [];
-        this._stateService.registerBricks(this.bricks);
-        this._stateService.registerPusherArea(true);
         // find random places for bricks
         this._bricksCount = this._stateService.getBricksCount();
         for (let i = 0; i < this._bricksCount; i++) {
             const brick = this._newBrick(i);
             if (this._findAndSetPosition(brick)) {
-                this._stateService._registerBlock(brick.position, true);
-                this._stateService._registerBlock(this._stateService.getBlockPosition(brick.position, brick.direction), true);
+                this._stateService.registerBlock(brick.position, true);
+                this._stateService.registerBlock(this._stateService.getBlockPosition(brick.position, brick.direction), true);
                 this.bricks.push(brick);
             }
         }
-        this._stateService.registerPusherArea(false);
     }
 
-    async _initializeBricks() {
-        this._fillRandom();
+    async _closeThroughs() {
         // block the throughs
         let throughs = [];
         const playerPosition = this._stateService.getPlayerPosition();
-        const beforeExits = this._stateService.getBeforeExits();
         let blocks = this._stateService.getBlocks();
-        throughs = await this._mazeWorkerService.findThrough(blocks, playerPosition, beforeExits);
+        throughs = await this._mazeWorkerService.findThrough(blocks, playerPosition, this._beforeExits);
         while (throughs && throughs.length) {
             const brick = this._newBrick(this.bricks.length + 1);
             brick.position = throughs[0];
             const direction = this._findDirection(brick.position);
             if (direction !== false) {
                 brick.direction = direction;
-                this._stateService._registerBlock(brick.position, true);
-                this._stateService._registerBlock(this._stateService.getBlockPosition(brick.position, brick.direction), true);
+                this._stateService.registerBlock(brick.position, true);
+                this._stateService.registerBlock(this._stateService.getBlockPosition(brick.position, brick.direction), true);
                 this.bricks.push(brick);
             }
-            throughs = await this._mazeWorkerService.findThrough(blocks, playerPosition, beforeExits);
-            // throughs = throughs.length ? throughs : await this._mazeWorkerService.findThrough(blocks, playerPosition, beforeExits);
+            throughs = await this._mazeWorkerService.findThrough(blocks, playerPosition, this._beforeExits);
         }
     }
 

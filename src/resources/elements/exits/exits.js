@@ -12,6 +12,7 @@ export class Exits {
         this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
         this._boardSize = this._stateService.getBoardSize();
         this._blockSize = this._stateService.getBlockSize();
+        this._firstTime = true;
     }
 
     attached() {
@@ -55,7 +56,8 @@ export class Exits {
         }));
         // wait for other elements to be attached.
         setTimeout(_ => {
-            this._eventAggregator.publish('exitsReady', this._exits);
+            !this._firstTime && this._eventAggregator.publish('exitsReady', this._exits);
+            this._firstTime = false;
         });
 
         outwardsVectors = [[0, 0], [1, 0], [0, 1], [0, 0]];
