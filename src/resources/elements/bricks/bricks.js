@@ -21,19 +21,17 @@ export class BricksCustomElement {
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             this._removeBricks();
         });
-        this._giveUpSubscristion = this._eventAggregator.subscribe('giveUp', _ => {
-            this._removeBricks();
-        });
-        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
-            this._setBricks(true);
-        });
         this._beforeExitsReadySubscription = this._eventAggregator.subscribe('beforeExitsReady', beforeExits => {
             this._beforeExits = beforeExits;
         });
         this._pushersReadySubscription = this._eventAggregator.subscribe('pushersReady', _ => {
             this._setBricks();
         });
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this.showBricks = true)
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGiveUpSubscription();
+            this._addRetrySubscription();
+            this.showBricks = true;
+        });
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             this.bricks.find(brick => {
                 if (indices.includes(brick.index)) {
@@ -46,12 +44,25 @@ export class BricksCustomElement {
 
     detached() {
         this._winSubscristion.dispose();
-        this._giveUpSubscristion.dispose();
+        this._giveUpSubscription?.dispose();
         this._retrySubscription.dispose();
         this._beforeExitsReadySubscription.dispose();
         this._pushersReadySubscription.dispose();
         this._removeSubscription.dispose();
         this._gameStartSubscription.dispose();
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._removeBricks();
+        });
+    }
+
+    _addRetrySubscription() {
+        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
+            this._removeBricks();
+            this._resetBricks();
+        });
     }
 
     _removeBrick(brick) {
@@ -63,20 +74,24 @@ export class BricksCustomElement {
     _removeBricks() {
         this.bricks = [];
         this._stateService.registerBricks(this.bricks);
-        this.showBricks = false;
+        // this.showBricks = false;
     }
 
-    _setBricks(retry) {
-        if (retry) {
-            this.bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
+    _resetBricks() {
+        this.showBricks = false;
+        this.bricks = JSON.parse(JSON.stringify(this._originalBricks)); // deep copy
+        setTimeout(_ => {
             this._stateService.registerBricks(this.bricks);
-        } else {
-            this._initializeBricks();
-            setTimeout(_ => { // wacht tot bricks blocks hebben
-                this._stateService.registerBricks(this.bricks);
-                this._originalBricks = JSON.parse(JSON.stringify(this.bricks)); // deep copy
-            });
-        }
+            this.showBricks = true;
+        });
+    }
+
+    _setBricks() {
+        this._initializeBricks();
+        setTimeout(_ => { // wacht tot bricks blocks hebben
+            this._stateService.registerBricks(this.bricks);
+            this._originalBricks = JSON.parse(JSON.stringify(this.bricks)); // deep copy
+        });
     }
 
     _newBrick(i) {

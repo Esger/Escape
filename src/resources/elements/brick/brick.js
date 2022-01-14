@@ -27,20 +27,24 @@ export class BrickCustomElement {
             }, Math.random() * 500);
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGiveUpSubscription();
             this.gameOver = false;
-        });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this.gameOver = true;
         });
         setTimeout(_ => {
             this.visible = true;
         }, Math.random() * 1000);
     }
 
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this.gameOver = true;
+        });
+    }
+
     detached() {
         this._winSubscription.dispose();
         this._gameStartSubscription.dispose();
-        this._giveUpSubscription.dispose();
+        this._giveUpSubscription?.dispose();
     }
 
     _hideBrick() {

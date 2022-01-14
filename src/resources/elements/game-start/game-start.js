@@ -15,7 +15,6 @@ export class GameStart {
 
     attached() {
         this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', message => this._showStuckScreen(message));
         this._addStartSubscription();
         this._flashHint();
     }
@@ -32,7 +31,7 @@ export class GameStart {
 
     detached() {
         this._winSubscribtion.dispose();
-        this._giveUpSubscription.dispose();
+        this._giveUpSubscription?.dispose();
         this._startSubscription && this._startSubscription.dispose();
     }
 
@@ -43,23 +42,29 @@ export class GameStart {
         this._flashHint();
     }
 
-    _showStuckScreen(message = 'Stuck') {
+    _showStuckScreen() {
+        this.title = 'Stuck';
         this.gameStartVisible = true;
-        this.title = message;
         this._addStartSubscription();
         this._flashHint();
     }
 
     _addStartSubscription() {
-        this._startSubscription = this._eventAggregator.subscribe('start', _ => {
-            this._startSubscription.dispose();
+        this._startSubscription = this._eventAggregator.subscribeOnce('start', _ => {
             this.startGame();
         })
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._showStuckScreen();
+        });
     }
 
     startGame() {
         this.animating = true;
         setTimeout(_ => {
+            this._addGiveUpSubscription();
             this.gameStartVisible = false;
             this._eventAggregator.publish('gameStart');
             this.animating = false;

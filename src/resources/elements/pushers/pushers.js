@@ -21,15 +21,13 @@ export class PushersCustomElement {
             this._registerPlayerArea(false);
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGiveUpSubscription();
+            this._addRetrySubscription();
             this.isVisible = true;
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.isVisible = false;
         });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this.isVisible = false;
-        });
-        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => this._initialize(true));
     }
 
     detached() {
@@ -37,8 +35,20 @@ export class PushersCustomElement {
         this._bricksReadySubscription.dispose();
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
-        this._giveUpSubscription.dispose();
+        this._giveUpSubscription?.dispose();
         this._retrySubscription.dispose();
+    }
+
+    _addRetrySubscription() {
+        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
+            this._initialize(true);
+        });
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this.isVisible = false;
+        });
     }
 
     _initialize(retry) {
@@ -51,9 +61,9 @@ export class PushersCustomElement {
             this.pushers = [];
             this._addPlayer();
             this._addFaassen();
+            this._eventAggregator.publish('pushersReady');
         }
         this._stateService.setPushers(this.pushers);
-        this._eventAggregator.publish('pushersReady');
     }
 
     _newPusher(type, position, direction) {

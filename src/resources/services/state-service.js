@@ -21,16 +21,12 @@ export class StateService {
         this._cleanGame();
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGiveUpSubscription());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
             this._cleanGame();
             console.log(this._bricksCount);
-        });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this._bricksCount = this._initialBricksCount;
-            this._level = 0;
-            this._cleanGame();
         });
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this._bolts = bolts;
@@ -41,9 +37,18 @@ export class StateService {
     }
 
     detached() {
+        this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
-        this._giveUpSubscription.dispose();
+        this._giveUpSubscription?.dispose();
         this._boltsCountSubscription.dispose();
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._bricksCount = this._initialBricksCount;
+            this._level = 0;
+            this._cleanGame();
+        });
     }
 
     _cleanGame() {
@@ -142,8 +147,8 @@ export class StateService {
     }
 
     registerBricks(bricks) {
+        this._bricks = bricks;
         if (bricks.length) {
-            this._bricks = bricks;
             bricks.forEach(brick => this.registerBothBlocks(brick, true));
         } else {
             this._cleanBlocks();

@@ -33,17 +33,11 @@ export class PusherCustomElement {
                 this._element.classList.remove('flash--in');
             }, 250);
         });
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGiveUpSubscription();
+            this._addRetrySubscription();
+        });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._moveSubscription?.dispose();
-            this.lastKey = 'down';
-        });
-        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
-            setTimeout(() => {
-                this._setPositionStyle();
-            });
-            this.lastKey = 'down';
-        });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
             this._moveSubscription?.dispose();
             this.lastKey = 'down';
         });
@@ -72,12 +66,29 @@ export class PusherCustomElement {
     }
 
     detached() {
+        this._gameStartSubscription.dispose();
         this._moveSubscription.dispose();
         this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
-        this._retrySubscription.dispose();
-        this._giveUpSubscription.dispose();
+        this._retrySubscription?.dispose();
+        this._giveUpSubscription?.dispose();
         this._boltsCountSubscription.dispose();
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._moveSubscription?.dispose();
+            this.lastKey = 'down';
+        });
+    }
+
+    _addRetrySubscription() {
+        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
+            setTimeout(() => {
+                this._setPositionStyle();
+            });
+            this.lastKey = 'down';
+        });
     }
 
     _setPositionStyle() {
