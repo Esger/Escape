@@ -54,6 +54,7 @@ export class BricksCustomElement {
 
     _addGiveUpSubscription() {
         this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._giveUpSubscription?.dispose();
             this._removeBricks();
         });
     }
