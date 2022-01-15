@@ -17,9 +17,10 @@ export class MazeWorkerService {
     }
 
     findThrough(cells, position, targetPositions) {
+        const booleanCells = cells.map(row => row.map(cell => cell !== false));
         const message = {
             message: 'getPositionHalfway',
-            cells: cells,
+            cells: booleanCells,
             position: position,
             targetPositions: targetPositions
         }

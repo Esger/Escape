@@ -19,7 +19,6 @@ export class BrickCustomElement {
     attached() {
         this.left = this.brick.position[0];
         this.top = this.brick.position[1];
-        this._setBlocks();
         this.directionClass = ['toRight', 'toBottom', 'toLeft', 'toTop'][this.brick.direction];
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             setTimeout(_ => {
@@ -27,24 +26,20 @@ export class BrickCustomElement {
             }, Math.random() * 500);
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGiveUpSubscription();
             this.gameOver = false;
+        });
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this.gameOver = true;
         });
         setTimeout(_ => {
             this.visible = true;
         }, Math.random() * 1000);
     }
 
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this.gameOver = true;
-        });
-    }
-
     detached() {
         this._winSubscription.dispose();
         this._gameStartSubscription.dispose();
-        this._giveUpSubscription?.dispose();
+        this._giveUpSubscription.dispose();
     }
 
     _hideBrick() {
@@ -52,11 +47,5 @@ export class BrickCustomElement {
     }
 
     isOdd = (num) => { return num % 2 }
-
-    _setBlocks() {
-        this.brick.blocks = [];
-        this.brick.blocks.push([0, 0]);
-        this.brick.blocks.push(this._directionToVector.toView(this.brick.direction));
-    }
 
 }

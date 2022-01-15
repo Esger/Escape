@@ -31,8 +31,8 @@ export class StateService {
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
             this._bolts = bolts;
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
-            this._pushers[message.index].position = message.position;
+        this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
+            this._pushers[pusher.index].position = pusher.position;
         });
     }
 
@@ -87,10 +87,6 @@ export class StateService {
 
     setPushers(pushers) {
         this._pushers = pushers;
-    }
-
-    getPlayerPosition() {
-        return this._pushers[0].position;
     }
 
     moveBrick(position, vector, hasBolts = false) {
@@ -148,24 +144,29 @@ export class StateService {
 
     registerBricks(bricks) {
         this._bricks = bricks;
-        if (bricks.length) {
-            bricks.forEach(brick => this.registerBothBlocks(brick, true));
-        } else {
-            this._cleanBlocks();
-        }
+        this._cleanBlocks();
+        bricks?.forEach(brick => this.registerBothBlocks(brick, brick.index));
     }
 
     registerBlock(position, occupied) {
         if (this._withinBounds(position)) {
+            const content = this._blocks[position[1]][position[0]];
             this._blocks[position[1]][position[0]] = occupied;
+            return content;
         }
+        return false;
     }
 
     registerBothBlocks(brick, occupied) {
         brick.blocks?.forEach(block => {
             const position = this.sumVectors(brick.position, block);
-            this.registerBlock(position, occupied);
+            this.registerBlock(position, occupied ? brick.index : false);
         });
+    }
+
+    registerBrick(brick, occupied) {
+        this.registerBlock(brick.position, brick.index);
+        this.registerBlock(this.getBlockPosition(brick.position, brick.direction), occupied ? brick.index : false);
     }
 
     multiplyVector(vector, factor) {
