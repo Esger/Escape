@@ -47,10 +47,6 @@ export class Exits {
             [[max - offset, max - 1], [max - offset - 1, max - 1]],
             [[0, max - offset], [0, max - offset - 1]]
         ];
-        // wait for other elements to be attached.
-        setTimeout(_ => {
-            this._eventAggregator.publish('beforeExitsReady', this._beforeExits);
-        });
 
         let outwardsVectors = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         // this._exits are just outside the board.
@@ -58,9 +54,9 @@ export class Exits {
             const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
-        // wait for other elements to be attached.
+        // wait for bricks to be initialized.
         setTimeout(_ => {
-            !this._firstTime && this._eventAggregator.publish('exitsReady', this._exits);
+            !this._firstTime && this._eventAggregator.publish('exitsReady', { 'exits': this._exits, 'beforeExits': this._beforeExits });
             this._firstTime = false;
         });
 

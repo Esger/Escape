@@ -18,14 +18,14 @@ export class StateService {
         this._realBoardSize = this._isMobile ? 100 : 80;
         this._blockSize = this._isMobile ? 5 : 4;
         this._boardSize = Math.round(this._realBoardSize / this._blockSize);
-        this._cleanGame();
+        this._bricks = [];
+        this._pushers = [];
         this._directionToVector = directionToVectorValueConverter;
         this._vectorToDirection = vectorToDirectionValueConverter;
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGiveUpSubscription());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
-            this._cleanGame();
             console.log(this._bricksCount);
         });
         this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
@@ -47,18 +47,7 @@ export class StateService {
         this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
             this._bricksCount = this._initialBricksCount;
             this._level = 0;
-            this._cleanGame();
         });
-    }
-
-    _cleanGame() {
-        this._bricks = [];
-        this._pushers = [];
-        this._cleanBlocks();
-    }
-
-    _cleanBlocks() {
-        this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
     }
 
     getBricksCount() {
@@ -81,16 +70,16 @@ export class StateService {
         return this._bolts;
     }
 
-    getBlocks() {
-        return this._blocks;
-    }
-
     setPushers(pushers) {
         this._pushers = pushers;
     }
 
+    setBricks(bricks) {
+        this._bricks = bricks;
+    }
+
     moveBrick(position, vector, hasBolts = false) {
-        const brick = this._findBrickAt(position);
+        const brick = this.findBrickAt(position);
         if (brick) {
             const vectorDirection = this._vectorToDirection.toView(vector);
             const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
@@ -104,9 +93,9 @@ export class StateService {
                 spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
             }
             if (spaceBehindBrickIsFree) {
-                this.registerBothBlocks(brick, false);
+                this.mapBrick(brick, false);
                 brick.position = this.sumVectors(brick.position, vector);
-                this.registerBothBlocks(brick, true);
+                this.mapBrick(brick, true);
                 return true;
             } else {
                 if (brick.bumpedIn && hasBolts) {
@@ -128,45 +117,34 @@ export class StateService {
         const positions = offsets.map(offset => this.sumVectors(position, offset));
         const bricks = [];
         positions.forEach(position => {
-            const brick = this._findBrickAt(position);
+            const brick = this.findBrickAt(position);
             brick && bricks.push(brick.index);
         });
         this._eventAggregator.publish('removeBricks', bricks);
     }
 
-    _findBrickAt(position) {
+    findBrickAt(position) {
+
+
         const brick = this._bricks.find(brick => brick.blocks.some(block => {
             const blockPosition = this.getBlockPosition(brick.position, block);
-            return blockPosition[0] == position[0] && blockPosition[1] == position[1];
+            return this.areEqual([blockPosition, position]);
         }));
         return brick;
     }
 
-    registerBricks(bricks) {
-        this._bricks = bricks;
-        this._cleanBlocks();
-        bricks?.forEach(brick => this.registerBothBlocks(brick, brick.index));
+    setMap(blocks) {
+        this._blocks = blocks;
     }
 
-    registerBlock(position, occupied) {
-        if (this._withinBounds(position)) {
-            const content = this._blocks[position[1]][position[0]];
-            this._blocks[position[1]][position[0]] = occupied;
-            return content;
-        }
-        return false;
-    }
-
-    registerBothBlocks(brick, occupied) {
+    mapBrick(brick, occupied) {
         brick.blocks?.forEach(block => {
             const position = this.sumVectors(brick.position, block);
-            this.registerBlock(position, occupied ? brick.index : false);
+            if (this._withinBounds(position)) {
+                const value = occupied ? brick.index : false;
+                this._blocks[position[1]][position[0]] = value;
+            };
         });
-    }
-
-    registerBrick(brick, occupied) {
-        this.registerBlock(brick.position, brick.index);
-        this.registerBlock(this.getBlockPosition(brick.position, brick.direction), occupied ? brick.index : false);
     }
 
     multiplyVector(vector, factor) {
@@ -184,13 +162,8 @@ export class StateService {
         return sumVector;
     }
 
-    areEqual(vectors) { // array of positions [x,y]
-        const areEqual = vectors.every(position => {
-            if (vectors[0]) {
-                const areEqual = position[0] == vectors[0][0] && position[1] == vectors[0][1];
-                return areEqual;
-            } else return false;
-        });
+    areEqual(vectors) { // array of 2 positions [x,y]
+        const areEqual = JSON.stringify(vectors[0]) == JSON.stringify(vectors[1]);
         return areEqual;
     }
 
@@ -216,7 +189,7 @@ export class StateService {
 
     isFree(position, ignorePusher = true) {
         if (this._withinBounds(position)) {
-            const brickAtPosition = this._blocks[position[1]][position[0]];
+            const brickAtPosition = this._blocks[position[1]][position[0]] !== false;
             const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this.areEqual([position, pusher.position]));
             return !brickAtPosition && !playerAtPosition;
         }

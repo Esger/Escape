@@ -13,8 +13,8 @@ export class PushersCustomElement {
     }
 
     attached() {
-        this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', exits => {
-            this.exits = exits;
+        this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', data => {
+            this.exits = data.exits;
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
