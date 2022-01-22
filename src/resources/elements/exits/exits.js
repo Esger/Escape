@@ -1,14 +1,16 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
+import { HelperService } from 'services/helper-service';
 
-@inject(Element, EventAggregator, StateService)
+@inject(Element, EventAggregator, StateService, HelperService)
 export class Exits {
 
-    constructor(element, eventAggregator, stateService) {
+    constructor(element, eventAggregator, stateService, helperService) {
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this._helpers = helperService;
         this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
         this._boardSize = this._stateService.getBoardSize();
         this._blockSize = this._stateService.getBlockSize();
@@ -51,7 +53,7 @@ export class Exits {
         let outwardsVectors = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         // this._exits are just outside the board.
         this._exits = this._beforeExits.map((beforeExit, index) => beforeExit.map(vector => {
-            const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
+            const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
         // wait for bricks to be initialized.
@@ -63,10 +65,10 @@ export class Exits {
         outwardsVectors = [[0, 0], [1, 0], [0, 1], [0, 0]];
         // positions for visual exits one further out on the far sides
         const exitPositions = this._exits.map((exit, index) => exit.map(vector => {
-            const newVector = this._stateService.sumVectors(vector, outwardsVectors[index]);
+            const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
-        const positions = exitPositions.map(exit => this._stateService.multiplyVector(exit[0], this._blockSize));
+        const positions = exitPositions.map(exit => this._helpers.multiplyVector(exit[0], this._blockSize));
 
         this.exits = positions.map((position, index) => {
             const positionToUse = index % 2 === 0 ? 0 : 1;

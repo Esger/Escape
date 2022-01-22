@@ -1,15 +1,17 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
+import { HelperService } from 'services/helper-service';
 
-@inject(EventAggregator, StateService)
+@inject(EventAggregator, StateService, HelperService)
 
 export class PushersCustomElement {
     isVisible = false;
 
-    constructor(eventAggregator, stateService) {
+    constructor(eventAggregator, stateService, helperService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this._helpers = helperService;
     }
 
     attached() {
@@ -81,7 +83,7 @@ export class PushersCustomElement {
     }
 
     _addFaassen() {
-        const exitNumber = this._stateService.randomNumberWithin(4); // 0..3
+        const exitNumber = this._helpers.randomNumberWithin(4); // 0..3
         // 0 -> 1
         // 1 -> 2
         // 2 -> 3

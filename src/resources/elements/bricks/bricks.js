@@ -1,17 +1,19 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
+import { HelperService } from 'services/helper-service';
 import { MazeWorkerService } from 'services/maze-worker-service';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, StateService, MazeWorkerService, DirectionToVectorValueConverter)
+@inject(EventAggregator, StateService, HelperService, MazeWorkerService, DirectionToVectorValueConverter)
 export class BricksCustomElement {
 
     bricks = [];
 
-    constructor(eventAggregator, stateService, mazeWorkerService, directionToVectorValueConverter) {
+    constructor(eventAggregator, stateService, helperService, mazeWorkerService, directionToVectorValueConverter) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this._helpers = helperService;
         this._mazeWorkerService = mazeWorkerService;
         this._dir2vector = directionToVectorValueConverter;
     }
@@ -108,9 +110,9 @@ export class BricksCustomElement {
         const maxPositions = 50;
         do {
             position = [];
-            direction = this._stateService.randomNumberWithin(4);
-            position.push(this._stateService.randomNumberWithin(this._boardSize));
-            position.push(this._stateService.randomNumberWithin(this._boardSize));
+            direction = this._helpers.randomNumberWithin(4);
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
             count++;
         } while (!positionFound && count < maxPositions); // TODO geen goede check
@@ -149,7 +151,7 @@ export class BricksCustomElement {
 
     _mapBrick(brick, occupied) {
         for (const block of brick.blocks) {
-            const position = this._stateService.sumVectors(brick.position, block);
+            const position = this._helpers.sumVectors(brick.position, block);
             if (this._stateService._withinBounds(position)) {
                 const value = occupied ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
@@ -164,8 +166,9 @@ export class BricksCustomElement {
         this._cleanBeforeExits();
         this._cleanCenter();
         // this._closeThroughs();
-        // this._mapBricks(this.bricks);
+        this._mapBricks(this.bricks);
         this._originalBricks = this._deepCopy(this.bricks);
+        this._stateService.setBricks(this.bricks);
         this._eventAggregator.publish('bricksReady');
     }
 
@@ -187,7 +190,6 @@ export class BricksCustomElement {
             brick.index = i;
             return brick;
         });
-        this._stateService.setBricks(this.bricks);
     }
 
     _cleanCenter() {
@@ -195,7 +197,7 @@ export class BricksCustomElement {
         const center = [c - 1, c, c + 1];
         const newBricks = this.bricks.filter(brick => {
             const isInCenter = brick.blocks.some(block => {
-                const position = this._stateService.sumVectors(block, brick.position);
+                const position = this._helpers.sumVectors(block, brick.position);
                 return position.every(value => center.includes(value));
             });
             return !isInCenter
@@ -214,8 +216,8 @@ export class BricksCustomElement {
         const exitsFlat = exits.flat();
         const beforeExit = brick => {
             const beforeExit = brick.blocks.some(block => {
-                const position = this._stateService.sumVectors(block, brick.position);
-                const beforeExit = exitsFlat.some(exit => this._stateService.areEqual([exit, position]));
+                const position = this._helpers.sumVectors(block, brick.position);
+                const beforeExit = exitsFlat.some(exit => this._helpers.areEqual([exit, position]));
                 return beforeExit;
             });
             return beforeExit;

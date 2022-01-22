@@ -1,9 +1,10 @@
 import { inject, bindable } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
+import { HelperService } from 'services/helper-service';
 import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, Element, StateService, DirectionToVectorValueConverter)
+@inject(EventAggregator, Element, StateService, HelperService, DirectionToVectorValueConverter)
 export class PusherCustomElement {
     @bindable pusher;
     @bindable exits;
@@ -13,10 +14,11 @@ export class PusherCustomElement {
     bolts = 0;
     positionStyle = '';
 
-    constructor(eventAggregator, element, stateService, directionToVectorValueConverter) {
+    constructor(eventAggregator, element, stateService, helperService, directionToVectorValueConverter) {
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this._helpers = helperService;
         this._directionToVector = directionToVectorValueConverter;
         this.directions = ['right', 'down', 'left', 'up'];
     }
@@ -57,7 +59,7 @@ export class PusherCustomElement {
         });
         this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', message => {
             if (message.type !== this.pusher.type) {
-                const samePosition = this._stateService.areEqual([message.position, this.pusher.position]);
+                const samePosition = this._helpers.areEqual([message.position, this.pusher.position]);
                 if (samePosition) {
                     setTimeout(_ => this._eventAggregator.publish('giveUp', 'caught'), 250);
                 }
@@ -138,7 +140,7 @@ export class PusherCustomElement {
             this._outsideResolve = resolve;
         });
         const vector = this._directionToVector.toView(direction);
-        const newPosition = this._stateService.sumVectors(this.pusher.position, vector);
+        const newPosition = this._helpers.sumVectors(this.pusher.position, vector);
         const exited = !this._isFaassen && this._throughExit(newPosition);
         if (exited) {
             this._doMove(newPosition);
