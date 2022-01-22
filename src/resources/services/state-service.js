@@ -125,7 +125,7 @@ export class StateService {
 
     findBrickAt(position) {
         const brick = this._bricks.find(brick => brick.blocks.some(block => {
-            const blockPosition = this.getBlockPosition(brick.position, block);
+            const blockPosition = this._helpers.getBlockPosition(brick.position, block);
             return this._helpers.areEqual([blockPosition, position]);
         }));
         return brick;
@@ -143,17 +143,6 @@ export class StateService {
                 this._blocks[position[1]][position[0]] = value;
             };
         });
-    }
-
-    getBlockPosition(position, direction) {
-        let directionVector;
-        if (typeof direction === 'number') {
-            directionVector = this._helpers.direction2vector(direction);
-        } else {
-            directionVector = direction;
-        }
-        const position2 = this._helpers.sumVectors(position, directionVector);
-        return position2;
     }
 
     _withinBounds(position) {

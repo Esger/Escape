@@ -37,4 +37,15 @@ export class HelperService {
         return direction;
     }
 
+    getBlockPosition(position, direction) {
+        let directionVector;
+        if (typeof direction === 'number') {
+            directionVector = this.direction2vector(direction);
+        } else {
+            directionVector = direction;
+        }
+        const position2 = this.sumVectors(position, directionVector);
+        return position2;
+    }
+
 }
