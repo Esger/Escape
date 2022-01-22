@@ -1,10 +1,8 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { HelperService } from 'services/helper-service';
-import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
-import { VectorToDirectionValueConverter } from "resources/value-converters/vector-to-direction-value-converter";
 
-@inject(EventAggregator, HelperService, DirectionToVectorValueConverter, VectorToDirectionValueConverter)
+@inject(EventAggregator, HelperService)
 export class StateService {
 
     _initialBricksCount = 80;
@@ -13,7 +11,7 @@ export class StateService {
     _bricksIncrement = 2;
     _level = 0;
 
-    constructor(eventAggregator, helperService, directionToVectorValueConverter, vectorToDirectionValueConverter) {
+    constructor(eventAggregator, helperService) {
         this._eventAggregator = eventAggregator;
         this._helpers = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
@@ -21,9 +19,8 @@ export class StateService {
         this._boardSize = 20;
         this._blockSize = Math.round(this._realBoardSize / this._boardSize);
         this._bricks = [];
+        this._blocks = [];
         this._pushers = [];
-        this._directionToVector = directionToVectorValueConverter;
-        this._vectorToDirection = vectorToDirectionValueConverter;
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGiveUpSubscription());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
@@ -43,6 +40,7 @@ export class StateService {
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
         this._boltsCountSubscription.dispose();
+        this._moveSubscription.dispose();
     }
 
     _addGiveUpSubscription() {
@@ -83,7 +81,7 @@ export class StateService {
     moveBrick(position, vector, hasBolts = false) {
         const brick = this.findBrickAt(position);
         if (brick) {
-            const vectorDirection = this._vectorToDirection.toView(vector);
+            const vectorDirection = this._helpers.vector2direction(vector);
             const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
             let spaceBehindBrickIsFree;
             if (moveLongitudonal) {
@@ -150,7 +148,7 @@ export class StateService {
     getBlockPosition(position, direction) {
         let directionVector;
         if (typeof direction === 'number') {
-            directionVector = this._directionToVector.toView(direction);
+            directionVector = this._helpers.direction2vector(direction);
         } else {
             directionVector = direction;
         }

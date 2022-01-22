@@ -1,18 +1,16 @@
 import { inject, bindable } from "aurelia-framework";
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
-import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, StateService, DirectionToVectorValueConverter)
+@inject(EventAggregator, StateService)
 export class BrickCustomElement {
     @bindable brick;
     @bindable blockSize;
     visible = false;
 
-    constructor(eventAggregator, stateService, directionToVectorValueConverter) {
+    constructor(eventAggregator, stateService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
-        this._directionToVector = directionToVectorValueConverter;
         this.gameOver = false;
     }
 
@@ -46,6 +44,8 @@ export class BrickCustomElement {
         this.gameOver = true;
     }
 
-    isOdd = (num) => { return num % 2 }
+    isOdd(num) {
+        return num % 2
+    }
 
 }

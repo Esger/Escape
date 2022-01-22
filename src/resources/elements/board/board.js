@@ -7,7 +7,6 @@ export class BoardCustomElement {
     constructor(element, stateService) {
         this._element = element;
         this._stateService = stateService;
-        this.blockSize = this._stateService.getBlockSize();
         this.isMobile = sessionStorage.getItem('isMobile') == 'true';
     }
 

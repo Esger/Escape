@@ -3,19 +3,17 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
 import { HelperService } from 'services/helper-service';
 import { MazeWorkerService } from 'services/maze-worker-service';
-import { DirectionToVectorValueConverter } from "resources/value-converters/direction-to-vector-value-converter";
 
-@inject(EventAggregator, StateService, HelperService, MazeWorkerService, DirectionToVectorValueConverter)
+@inject(EventAggregator, StateService, HelperService, MazeWorkerService)
 export class BricksCustomElement {
 
     bricks = [];
 
-    constructor(eventAggregator, stateService, helperService, mazeWorkerService, directionToVectorValueConverter) {
+    constructor(eventAggregator, stateService, helperService, mazeWorkerService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._helpers = helperService;
         this._mazeWorkerService = mazeWorkerService;
-        this._dir2vector = directionToVectorValueConverter;
     }
 
     attached() {
@@ -81,7 +79,7 @@ export class BricksCustomElement {
             position: metrics.position,
             direction: metrics.direction,
             content: '',
-            blocks: [[0, 0], this._dir2vector.toView(metrics.direction)]
+            blocks: [[0, 0], this._helpers.direction2vector(metrics.direction)]
         }
         return brick;
     }
@@ -142,7 +140,6 @@ export class BricksCustomElement {
 
     _cleanMap() {
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
-        this._stateService.setMap(this._blocks);
     }
 
     _mapBricks() {
@@ -168,6 +165,7 @@ export class BricksCustomElement {
         // this._closeThroughs();
         this._mapBricks(this.bricks);
         this._originalBricks = this._deepCopy(this.bricks);
+        this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
         this._eventAggregator.publish('bricksReady');
     }
