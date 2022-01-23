@@ -50,6 +50,19 @@ export class StateService {
         });
     }
 
+    setExits(exits) {
+        this._exits = exits.exits;
+        this._beforeExits = exits.beforeExits;
+    }
+
+    getExits() {
+        return this._exits;
+    }
+
+    getBeforeExits() {
+        return this._beforeExits;
+    }
+
     getBricksCount() {
         return this._bricksCount;
     }

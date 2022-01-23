@@ -23,8 +23,8 @@ export class BricksCustomElement {
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             setTimeout(_ => this._cleanMap(), 500);
         });
-        this._beforeExitsReadySubscription = this._eventAggregator.subscribe('exitsReady', data => {
-            this._beforeExits = data.beforeExits;
+        this._beforeExitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
+            this._beforeExits = this._stateService.getBeforeExits();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._setBricks();
@@ -103,28 +103,6 @@ export class BricksCustomElement {
         return false;
     }
 
-    _findPosition() {
-        let positionFound, direction, position, count = 0;
-        const maxPositions = 50;
-        do {
-            position = [];
-            direction = this._helpers.randomNumberWithin(4);
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            positionFound = this._brickSpaceIsFree(position, direction);
-            count++;
-        } while (!positionFound && count < maxPositions); // TODO geen goede check
-        // console.log('positionsTried ', count);
-        if (positionFound) {
-            const metrics = {
-                position: position,
-                direction: direction
-            }
-            return metrics;
-        }
-        return false;
-    }
-
     _deepCopy(bricks) {
         return JSON.parse(JSON.stringify(bricks));
     }
@@ -150,24 +128,57 @@ export class BricksCustomElement {
         for (const block of brick.blocks) {
             const position = this._helpers.sumVectors(brick.position, block);
             if (this._stateService._withinBounds(position)) {
-                const value = occupied ? brick.index : false;
+                const value = occupied !== false ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
             }
         }
+    }
+
+    _removeMarkedBricks() {
+        const removedBricks = this.bricks.filter(brick => brick.remove == true);
+        // console.log(...removedBricks);
+        const newBricks = this.bricks.filter(brick => brick.remove !== true);
+        // console.log(...newBricks);
+        this.bricks = newBricks;
     }
 
     _setBricks() {
         this.bricks = [];
         this._cleanMap();
         this._fillRandom();
-        this._cleanBeforeExits();
-        this._cleanCenter();
+        this._markExitBricks();
+        this._markCenterBricks();
+        this._removeMarkedBricks();
+        this._reIndexBricks();
+        this._cleanMap();
+        this._mapBricks();
         // this._closeThroughs();
-        this._mapBricks(this.bricks);
         this._originalBricks = this._deepCopy(this.bricks);
         this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
-        this._eventAggregator.publish('bricksReady');
+        // this._eventAggregator.publish('bricksReady');
+    }
+
+    _findPosition() {
+        let positionFound, direction, position, count = 0;
+        const maxPositions = 50;
+        do {
+            position = [];
+            direction = this._helpers.randomNumberWithin(4);
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            positionFound = this._brickSpaceIsFree(position, direction);
+            count++;
+        } while (!positionFound && count < maxPositions); // TODO geen goede check
+        // console.log('positionsTried ', count);
+        if (positionFound) {
+            const metrics = {
+                position: position,
+                direction: direction
+            }
+            return metrics;
+        }
+        return false;
     }
 
     _fillRandom() {
@@ -176,52 +187,44 @@ export class BricksCustomElement {
         for (let i = 0; i < this._bricksCount; i++) {
             const metrics = this._findPosition();
             if (metrics) {
-                const brick = this._newBrick(i, metrics);
-                this._mapBrick(brick, true);
+                const brick = this._newBrick(this.bricks.length, metrics);
                 this.bricks.push(brick);
+                this._mapBrick(brick, true);
+            } else {
+                console.log('No position found');
             }
         }
     }
 
-    _reIndexBricks(oldBricks) {
-        this.bricks = oldBricks.map((brick, i) => {
+    _reIndexBricks() {
+        this.bricks.forEach((brick, i) => {
             brick.index = i;
-            return brick;
         });
     }
 
-    _cleanCenter() {
+    _markCenterBricks() {
         const c = Math.round(this._boardSize / 2);
-        const center = [c - 1, c, c + 1];
-        const newBricks = this.bricks.filter(brick => {
-            const isInCenter = brick.blocks.some(block => {
-                const position = this._helpers.sumVectors(block, brick.position);
-                return position.every(value => center.includes(value));
-            });
-            return !isInCenter
-        });
-        this._reIndexBricks(newBricks);
-    };
-
-    _getExits() {
-        return new Promise((resolve, reject) => {
-            this._eventAggregator.subscribeOnce('exitsReady', data => resolve(data.beforeExits));
-        });
+        const min = c - 1;
+        const max = c + 1;
+        for (let y = min; y <= max; y++) {
+            for (let x = min; x <= max; x++) {
+                const value = this._blocks[y][x];
+                if (value !== false) {
+                    this.bricks[value].remove = true;
+                }
+            }
+        }
     }
 
-    async _cleanBeforeExits() {
-        const exits = await this._getExits();
+    _markExitBricks() {
+        const exits = this._stateService.getBeforeExits();
         const exitsFlat = exits.flat();
-        const beforeExit = brick => {
-            const beforeExit = brick.blocks.some(block => {
-                const position = this._helpers.sumVectors(block, brick.position);
-                const beforeExit = exitsFlat.some(exit => this._helpers.areEqual([exit, position]));
-                return beforeExit;
-            });
-            return beforeExit;
-        }
-        const newBricks = this.bricks.filter(brick => !beforeExit(brick));
-        this._reIndexBricks(newBricks);
+        exitsFlat.forEach(position => {
+            const value = this._blocks[position[1]][position[0]];
+            if (value !== false) {
+                this.bricks[value].remove = true;
+            }
+        })
     }
 
     async _closeThroughs() {
@@ -234,7 +237,7 @@ export class BricksCustomElement {
             const direction = this._findDirection(position);
             if (direction !== false) {
                 const metrics = { direction: direction, position: position }
-                const brick = this._newBrick(this.bricks.length + 1, metrics);
+                const brick = this._newBrick(this.bricks.length, metrics);
                 this._mapBrick(brick);
                 this.bricks.push(brick);
             }

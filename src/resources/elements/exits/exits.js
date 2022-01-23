@@ -56,11 +56,8 @@ export class Exits {
             const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
             return newVector;
         }));
-        // wait for bricks to be initialized.
-        setTimeout(_ => {
-            !this._firstTime && this._eventAggregator.publish('exitsReady', { 'exits': this._exits, 'beforeExits': this._beforeExits });
-            this._firstTime = false;
-        });
+        this._stateService.setExits({ 'exits': this._exits, 'beforeExits': this._beforeExits });
+        this._eventAggregator.publish('exitsReady');
 
         outwardsVectors = [[0, 0], [1, 0], [0, 1], [0, 0]];
         // positions for visual exits one further out on the far sides
