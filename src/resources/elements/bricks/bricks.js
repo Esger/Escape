@@ -87,7 +87,7 @@ export class BricksCustomElement {
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
-            if (this._stateService._withinBounds(pos)) {
+            if (this._stateService.withinBounds(pos)) {
                 return this._blocks[pos[1]][pos[0]] == false;
             }
         });
@@ -127,7 +127,7 @@ export class BricksCustomElement {
     _mapBrick(brick, occupied) {
         for (const block of brick.blocks) {
             const position = this._helpers.sumVectors(brick.position, block);
-            if (this._stateService._withinBounds(position)) {
+            if (this._stateService.withinBounds(position)) {
                 const value = occupied !== false ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
             }

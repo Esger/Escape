@@ -137,11 +137,13 @@ export class StateService {
     }
 
     findBrickAt(position) {
-        const brick = this._bricks.find(brick => brick.blocks.some(block => {
-            const blockPosition = this._helpers.getBlockPosition(brick.position, block);
-            return this._helpers.areEqual([blockPosition, position]);
-        }));
-        return brick;
+        if (this.withinBounds(position)) {
+            const brickIndex = this._blocks[position[1]][position[0]];
+            if (brickIndex !== false) {
+                return this._bricks[brickIndex];
+            }
+        }
+        return false;
     }
 
     setMap(blocks) {
@@ -151,20 +153,20 @@ export class StateService {
     mapBrick(brick, occupied) {
         brick.blocks?.forEach(block => {
             const position = this._helpers.sumVectors(brick.position, block);
-            if (this._withinBounds(position)) {
+            if (this.withinBounds(position)) {
                 const value = occupied ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
             };
         });
     }
 
-    _withinBounds(position) {
+    withinBounds(position) {
         const withinBounds = position.every(coordinate => coordinate >= 0 && coordinate < this._boardSize);
         return withinBounds;
     }
 
     isFree(position, ignorePusher = true) {
-        if (this._withinBounds(position)) {
+        if (this.withinBounds(position)) {
             const brickAtPosition = this._blocks[position[1]][position[0]] !== false;
             const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
             return !brickAtPosition && !playerAtPosition;
