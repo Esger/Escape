@@ -22,15 +22,11 @@ export class BricksCustomElement {
         this._boardSize = this._stateService.getBoardSize();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             setTimeout(_ => this._cleanMap(), 500);
+            this._addBeforeExitsReadySubscription();
         });
-        this._beforeExitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
-            this._beforeExits = this._stateService.getBeforeExits();
-        });
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._setBricks();
-            this._addGiveUpSubscription();
-            this._addRetrySubscription();
-            this.showBricks = true;
+        this._addBeforeExitsReadySubscription();
+        this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
+            this._initialize();
         });
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             this.bricks.find(brick => {
@@ -51,6 +47,12 @@ export class BricksCustomElement {
         this._gameStartSubscription.dispose();
     }
 
+    _addBeforeExitsReadySubscription() {
+        this._beforeExitsReadySubscription = this._eventAggregator.subscribeOnce('exitsReady', _ => {
+            this._initialize();
+        });
+    }
+
     _addGiveUpSubscription() {
         this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
             this._giveUpSubscription?.dispose();
@@ -63,6 +65,13 @@ export class BricksCustomElement {
             this._cleanMap();
             this._resetBricks();
         });
+    }
+
+    _initialize() {
+        this._setBricks();
+        this._addGiveUpSubscription();
+        this._addRetrySubscription();
+        this.showBricks = true;
     }
 
     _removeBrick(brick) {
@@ -135,10 +144,7 @@ export class BricksCustomElement {
     }
 
     _removeMarkedBricks() {
-        const removedBricks = this.bricks.filter(brick => brick.remove == true);
-        // console.log(...removedBricks);
         const newBricks = this.bricks.filter(brick => brick.remove !== true);
-        // console.log(...newBricks);
         this.bricks = newBricks;
     }
 
@@ -152,7 +158,7 @@ export class BricksCustomElement {
         this._reIndexBricks();
         this._cleanMap();
         this._mapBricks();
-        // this._closeThroughs();
+        this._closeThroughs();
         this._originalBricks = this._deepCopy(this.bricks);
         this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
@@ -231,6 +237,7 @@ export class BricksCustomElement {
         // block the throughs
         const center = Math.round(this._boardSize / 2);
         const playerPosition = [center, center];
+        this._beforeExits = this._stateService.getBeforeExits();
         let throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
         while (throughs && throughs.length) {
             const position = throughs[0];
