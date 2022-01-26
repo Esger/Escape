@@ -27,6 +27,7 @@ export class Score {
                 this._publishBolts();
                 this._resetScore = false;
             }
+            this._addGameEndSubscription();
         });
         this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
             this.level -= this.level > 0 ? 1 : 0;
@@ -46,8 +47,7 @@ export class Score {
             this.score += this._boltScore;
             this._publishBolts();
         });
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+        this._addGameEndSubscription();
     }
 
     detached() {
@@ -61,8 +61,15 @@ export class Score {
     }
 
     _gameEnd() {
+        this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._resetScore = true;
         this._saveScores();
+    }
+
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
     }
 
     resetHigh() {

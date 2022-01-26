@@ -25,10 +25,8 @@ export class BricksCustomElement {
             this._addBeforeExitsReadySubscription();
         });
         this._addBeforeExitsReadySubscription();
-        this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
-            this._initialize();
-        });
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+        this._addGameStartSubscription();
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             this.bricks.find(brick => {
                 if (indices.includes(brick.index)) {
@@ -49,6 +47,12 @@ export class BricksCustomElement {
         this._gameStartSubscription.dispose();
     }
 
+    _addGameStartSubscription() {
+        this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
+            this._initialize();
+        });
+    }
+
     _addBeforeExitsReadySubscription() {
         this._beforeExitsReadySubscription = this._eventAggregator.subscribeOnce('exitsReady', _ => {
             this._initialize();
@@ -61,7 +65,10 @@ export class BricksCustomElement {
 
     _gameEnd() {
         this._giveUpSubscription?.dispose();
-        setTimeout(_ => this._addBeforeExitsReadySubscription(), 500);
+        setTimeout(_ => {
+            this._addBeforeExitsReadySubscription();
+            this._addGameStartSubscription();
+        }, 500);
     }
 
     _addRetrySubscription() {
@@ -78,14 +85,6 @@ export class BricksCustomElement {
         this.showBricks = true;
     }
 
-    _removeBrick(brick) {
-        if (brick) {
-            this._mapBrick(bricks, false);
-            this.bricks.splice(brick.index, 1);
-            this._reIndexBricks(this.bricks);
-        }
-    }
-
     _newBrick(i, metrics) {
         const brick = {
             index: i,
@@ -95,6 +94,14 @@ export class BricksCustomElement {
             blocks: [[0, 0], this._helpers.direction2vector(metrics.direction)]
         }
         return brick;
+    }
+
+    _removeBrick(brick) {
+        if (brick) {
+            this._mapBrick(brick, false);
+            this.bricks.splice(brick.index, 1);
+            this._reIndexBricks(this.bricks);
+        }
     }
 
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
