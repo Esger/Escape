@@ -25,17 +25,20 @@ export class Footer {
     attached() {
         this._setNextHint();
         this._addGameStartSubscription();
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this._addGameStartSubscription();
-            this._messageIndex = 0;
-            this._showMessage('or hit enter/space');
-        });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._addGameStartSubscription();
             (this._wins == 0) && this._messages.shift();
             this._showMessage('or hit enter/space');
             this._wins++;
         });
+    }
+
+    _gameEnd() {
+        this._addGameStartSubscription();
+        this._messageIndex = 0;
+        this._showMessage('or hit enter/space');
     }
 
     _addGameStartSubscription() {
@@ -46,7 +49,8 @@ export class Footer {
 
     detached() {
         this._gameStartSubscrption.dispose();
-        this._giveUpSubscription && this._giveUpSubscription.dispose();
+        this._giveUpSubscription.dispose();
+        this._caughtSubscription.dispose();
         this._winSubscription.dispose();
     }
 

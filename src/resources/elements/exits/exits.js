@@ -20,7 +20,7 @@ export class Exits {
     attached() {
         this._setExits();
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGiveUpSubscription();
+            this._addGameEndSubscription();
             this._element.style.setProperty('--exitColor', 'lime');
             this.positions = [];
             this._setExits();
@@ -29,13 +29,17 @@ export class Exits {
 
     detached() {
         this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._gameStartSubscription.dispose();
     }
 
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this._element.style.setProperty('--exitColor', 'red');
-        });
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+    }
+
+    _gameEnd() {
+        this._element.style.setProperty('--exitColor', 'red');
     }
 
     _setExits() {

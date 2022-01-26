@@ -21,7 +21,7 @@ export class StateService {
         this._bricks = [];
         this._blocks = [];
         this._pushers = [];
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGiveUpSubscription());
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGameEndSubscription());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
@@ -39,15 +39,19 @@ export class StateService {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._boltsCountSubscription.dispose();
         this._moveSubscription.dispose();
     }
 
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this._bricksCount = this._initialBricksCount;
-            this._level = 0;
-        });
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+    }
+
+    _gameEnd() {
+        this._bricksCount = this._initialBricksCount;
+        this._level = 0;
     }
 
     setExits(exits) {

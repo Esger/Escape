@@ -20,7 +20,7 @@ export class PushersCustomElement {
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGiveUpSubscription();
+            this._addGameEndSubscription();
             this._addRetrySubscription();
             this.isVisible = true;
         });
@@ -34,6 +34,7 @@ export class PushersCustomElement {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._retrySubscription.dispose();
     }
 
@@ -43,10 +44,9 @@ export class PushersCustomElement {
         });
     }
 
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this.isVisible = false;
-        });
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this.isVisible = false);
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this.isVisible = false);
     }
 
     _initialize(retry) {

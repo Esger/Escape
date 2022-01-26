@@ -28,6 +28,7 @@ export class BricksCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
             this._initialize();
         });
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             this.bricks.find(brick => {
                 if (indices.includes(brick.index)) {
@@ -40,7 +41,8 @@ export class BricksCustomElement {
 
     detached() {
         this._winSubscristion.dispose();
-        this._giveUpSubscription.dispose();
+        this._giveUpSubscription?.dispose();
+        this._caughtSubscription.dispose();
         this._retrySubscription.dispose();
         this._beforeExitsReadySubscription.dispose();
         this._removeSubscription.dispose();
@@ -54,10 +56,12 @@ export class BricksCustomElement {
     }
 
     _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this._giveUpSubscription?.dispose();
-            setTimeout(_ => this._cleanMap(), 500);
-        });
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+    }
+
+    _gameEnd() {
+        this._giveUpSubscription?.dispose();
+        setTimeout(_ => this._cleanMap(), 500);
     }
 
     _addRetrySubscription() {

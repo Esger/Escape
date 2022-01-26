@@ -26,9 +26,8 @@ export class BrickCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this.gameOver = false;
         });
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this.gameOver = true;
-        });
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this.gameOver = true);
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this.gameOver = true);
         setTimeout(_ => {
             this.visible = true;
         }, Math.random() * 1000);
@@ -38,6 +37,7 @@ export class BrickCustomElement {
         this._winSubscription.dispose();
         this._gameStartSubscription.dispose();
         this._giveUpSubscription.dispose();
+        this._caughtSubscription.dispose();
     }
 
     _hideBrick() {

@@ -34,7 +34,7 @@ export class PusherCustomElement {
             }, 250);
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGiveUpSubscription();
+            this._addGameEndSubscription();
             this._addRetrySubscription();
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
@@ -59,7 +59,7 @@ export class PusherCustomElement {
             if (message.type !== this.pusher.type) {
                 const samePosition = this._helpers.areEqual([message.position, this.pusher.position]);
                 if (samePosition) {
-                    setTimeout(_ => this._eventAggregator.publish('giveUp', 'caught'), 250);
+                    setTimeout(_ => this._eventAggregator.publish('caught'), 250);
                 }
             }
         });
@@ -72,14 +72,18 @@ export class PusherCustomElement {
         this._winSubscription.dispose();
         this._retrySubscription?.dispose();
         this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._boltsCountSubscription.dispose();
     }
 
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this._moveSubscription?.dispose();
-            this.lastKey = 'down';
-        });
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+    }
+
+    _gameEnd() {
+        this._moveSubscription?.dispose();
+        this.lastKey = 'down';
     }
 
     _addRetrySubscription() {
