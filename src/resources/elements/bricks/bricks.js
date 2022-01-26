@@ -61,7 +61,7 @@ export class BricksCustomElement {
 
     _gameEnd() {
         this._giveUpSubscription?.dispose();
-        setTimeout(_ => this._cleanMap(), 500);
+        setTimeout(_ => this._addBeforeExitsReadySubscription(), 500);
     }
 
     _addRetrySubscription() {
