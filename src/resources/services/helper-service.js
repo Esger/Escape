@@ -47,5 +47,4 @@ export class HelperService {
         const position2 = this.sumVectors(position, directionVector);
         return position2;
     }
-
 }

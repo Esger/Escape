@@ -24,7 +24,6 @@ export class PusherCustomElement {
     attached() {
         this._isFaassen = this.pusher.type == 'faassen';
         !this._isFaassen && (this.gender = 'female');
-        this.bolts = this._stateService.getBolts();
         this._element.classList.add(this.pusher.type);
         this._setPositionStyle();
         setTimeout(_ => {
@@ -35,14 +34,10 @@ export class PusherCustomElement {
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
-            this._addRetrySubscription();
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._moveSubscription?.dispose();
             this.lastKey = 'down';
-        });
-        this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
-            this.bolts = bolts;
         });
         this._moveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => {
             let direction;
@@ -70,10 +65,8 @@ export class PusherCustomElement {
         this._moveSubscription.dispose();
         this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
-        this._retrySubscription?.dispose();
         this._giveUpSubscription?.dispose();
         this._caughtSubscription?.dispose();
-        this._boltsCountSubscription.dispose();
     }
 
     _addGameEndSubscription() {
@@ -84,15 +77,6 @@ export class PusherCustomElement {
     _gameEnd() {
         this._moveSubscription?.dispose();
         this.lastKey = 'down';
-    }
-
-    _addRetrySubscription() {
-        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
-            setTimeout(() => {
-                this._setPositionStyle();
-            });
-            this.lastKey = 'down';
-        });
     }
 
     _setPositionStyle() {
@@ -156,7 +140,7 @@ export class PusherCustomElement {
                     this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
                 });
             } else {
-                const canThrowBolts = !this._isFaassen && this.bolts > 0;
+                const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
                 if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
                     this._doMove(newPosition);
                     afterMove.then(_ => {

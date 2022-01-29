@@ -14,8 +14,6 @@ export class GameStart {
     }
 
     attached() {
-        this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showEndScreen('Escaped'));
-        this._caughtSubscribtion = this._eventAggregator.subscribe('caught', _ => this._showEndScreen('Caught'));
         this._addStartSubscription();
         this._flashHint();
     }
@@ -31,8 +29,8 @@ export class GameStart {
     }
 
     detached() {
-        this._winSubscribtion.dispose();
-        this._caughtSubscribtion.dispose();
+        this._winSubscribtion?.dispose();
+        this._caughtSubscribtion?.dispose();
         this._giveUpSubscription?.dispose();
         this._startSubscription?.dispose();
     }
@@ -50,8 +48,26 @@ export class GameStart {
         })
     }
 
-    _addGameEndSubscription() {
+    _addWinSubscription() {
+        this._winSubscribtion = this._eventAggregator.subscribeOnce('win', _ => {
+            this._caughtSubscribtion.dispose();
+            this._giveUpSubscription.dispose();
+            this._showEndScreen('Escaped');
+        });
+    }
+
+    _addCaughtSubscription() {
+        this._caughtSubscribtion = this._eventAggregator.subscribeOnce('caught', _ => {
+            this._winSubscribtion.dispose();
+            this._giveUpSubscription.dispose();
+            this._showEndScreen('Caught');
+        });
+    }
+
+    _addGiveUpSubscription() {
         this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._winSubscribtion.dispose();
+            this._caughtSubscribtion.dispose();
             this._showEndScreen('Stuck');
         });
     }
@@ -59,7 +75,9 @@ export class GameStart {
     startGame() {
         this.animating = true;
         setTimeout(_ => {
-            this._addGameEndSubscription();
+            this._addGiveUpSubscription();
+            this._addWinSubscription();
+            this._addCaughtSubscription();
             this.gameStartVisible = false;
             this._eventAggregator.publish('gameStart');
             this.animating = false;

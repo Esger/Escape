@@ -27,9 +27,6 @@ export class StateService {
             this._level++;
             console.log(this._bricksCount);
         });
-        this._boltsCountSubscription = this._eventAggregator.subscribe('boltsCount', bolts => {
-            this._bolts = bolts;
-        });
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
             this._pushers[pusher.index].position = pusher.position;
         });
@@ -40,7 +37,6 @@ export class StateService {
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
         this._caughtSubscription?.dispose();
-        this._boltsCountSubscription.dispose();
         this._moveSubscription.dispose();
     }
 
@@ -83,8 +79,20 @@ export class StateService {
         return this._blockSize;
     }
 
+    setBolts(bolts) {
+        this._bolts = bolts;
+    }
+
     getBolts() {
         return this._bolts;
+    }
+
+    setLives(lives) {
+        this._lives = lives;
+    }
+
+    getLives() {
+        return this._lives;
     }
 
     setPushers(pushers) {

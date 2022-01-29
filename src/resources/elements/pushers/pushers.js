@@ -22,7 +22,6 @@ export class PushersCustomElement {
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
-            this._addRetrySubscription();
             this._exitNumbersTaken = [];
             this.isVisible = true;
         });
@@ -40,32 +39,19 @@ export class PushersCustomElement {
         this._retrySubscription.dispose();
     }
 
-    _addRetrySubscription() {
-        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
-            this._initialize(true);
-        });
-    }
-
     _addGameEndSubscription() {
         this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this.isVisible = false);
         this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this.isVisible = false);
     }
 
-    _initialize(retry) {
-        if (retry) {
-            this.pushers.forEach(pusher => {
-                pusher.position = [...pusher.startPosition];
-                pusher.direction = pusher.startDirection;
-            })
-        } else {
-            this.pushers = [];
-            this._addPlayer();
-            const level = this._stateService.getLevel();
-            let faassenCount = level / 5 + .6;
-            faassenCount = Math.max(0, Math.min(4, Math.floor(faassenCount)));
-            for (let i = 0; i < faassenCount; i++) {
-                this._addFaassen();
-            }
+    _initialize() {
+        this.pushers = [];
+        this._addPlayer();
+        const level = this._stateService.getLevel();
+        let faassenCount = level / 5 + .6;
+        faassenCount = Math.max(0, Math.min(4, Math.floor(faassenCount)));
+        for (let i = 0; i < faassenCount; i++) {
+            this._addFaassen();
         }
         this._stateService.setPushers(this.pushers);
     }

@@ -41,7 +41,6 @@ export class BricksCustomElement {
         this._winSubscristion.dispose();
         this._giveUpSubscription?.dispose();
         this._caughtSubscription.dispose();
-        this._retrySubscription.dispose();
         this._beforeExitsReadySubscription.dispose();
         this._removeSubscription.dispose();
         this._gameStartSubscription.dispose();
@@ -71,17 +70,9 @@ export class BricksCustomElement {
         }, 500);
     }
 
-    _addRetrySubscription() {
-        this._retrySubscription = this._eventAggregator.subscribeOnce('retry', _ => {
-            this._cleanMap();
-            this._resetBricks();
-        });
-    }
-
     _initialize() {
         this._setBricks();
         this._addGiveUpSubscription();
-        this._addRetrySubscription();
         this.showBricks = true;
     }
 
@@ -123,24 +114,12 @@ export class BricksCustomElement {
         return false;
     }
 
-    _deepCopy(bricks) {
-        return JSON.parse(JSON.stringify(bricks));
-    }
-
-    _resetBricks() {
-        this.showBricks = false;
-        this.bricks = this._deepCopy(this._originalBricks);
-        this._mapBricks(this.bricks);
-        setTimeout(_ => {
-            this.showBricks = true;
-        });
-    }
-
     _cleanMap() {
         this._blocks = Array.from(Array(this._boardSize), () => Array(this._boardSize).fill(false));
     }
 
     _mapBricks() {
+        this._cleanMap();
         this.bricks.forEach(brick => this._mapBrick(brick, brick.index));
     }
 
@@ -167,13 +146,11 @@ export class BricksCustomElement {
         this._markCenterBricks();
         this._removeMarkedBricks();
         this._reIndexBricks();
-        this._cleanMap();
         this._mapBricks();
         this._closeThroughs();
-        this._originalBricks = this._deepCopy(this.bricks);
+        this._mapBricks();
         this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
-        // this._eventAggregator.publish('bricksReady');
     }
 
     _findPosition() {
