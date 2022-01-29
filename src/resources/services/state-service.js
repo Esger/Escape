@@ -87,14 +87,6 @@ export class StateService {
         return this._bolts;
     }
 
-    setLives(lives) {
-        this._lives = lives;
-    }
-
-    getLives() {
-        return this._lives;
-    }
-
     setPushers(pushers) {
         this._pushers = pushers;
     }

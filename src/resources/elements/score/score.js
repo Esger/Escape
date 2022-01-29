@@ -85,7 +85,6 @@ export class Score {
         this.bolts = Math.floor(this.level / 5) - this._boltsUsed;
         this.lives = this.level % 5;
         this._stateService.setBolts(this.bolts);
-        this._stateService.setLives(this.lives);
     }
 
     _getHighScore() {
