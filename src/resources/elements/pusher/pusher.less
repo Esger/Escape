@@ -20,11 +20,19 @@
         background-size : cover;
         background-color: transparent !important;
         box-shadow      : none;
+
+        .isMobile & {
+            width : 5.5vmin;
+            height: 5.5vmin;
+        }
     }
 
-    .isMobile & {
-        box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+    &.player {
+        .isMobile & {
+            box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+        }
     }
+
 
     &.male {
         background-position: 0 100%;
