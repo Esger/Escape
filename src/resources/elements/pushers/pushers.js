@@ -12,6 +12,7 @@ export class PushersCustomElement {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._helpers = helperService;
+        this._exitNumbersTaken = [];
     }
 
     attached() {
@@ -22,6 +23,7 @@ export class PushersCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
             this._addRetrySubscription();
+            this._exitNumbersTaken = [];
             this.isVisible = true;
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
@@ -58,7 +60,12 @@ export class PushersCustomElement {
         } else {
             this.pushers = [];
             this._addPlayer();
-            this._addFaassen();
+            const level = this._stateService.getLevel();
+            let faassenCount = level / 5 + .6;
+            faassenCount = Math.max(0, Math.min(4, Math.floor(faassenCount)));
+            for (let i = 0; i < faassenCount; i++) {
+                this._addFaassen();
+            }
         }
         this._stateService.setPushers(this.pushers);
     }
@@ -83,7 +90,16 @@ export class PushersCustomElement {
     }
 
     _addFaassen() {
-        const exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+        let exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+        const limit = 25;
+        let count = 0;
+        while (this._exitNumbersTaken.includes(exitNumber) && (count < limit)) {
+            exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+            count++;
+        }
+        if (count < limit) {
+            this._exitNumbersTaken.push(exitNumber);
+        }
         // 0 -> 1
         // 1 -> 2
         // 2 -> 3
