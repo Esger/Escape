@@ -8,9 +8,6 @@ export class App {
     constructor(eventAggregator, keyInputService) {
         this._keyInputService = keyInputService;
         this._eventAggregator = eventAggregator;
-    }
-
-    attached() {
         this._detectTouchDevice();
     }
 

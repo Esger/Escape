@@ -14,7 +14,7 @@ export class FlashCustomAttribute {
             this._element.classList.remove('flash--in', 'flash--out');
         }
         this._element.classList.add(className);
-        this._flasTimeoutHandle = setTimeout(() => {
+        this._flasTimeoutHandle = setTimeout(_ => {
             this._element.classList.remove(className);
         }, 250);
     }

@@ -1,7 +1,5 @@
-<template show.bind="isVisible"
-          class="pusher 
-                 ${gender || 'female'} ${step} ${lastKey}"
+<template class="pusher ${gender} ${step} ${lastKey}"
           click.delegate="changeGender()"
-          css="left: ${blockSize * position[0]}vmin; top: ${blockSize * position[1]}vmin;">
+          css="${positionStyle}">
     <require from="./pusher.css"></require>
 </template>

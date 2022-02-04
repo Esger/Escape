@@ -13,9 +13,26 @@
     will-change        : transform;
     zoom               : 1;
 
-    .isMobile & {
-        box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+    &.faassen {
+        width           : 4.5vmin;
+        height          : 4.5vmin;
+        background-image: url(./baardman.webp);
+        background-size : cover;
+        background-color: transparent !important;
+        box-shadow      : none;
+
+        .isMobile & {
+            width : 5.5vmin;
+            height: 5.5vmin;
+        }
     }
+
+    &.player {
+        .isMobile & {
+            box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+        }
+    }
+
 
     &.male {
         background-position: 0 100%;
@@ -29,7 +46,6 @@
     &.female {
         background-position: 0 0;
         background-color   : gold;
-
     }
 
     &.female.step {
@@ -52,11 +68,7 @@
         transform: rotate(180deg);
     }
 
-    &.flash {
-        transition: transform .2s ease-in-out;
-
-        &.flash--in {
-            transform: scale3d(1.41, 1.41, 1.41) rotate(90deg);
-        }
+    &.flash--in {
+        transform: scale3d(1.41, 1.41, 1.41) rotate(90deg);
     }
 }
