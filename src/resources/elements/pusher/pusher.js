@@ -117,7 +117,7 @@ export class PusherCustomElement {
     }
 
     _addTransitionendListenter() {
-        this._element.addEventListener('transitionend', this._outsideResolve, { 'once': true });
+        this._element.addEventListener('transitionend.move', this._outsideResolve, { 'once': true });
     }
 
     _moveIfPossible(direction) {

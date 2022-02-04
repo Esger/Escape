@@ -83,12 +83,7 @@ export class Exits {
         });
     }
 
-    offsetX(use, value) {
-        value = use * (value * (9 / 8) - (34 / 8)) || value;
-        return value;
-    }
-
-    offsetY(use, value) {
+    offset(use, value) {
         value = use * (value * (9 / 8) - (34 / 8)) || value;
         return value;
     }
