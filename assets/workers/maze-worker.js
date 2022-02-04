@@ -35,11 +35,7 @@ const clearData = function () {
 };
 
 const copyMazeWithMarks = function () {
-    return cells.map(row => {
-        return row.map(cell => {
-            return false;
-        });
-    });
+    return cells.map(row => row.map(cell => false));
 };
 
 const findPositionHalfway = function (targetPositionSets) {

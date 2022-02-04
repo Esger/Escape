@@ -1,0 +1,7 @@
+<template>
+    <require from="elements/pusher/pusher"></require>
+    <pusher repeat.for="pusher of pushers"
+            if.bind="isVisible"
+            pusher.bind="pusher"
+            exits.bind="exits"></pusher>
+</template>

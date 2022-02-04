@@ -1,14 +1,17 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
-@inject(EventAggregator)
+import { StateService } from 'services/state-service';
+
+@inject(EventAggregator, StateService)
 export class Score {
-    score = 0;
     bolts = 0;
     level = 0;
-    flast = false;
+    lives = 0;
+    score = 0;
 
-    constructor(eventAggregator) {
+    constructor(eventAggregator, stateService) {
         this._eventAggregator = eventAggregator;
+        this._stateService = stateService;
         this._boltsUsed = 0;
         this._winScore = 25;
         this._levelScore = 5;
@@ -23,42 +26,50 @@ export class Score {
             if (this._resetScore) {
                 this.score = 0;
                 this.level = 0;
+                this.lives = 0;
                 this.bolts = 0;
                 this._publishBolts();
                 this._resetScore = false;
             }
+            this._addGameEndSubscription();
         });
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
-            this._resetScore = true;
-            this._saveScores();
-        });
-        this._retrySubscription = this._eventAggregator.subscribe('retry', _ => {
-            this.level -= this.level > 0 ? 1 : 0;
-            this._publishBolts();
-        })
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
             this.level++;
+            this.lives++;
             this._publishBolts();
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', _ => {
-            this.score -= this._moveScore;
+        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
+            this.score -= (message.type == 'player') ? this._moveScore : 0;
         });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
             this._publishBolts();
         });
+        this._addGameEndSubscription();
     }
 
     detached() {
         this._gameStartSubscrption.dispose();
-        this._giveUpSubscription.dispose();
-        this._retrySubscription.dispose();
+        this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
         this._winSubscription.dispose();
         this._moveSubscription.dispose();
         this._boltThrownSubscription.dispose();
+    }
+
+    _gameEnd() {
+        this._giveUpSubscription?.dispose();
+        this._caughtSubscription?.dispose();
+        this._resetScore = true;
+        this._saveScores();
+    }
+
+    _addGameEndSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
     }
 
     resetHigh() {
@@ -66,9 +77,14 @@ export class Score {
         localStorage.setItem('escape-score', this.highScore);
     }
 
+    _publishLives() {
+        this._eventAggregator.publish('lives', this.lives);
+    }
+
     _publishBolts() {
         this.bolts = Math.floor(this.level / 5) - this._boltsUsed;
-        this._eventAggregator.publish('boltsCount', this.bolts);
+        this.lives = this.level % 5;
+        this._stateService.setBolts(this.bolts);
     }
 
     _getHighScore() {

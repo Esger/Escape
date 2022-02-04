@@ -14,52 +14,70 @@ export class GameStart {
     }
 
     attached() {
-        this._winSubscribtion = this._eventAggregator.subscribe('win', _ => this._showWinScreen());
-        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._showStuckScreen());
         this._addStartSubscription();
         this._flashHint();
     }
 
     _flashHint() {
-        setTimeout(() => {
+        setTimeout(_ => {
             const keysHint = document.querySelectorAll('.keysHint')[0];
             keysHint.classList.add('flash', 'flash--in');
-            setTimeout(() => {
+            setTimeout(_ => {
                 keysHint.classList.remove('flash', 'flash--in');
             }, 200);
         }, 300);
     }
 
     detached() {
-        this._winSubscribtion.dispose();
-        this._giveUpSubscription.dispose();
-        this._startSubscription && this._startSubscription.dispose();
+        this._winSubscribtion?.dispose();
+        this._caughtSubscribtion?.dispose();
+        this._giveUpSubscription?.dispose();
+        this._startSubscription?.dispose();
     }
 
-    _showWinScreen() {
+    _showEndScreen(title) {
         this.gameStartVisible = true;
-        this.title = 'Escaped'
-        this._addStartSubscription();
-        this._flashHint();
-    }
-
-    _showStuckScreen() {
-        this.gameStartVisible = true;
-        this.title = 'Stuck'
+        this.title = title;
         this._addStartSubscription();
         this._flashHint();
     }
 
     _addStartSubscription() {
-        this._startSubscription = this._eventAggregator.subscribe('start', _ => {
-            this._startSubscription.dispose();
+        this._startSubscription = this._eventAggregator.subscribeOnce('start', _ => {
             this.startGame();
         })
     }
 
+    _addWinSubscription() {
+        this._winSubscribtion = this._eventAggregator.subscribeOnce('win', _ => {
+            this._caughtSubscribtion.dispose();
+            this._giveUpSubscription.dispose();
+            this._showEndScreen('Escaped');
+        });
+    }
+
+    _addCaughtSubscription() {
+        this._caughtSubscribtion = this._eventAggregator.subscribeOnce('caught', _ => {
+            this._winSubscribtion.dispose();
+            this._giveUpSubscription.dispose();
+            this._showEndScreen('Caught');
+        });
+    }
+
+    _addGiveUpSubscription() {
+        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
+            this._winSubscribtion.dispose();
+            this._caughtSubscribtion.dispose();
+            this._showEndScreen('Stuck');
+        });
+    }
+
     startGame() {
         this.animating = true;
-        setTimeout(() => {
+        setTimeout(_ => {
+            this._addGiveUpSubscription();
+            this._addWinSubscription();
+            this._addCaughtSubscription();
             this.gameStartVisible = false;
             this._eventAggregator.publish('gameStart');
             this.animating = false;

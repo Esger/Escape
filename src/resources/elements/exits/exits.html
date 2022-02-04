@@ -3,5 +3,5 @@
     <div repeat.for="exit of exits"
          class="exit exit-${$index}"
          data-position="${exit.position}"
-         css="transform:translate3d(${exit.position[0]}vmin, ${exit.position[1]}vmin, 0) rotate(${exit.angle + 'rad'})"></div>
+         css="transform:translate3d(${offset($even,exit.position[0])}vmin, ${offset($odd,exit.position[1])}vmin, 0) rotate(${exit.angle + 'rad'})"></div>
 </template>
