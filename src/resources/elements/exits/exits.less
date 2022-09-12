@@ -1,11 +1,13 @@
+
 exits {
     position: relative;
+    --exitSize      : 26vmin;
+    --gradientSize  : 45%;
+    // --arrowPath:'m40 30h50l-20 20l50 50l-20 20l-50 -50l-20 20v-50';
 }
 
 .exit {
     position        : absolute;
-    --exitSize      : 26vmin;
-    --gradientSize  : 45%;
     overflow        : hidden;
     transform-origin: left top;
 
@@ -48,10 +50,18 @@ exits {
         --gradientSize: 60%;
     }
 
-    width     : var(--exitSize);
-    height    : var(--exitSize);
-    background: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
-    transition: transform 200ms ease-in-out;
-    filter    : blur(.5vmin);
+    width           : var(--exitSize);
+    height          : var(--exitSize);
+    background-image: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
+    transition      : transform 200ms ease-in-out;
+    filter          : blur(.5vmin);
 
+}
+
+.arrow {
+    position        : absolute;
+    inset           : 0;
+    background-color: var(--boardColor);
+    clip-path       : path(var(--arrowPath));
+    opacity         : .4;
 }
