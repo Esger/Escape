@@ -95,7 +95,6 @@ export class Exits {
         const size = Math.round((exitSize * vmin) / 24);
         const x = 3, y = 3, a = 9, b = 3;
         const path = `m${x * size} ${y * size} h${a * size} l${-b * size} ${b * size} l${a * size} ${a * size} l${-b * size} ${b * size} l${-a * size} ${-a * size} l${-b * size} ${b * size} v${-a * size}`
-        console.log(exitSize, vmin, size, path);
         
         this._element.style.setProperty('--arrowPath', '"' + path + '"');
         // arrow.style.setProperty('--arrowPath', `'m40 30h50l-20 20l50 50l-20 20l-50 -50l-20 20v-60'`);
