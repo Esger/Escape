@@ -1,8 +1,7 @@
-
 exits {
-    position: relative;
-    --exitSize      : 26vmin;
-    --gradientSize  : 45%;
+    position      : relative;
+    --exitSize    : 26vmin;
+    --gradientSize: 45%;
     // --arrowPath:'m40 30h50l-20 20l50 50l-20 20l-50 -50l-20 20v-50';
 }
 
@@ -60,6 +59,7 @@ exits {
 
 .arrow {
     position        : absolute;
+    z-index         : 1;
     inset           : 0;
     background-color: var(--boardColor);
     clip-path       : path(var(--arrowPath));
