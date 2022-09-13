@@ -25,6 +25,7 @@ export class Exits {
             this.positions = [];
             this._setExits();
         });
+        this._setArrow();
     }
 
     detached() {
@@ -86,5 +87,16 @@ export class Exits {
     offset(use, value) {
         value = use * (value * (9 / 8) - (34 / 8)) || value;
         return value;
+    }
+
+    _setArrow() {
+        const exitSize = parseInt(window.getComputedStyle(this._element).getPropertyValue('--exitSize'), 10);
+        const vmin = Math.min(window.innerWidth, window.innerHeight) / 100;
+        const size = Math.round((exitSize * vmin) / 24);
+        const x = 3, y = 3, a = 9, b = 3;
+        const path = `m${x * size} ${y * size} h${a * size} l${-b * size} ${b * size} l${a * size} ${a * size} l${-b * size} ${b * size} l${-a * size} ${-a * size} l${-b * size} ${b * size} v${-a * size}`
+        
+        this._element.style.setProperty('--arrowPath', '"' + path + '"');
+        // arrow.style.setProperty('--arrowPath', `'m40 30h50l-20 20l50 50l-20 20l-50 -50l-20 20v-60'`);
     }
 }
