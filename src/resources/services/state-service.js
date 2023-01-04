@@ -50,9 +50,9 @@ export class StateService {
         this._level = 0;
     }
 
-    setExits(exits) {
-        this._exits = exits.exits;
-        this._beforeExits = exits.beforeExits;
+    setExits(data) {
+        this._exits = data.exits;
+        this._beforeExits = data.beforeExits;
     }
 
     getExits() {
@@ -97,32 +97,31 @@ export class StateService {
 
     moveBrick(position, vector, hasBolts = false) {
         const brick = this.findBrickAt(position);
-        if (brick) {
-            const vectorDirection = this._helpers.vector2direction(vector);
-            const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
-            let spaceBehindBrickIsFree;
-            if (moveLongitudonal) {
-                const doubleVector = this._helpers.multiplyVector(vector, 2);
-                const spaceBehindBrick = this._helpers.sumVectors(position, doubleVector);
-                spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
+        if (!brick) return false;
+
+        const vectorDirection = this._helpers.vector2direction(vector);
+        const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
+        let spaceBehindBrickIsFree;
+        if (moveLongitudonal) {
+            const doubleVector = this._helpers.multiplyVector(vector, 2);
+            const spaceBehindBrick = this._helpers.sumVectors(position, doubleVector);
+            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
+        } else {
+            const spacesBehindBrick = brick.blocks.map(block => this._helpers.sumVectors([brick.position[0], brick.position[1]], block, vector));
+            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
+        }
+        if (spaceBehindBrickIsFree) {
+            this.mapBrick(brick, false);
+            brick.position = this._helpers.sumVectors(brick.position, vector);
+            this.mapBrick(brick, true);
+            return true;
+        } else {
+            if (brick.bumpedIn && hasBolts) {
+                this._throwBolt(position);
             } else {
-                const spacesBehindBrick = brick.blocks.map(block => this._helpers.sumVectors([brick.position[0], brick.position[1]], block, vector));
-                spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
-            }
-            if (spaceBehindBrickIsFree) {
-                this.mapBrick(brick, false);
-                brick.position = this._helpers.sumVectors(brick.position, vector);
-                this.mapBrick(brick, true);
-                return true;
-            } else {
-                if (brick.bumpedIn && hasBolts) {
-                    this._throwBolt(position);
-                } else {
-                    brick.bumpedIn = true;
-                }
+                brick.bumpedIn = true;
             }
         }
-        return false;
     }
 
     _throwBolt(position) {
@@ -141,13 +140,12 @@ export class StateService {
     }
 
     findBrickAt(position) {
-        if (this.withinBounds(position)) {
-            const brickIndex = this._blocks[position[1]][position[0]];
-            if (brickIndex !== false) {
-                return this._bricks[brickIndex];
-            }
+        if (!this.withinBounds(position)) return false;
+        const brickIndex = this._blocks[position[1]][position[0]];
+        if (brickIndex !== false) {
+            return this._bricks[brickIndex];
         }
-        return false;
+
     }
 
     setMap(blocks) {
@@ -170,12 +168,10 @@ export class StateService {
     }
 
     isFree(position, ignorePusher = true) {
-        if (this.withinBounds(position)) {
-            const brickAtPosition = this._blocks[position[1]][position[0]] !== false;
-            const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
-            return !brickAtPosition && !playerAtPosition;
-        }
-        return false;
+        if (!this.withinBounds(position)) return false;
+        const brickAtPosition = this._blocks[position[1]][position[0]] !== false;
+        const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
+        return !brickAtPosition && !playerAtPosition;
     }
 
 }

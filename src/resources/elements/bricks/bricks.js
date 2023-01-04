@@ -210,7 +210,7 @@ export class BricksCustomElement {
 
     _markExitBricks() {
         const exits = this._stateService.getBeforeExits();
-        console.log(exits);
+        // console.log(exits);
         const exitsFlat = exits.flat();
         exitsFlat.forEach(position => {
             if (position) {
