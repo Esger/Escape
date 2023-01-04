@@ -1,8 +1,8 @@
 <template>
     <require from="./game-start.css"></require>
-    <div class="clickCatcher"
-         click.delegate="startGame()"
-         if.bind="gameStartVisible">
+    <div if.bind="gameStartVisible"
+         class="clickCatcher"
+         click.delegate="startGame()">
         <h1 class="${animating ? 'animating' : ''}">${title}</h1>
         <h3 class="keysHint ${animating ? 'animating' : ''}">${howToPlay}</h3>
         <h2 class="${animating ? 'animating' : ''}">${howToStart}</h2>

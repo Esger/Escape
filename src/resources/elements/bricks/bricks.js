@@ -214,9 +214,11 @@ export class BricksCustomElement {
         const exits = this._stateService.getBeforeExits();
         const exitsFlat = exits.flat();
         exitsFlat.forEach(position => {
-            const value = this._blocks[position[1]][position[0]];
-            if (value !== false) {
-                this.bricks[value].remove = true;
+            if (position) {
+                const value = this._blocks[position[1]][position[0]];
+                if (value !== false) {
+                    this.bricks[value].remove = true;
+                }
             }
         })
     }
