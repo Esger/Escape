@@ -54,15 +54,16 @@ export class Exits {
             [[max - offset, max - 1], [max - offset - 1, max - 1]],
             [[0, max - offset], [0, max - offset - 1]]
         ];
-        const getMaxExits = level => {
-            return 3;
+        const getMaxExits = _ => {
+            const exitsToRemove = Math.min(Math.floor(level / 4), 3);
+            return 4 - exitsToRemove;
         }
         const maxExits = getMaxExits();
         const getExitsToRemoveIndices = _ => {
             const exits = [];
             // build array of unique random indices ranging from 0 to 3
             for (let i = 4; i > maxExits; i--) {
-                exits.push(Math.floor(Math.random() * i));
+                exits.push(this._helpers.randomNumberWithin(i));
             }
             const uniqueExits = Array.from(new Set(exits));
             return uniqueExits;

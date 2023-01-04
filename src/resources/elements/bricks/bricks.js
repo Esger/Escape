@@ -127,8 +127,8 @@ export class BricksCustomElement {
         for (const block of brick.blocks) {
             const position = this._helpers.sumVectors(brick.position, block);
             if (this._stateService.withinBounds(position)) {
-                const value = occupied !== false ? brick.index : false;
-                this._blocks[position[1]][position[0]] = value;
+                const index = occupied !== false ? brick.index : false;
+                this._blocks[position[1]][position[0]] = index;
             }
         }
     }
@@ -191,9 +191,7 @@ export class BricksCustomElement {
     }
 
     _reIndexBricks() {
-        this.bricks.forEach((brick, i) => {
-            brick.index = i;
-        });
+        this.bricks.forEach((brick, i) => brick.index = i);
     }
 
     _markCenterBricks() {
@@ -202,9 +200,9 @@ export class BricksCustomElement {
         const max = c + 1;
         for (let y = min; y <= max; y++) {
             for (let x = min; x <= max; x++) {
-                const value = this._blocks[y][x];
-                if (value !== false) {
-                    this.bricks[value].remove = true;
+                const index = this._blocks[y][x];
+                if (index !== false) {
+                    this.bricks[index].remove = true;
                 }
             }
         }
@@ -212,12 +210,13 @@ export class BricksCustomElement {
 
     _markExitBricks() {
         const exits = this._stateService.getBeforeExits();
+        console.log(exits);
         const exitsFlat = exits.flat();
         exitsFlat.forEach(position => {
             if (position) {
-                const value = this._blocks[position[1]][position[0]];
-                if (value !== false) {
-                    this.bricks[value].remove = true;
+                const index = this._blocks[position[1]][position[0]];
+                if (index !== false) {
+                    this.bricks[index].remove = true;
                 }
             }
         })
