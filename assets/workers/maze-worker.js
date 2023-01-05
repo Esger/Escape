@@ -39,7 +39,11 @@ const copyMazeWithMarks = function () {
 };
 
 const findPositionHalfway = function (targetPositionSets) {
-    const isTargetPosition = (xy) => xy && targetPositionSets.some(positionSet => positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i])));
+    const isTargetPosition = (xy) => xy && targetPositionSets.some(positionSet => {
+        if (positionSet) {
+            return positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i]));
+        }
+    });
     const queue = [];
     const targets = [];
     const results = [];

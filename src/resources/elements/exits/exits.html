@@ -1,9 +1,10 @@
 <template>
     <require from="./exits.css"></require>
     <div repeat.for="exit of exits"
+         show.bind="exit"
          class="exit exit-${$index}"
          data-position="${exit.position}"
          css="transform:translate3d(${offset($even,exit.position[0])}vmin, ${offset($odd,exit.position[1])}vmin, 0) rotate(${exit.angle + 'rad'})">
-        <div class="arrow"></div>    
+        <div class="arrow"></div>
     </div>
 </template>

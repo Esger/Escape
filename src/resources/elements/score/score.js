@@ -40,8 +40,8 @@ export class Score {
             this.lives++;
             this._publishBolts();
         });
-        this._moveSubscription = this._eventAggregator.subscribe('move', message => {
-            this.score -= (message.type == 'player') ? this._moveScore : 0;
+        this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
+            this.score -= (pusher.type == 'player') ? this._moveScore : 0;
         });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;

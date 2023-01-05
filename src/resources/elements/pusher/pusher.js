@@ -36,23 +36,14 @@ export class PusherCustomElement {
             this._addGameEndSubscription();
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._moveSubscription?.dispose();
+            this._keyMoveSubscription?.dispose();
             this.lastKey = 'down';
         });
-        this._moveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => {
-            let direction;
-            if (this._isFaassen && this.pusher.direction !== undefined) {
-                direction = this.pusher.direction;
-                this.lastKey = this.directions[direction];
-            } else {
-                direction = this.directions.indexOf(key);
-                this.lastKey = key;
-            }
-            direction > -1 && this._moveIfPossible(direction);
-        });
-        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', message => {
-            if (message.type !== this.pusher.type) {
-                const samePosition = this._helpers.areEqual([message.position, this.pusher.position]);
+        this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => this._dispatchMove(key));
+        this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
+        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
+            if (otherPusher.type !== this.pusher.type) {
+                const samePosition = this._helpers.areEqual([otherPusher.position, this.pusher.position]);
                 if (samePosition) {
                     setTimeout(_ => this._eventAggregator.publish('caught'), 250);
                 }
@@ -62,7 +53,8 @@ export class PusherCustomElement {
 
     detached() {
         this._gameStartSubscription.dispose();
-        this._moveSubscription.dispose();
+        this._keyMoveSubscription.dispose();
+        this._swipeMoveSubscription.dispose();
         this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
@@ -75,7 +67,7 @@ export class PusherCustomElement {
     }
 
     _gameEnd() {
-        this._moveSubscription?.dispose();
+        this._keyMoveSubscription?.dispose();
         this.lastKey = 'down';
     }
 
@@ -100,20 +92,31 @@ export class PusherCustomElement {
         }
     }
 
+    _dispatchMove(key) {
+        let direction;
+        if (this._isFaassen && this.pusher.direction !== undefined) {
+            direction = this.pusher.direction;
+            this.lastKey = this.directions[direction];
+        } else {
+            direction = this.directions.indexOf(key);
+            this.lastKey = key;
+        }
+        direction > -1 && this._moveIfPossible(direction);
+    }
+
     _throughExit(position) {
-        const exited = this.exits?.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
+        const exited = this.exits?.some((exit) => {
+            if (exit) {
+                return exit.some((e) => e[0] == position[0] && e[1] == position[1])
+            }
+        });
         return exited;
     }
 
     _doMove(newPosition) {
         this.pusher.position = newPosition;
         this._setPositionStyle();
-        const message = {
-            'index': this.pusher.index,
-            'type': this.pusher.type,
-            'position': this.pusher.position
-        }
-        this._eventAggregator.publish('move', message);
+        this._eventAggregator.publish('move', this.pusher);
     }
 
     _addTransitionendListenter() {

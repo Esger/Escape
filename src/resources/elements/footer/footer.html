@@ -1,9 +1,7 @@
 <template>
     <require from="./footer.css"></require>
     <h3>
-        <span if.bind="showHint"
-              click.trigger="giveUp()"
+        <span click.trigger="giveUp()"
               innerHTML="${hint}"></span>
-        <a else href="http://ashware.nl">&copy;ashWare</a>
     </h3>
 </template>

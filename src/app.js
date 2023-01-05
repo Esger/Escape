@@ -1,6 +1,7 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { KeyInputService } from "services/key-input-service";
+import $ from 'jquery';
 
 @inject(EventAggregator, KeyInputService)
 export class App {

@@ -2,8 +2,9 @@ import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
 import { HelperService } from 'services/helper-service';
+import { SwipeService } from 'services/swipe-service';
 
-@inject(EventAggregator, StateService, HelperService)
+@inject(EventAggregator, StateService, HelperService, SwipeService)
 
 export class PushersCustomElement {
     isVisible = false;
@@ -91,9 +92,14 @@ export class PushersCustomElement {
         // 2 -> 3
         // 3 -> 0
         const direction = [1, 2, 3, 0][exitNumber];
-        const position = this.exits[exitNumber][0];
-        const pusher = this._newPusher('faassen', position, direction);
-        this.pushers.push(pusher);
+        const position = this.exits[exitNumber];
+        if (position) {
+            const pusher = this._newPusher('faassen', position[0], direction);
+            this.pushers.push(pusher);
+        } else {
+            // removed exit
+            this._addFaassen();
+        }
     }
 
 }
