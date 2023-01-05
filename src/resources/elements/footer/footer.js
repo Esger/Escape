@@ -18,7 +18,6 @@ export class Footer {
             '💥 lets you destroy bricks',
             'move into an unmoveable brick to destroy it 💥',
         ];
-        this.showHint = false;
         this._wins = 0;
     }
 
@@ -65,11 +64,6 @@ export class Footer {
 
     _showMessage(message) {
         this.hint = message;
-        this.showHint = true;
-        clearTimeout(this._hintHideTimeoutHandle);
-        this._hintHideTimeoutHandle = setTimeout(_ => {
-            this.showHint = false;
-        }, 10000);
     }
 
 }
