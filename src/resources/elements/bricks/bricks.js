@@ -91,7 +91,7 @@ export class BricksCustomElement {
         if (brick) {
             this._mapBrick(brick, false);
             this.bricks.splice(brick.index, 1);
-            this._reIndexBricks(this.bricks);
+            this._reIndexBricks();
         }
     }
 
