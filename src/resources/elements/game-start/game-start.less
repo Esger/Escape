@@ -40,11 +40,19 @@ game-start {
     }
 
     h2 {
-        font-size: 8vmin;
-        margin   : 4vmin 0 6vmin;
+        display    : flex;
+        align-items: center;
+        font-size  : 8vmin;
+        margin     : 4vmin 0 6vmin;
 
         &.animating {
             transform: translate3d(120vmin, 0, 0);
+        }
+
+        b {
+            font-family : 'Bungee Outline';
+            font-size   : 5.6vmin;
+            margin-right: 1vmin;
         }
     }
 

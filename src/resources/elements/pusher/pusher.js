@@ -50,9 +50,9 @@ export class PusherCustomElement {
             }
             direction > -1 && this._moveIfPossible(direction);
         });
-        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', message => {
-            if (message.type !== this.pusher.type) {
-                const samePosition = this._helpers.areEqual([message.position, this.pusher.position]);
+        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
+            if (otherPusher.type !== this.pusher.type) {
+                const samePosition = this._helpers.areEqual([otherPusher.position, this.pusher.position]);
                 if (samePosition) {
                     setTimeout(_ => this._eventAggregator.publish('caught'), 250);
                 }
@@ -101,19 +101,18 @@ export class PusherCustomElement {
     }
 
     _throughExit(position) {
-        const exited = this.exits?.some((exit) => exit.some((e) => e[0] == position[0] && e[1] == position[1]));
+        const exited = this.exits?.some((exit) => {
+            if (exit) {
+                return exit.some((e) => e[0] == position[0] && e[1] == position[1])
+            }
+        });
         return exited;
     }
 
     _doMove(newPosition) {
         this.pusher.position = newPosition;
         this._setPositionStyle();
-        const message = {
-            'index': this.pusher.index,
-            'type': this.pusher.type,
-            'position': this.pusher.position
-        }
-        this._eventAggregator.publish('move', message);
+        this._eventAggregator.publish('move', this.pusher);
     }
 
     _addTransitionendListenter() {
