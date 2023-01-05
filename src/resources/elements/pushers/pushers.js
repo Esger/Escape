@@ -2,8 +2,9 @@ import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { StateService } from 'services/state-service';
 import { HelperService } from 'services/helper-service';
+import { SwipeService } from 'services/swipe-service';
 
-@inject(EventAggregator, StateService, HelperService)
+@inject(EventAggregator, StateService, HelperService, SwipeService)
 
 export class PushersCustomElement {
     isVisible = false;
