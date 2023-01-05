@@ -5,6 +5,7 @@
     <template if.bind="showBricks">
         <brick repeat.for="brick of bricks"
                block-size.bind="blockSize"
+               class="brick-${brick.index}"
                brick.bind="brick">
         </brick>
     </template>
