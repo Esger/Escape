@@ -98,9 +98,9 @@ export class BricksCustomElement {
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
-            if (this._stateService.withinBounds(pos)) {
-                return this._blocks[pos[1]][pos[0]] == false;
-            }
+            if (!this._stateService.withinBounds(pos))
+                return false;
+            return this._blocks[pos[1]][pos[0]] === false;
         });
         return isFree;
     }
@@ -154,24 +154,22 @@ export class BricksCustomElement {
     }
 
     _findPosition() {
-        let positionFound, direction, position, count = 0;
-        const maxPositions = 50;
-        do {
+        let positionFound, direction, position;
+        const maxAttempts = 50;
+        const metrics = {};
+        for (let count = 0; count < maxAttempts; count++) {
             position = [];
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
             direction = this._helpers.randomNumberWithin(4);
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
-            count++;
-        } while (!positionFound && count < maxPositions); // TODO geen goede check
-        // console.log('positionsTried ', count);
-        if (positionFound) {
-            const metrics = {
-                position: position,
-                direction: direction
+            if (positionFound) {
+                metrics.position = position;
+                metrics.direction = direction;
+                return metrics;
             }
-            return metrics;
         }
+        console.log('positionsTried ', count);
         return false;
     }
 
