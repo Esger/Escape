@@ -5,6 +5,7 @@
          click.delegate="startGame()">
         <h1 class="${animating ? 'animating' : ''}">${title}</h1>
         <h3 class="keysHint ${animating ? 'animating' : ''}">${howToPlay}</h3>
-        <h2 class="${animating ? 'animating' : ''}">${howToStart}</h2>
+        <h2 class="${animating ? 'animating' : ''}"
+            innerhtml.bind="howToStart"></h2>
     </div>
 </template>
