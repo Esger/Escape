@@ -28,12 +28,12 @@ export class BricksCustomElement {
         this._addGameStartSubscription();
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
-            this.bricks.find(brick => {
-                if (indices.includes(brick.index)) {
-                    brick.content = '💥';
-                    setTimeout(_ => this._removeBrick(brick), 300);
-                }
-            });
+            const bricksToRemove = this.bricks.filter(brick => indices.includes(brick.index));
+            bricksToRemove.forEach(brick => {
+                brick.content = '💥';
+                brick.remove = true;
+            })
+            setTimeout(_ => this._removeMarkedBricks(), 300);
         });
     }
 
@@ -87,14 +87,6 @@ export class BricksCustomElement {
         return brick;
     }
 
-    _removeBrick(brick) {
-        if (brick) {
-            this._mapBrick(brick, false);
-            this.bricks.splice(brick.index, 1);
-            this._reIndexBricks();
-        }
-    }
-
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
@@ -134,8 +126,12 @@ export class BricksCustomElement {
     }
 
     _removeMarkedBricks() {
-        const newBricks = this.bricks.filter(brick => brick.remove !== true);
-        this.bricks = newBricks;
+        const remainingBricks = this.bricks.filter(brick => brick.remove !== true);
+        this.bricks = remainingBricks;
+        this._reIndexBricks();
+        this._mapBricks();
+        this._stateService.setMap(this._blocks);
+        this._stateService.setBricks(this.bricks);
     }
 
     _setBricks() {
