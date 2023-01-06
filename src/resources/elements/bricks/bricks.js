@@ -28,12 +28,12 @@ export class BricksCustomElement {
         this._addGameStartSubscription();
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
-            this.bricks.find(brick => {
-                if (indices.includes(brick.index)) {
-                    brick.content = '💥';
-                    setTimeout(_ => this._removeBrick(brick), 300);
-                }
-            });
+            const bricksToRemove = this.bricks.filter(brick => indices.includes(brick.index));
+            bricksToRemove.forEach(brick => {
+                brick.content = '💥';
+                brick.remove = true;
+            })
+            setTimeout(_ => this._removeMarkedBricks(), 300);
         });
     }
 
@@ -87,20 +87,12 @@ export class BricksCustomElement {
         return brick;
     }
 
-    _removeBrick(brick) {
-        if (brick) {
-            this._mapBrick(brick, false);
-            this.bricks.splice(brick.index, 1);
-            this._reIndexBricks(this.bricks);
-        }
-    }
-
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
-            if (this._stateService.withinBounds(pos)) {
-                return this._blocks[pos[1]][pos[0]] == false;
-            }
+            if (!this._stateService.withinBounds(pos))
+                return false;
+            return this._blocks[pos[1]][pos[0]] === false;
         });
         return isFree;
     }
@@ -134,8 +126,12 @@ export class BricksCustomElement {
     }
 
     _removeMarkedBricks() {
-        const newBricks = this.bricks.filter(brick => brick.remove !== true);
-        this.bricks = newBricks;
+        const remainingBricks = this.bricks.filter(brick => brick.remove !== true);
+        this.bricks = remainingBricks;
+        this._reIndexBricks();
+        this._mapBricks();
+        this._stateService.setMap(this._blocks);
+        this._stateService.setBricks(this.bricks);
     }
 
     _setBricks() {
@@ -154,24 +150,22 @@ export class BricksCustomElement {
     }
 
     _findPosition() {
-        let positionFound, direction, position, count = 0;
-        const maxPositions = 50;
-        do {
+        let positionFound, direction, position;
+        const maxAttempts = 50;
+        const metrics = {};
+        for (let count = 0; count < maxAttempts; count++) {
             position = [];
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position.push(this._helpers.randomNumberWithin(this._boardSize));
             direction = this._helpers.randomNumberWithin(4);
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
             positionFound = this._brickSpaceIsFree(position, direction);
-            count++;
-        } while (!positionFound && count < maxPositions); // TODO geen goede check
-        // console.log('positionsTried ', count);
-        if (positionFound) {
-            const metrics = {
-                position: position,
-                direction: direction
+            if (positionFound) {
+                metrics.position = position;
+                metrics.direction = direction;
+                return metrics;
             }
-            return metrics;
         }
+        console.log('positionsTried ', count);
         return false;
     }
 

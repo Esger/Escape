@@ -145,7 +145,6 @@ export class StateService {
         if (brickIndex !== false) {
             return this._bricks[brickIndex];
         }
-
     }
 
     setMap(blocks) {
@@ -169,7 +168,7 @@ export class StateService {
 
     isFree(position, ignorePusher = true) {
         if (!this.withinBounds(position)) return false;
-        const brickAtPosition = this._blocks[position[1]][position[0]] !== false;
+        const brickAtPosition = !(this._blocks[position[1]][position[0]] === false);
         const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
         return !brickAtPosition && !playerAtPosition;
     }

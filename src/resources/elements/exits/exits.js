@@ -55,6 +55,7 @@ export class Exits {
             [[0, max - offset], [0, max - offset - 1]]
         ];
         const getMaxExits = _ => {
+            // return 3
             const exitsToRemove = Math.min(Math.floor(level / 4), 3);
             return 4 - exitsToRemove;
         }
