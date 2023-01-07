@@ -50,10 +50,10 @@ export class HelperService {
 
     flashElements(className) {
         setTimeout(_ => {
-            const element = document.querySelectorAll(className)[0];
-            element.classList.add('flash', 'flash--in');
+            const $element = $(className);
+            $element.addClass('flash flash--in');
             setTimeout(_ => {
-                element.classList.remove('flash', 'flash--in');
+                $element.removeClass('flash--in');
             }, 200);
         }, 300);
     }

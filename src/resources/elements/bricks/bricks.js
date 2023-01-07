@@ -135,11 +135,13 @@ export class BricksCustomElement {
         this._removeMarkedBricks();
         this._reIndexBricks();
         this._mapBricks();
-        this._closeThroughs();
-        this._mapBricks();
-        this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
-        this._eventAggregator.publish('bricksReady');
+        this._stateService.setMap(this._blocks);
+        this._closeThroughs().then(_ => {
+            this._mapBricks();
+            this._stateService.setBricks(this.bricks);
+            this._stateService.setMap(this._blocks);
+        });
     }
 
     _findPosition() {
@@ -158,7 +160,7 @@ export class BricksCustomElement {
                 return metrics;
             }
         }
-        console.log('positionsTried ', count);
+        // console.log('positionsTried ', count);
         return false;
     }
 
@@ -221,10 +223,12 @@ export class BricksCustomElement {
             if (direction !== false) {
                 const metrics = { direction: direction, position: position }
                 const brick = this._newBrick(this.bricks.length, metrics);
-                this._mapBrick(brick);
                 this.bricks.push(brick);
+                this._mapBrick(brick);
+                // console.log('dichten', brick.position);
             }
             throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
+            throughs.length == 0 && this._eventAggregator.publish('bricksReady');
         }
     }
 
