@@ -22,10 +22,9 @@ export class BricksCustomElement {
         this._boardSize = this._stateService.getBoardSize();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             setTimeout(_ => this._cleanMap(), 500);
-            this._addBeforeExitsReadySubscription();
+            this._addExitsReadySubscription();
         });
-        this._addBeforeExitsReadySubscription();
-        this._addGameStartSubscription();
+        this._addExitsReadySubscription();
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             const bricksToRemove = this.bricks.filter(brick => indices.includes(brick.index));
@@ -46,13 +45,7 @@ export class BricksCustomElement {
         this._gameStartSubscription.dispose();
     }
 
-    _addGameStartSubscription() {
-        this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
-            this._initialize();
-        });
-    }
-
-    _addBeforeExitsReadySubscription() {
+    _addExitsReadySubscription() {
         this._beforeExitsReadySubscription = this._eventAggregator.subscribeOnce('exitsReady', _ => {
             this._initialize();
         });
@@ -65,8 +58,7 @@ export class BricksCustomElement {
     _gameEnd() {
         this._giveUpSubscription?.dispose();
         setTimeout(_ => {
-            this._addBeforeExitsReadySubscription();
-            this._addGameStartSubscription();
+            this._addExitsReadySubscription();
         }, 500);
     }
 
@@ -147,6 +139,7 @@ export class BricksCustomElement {
         this._mapBricks();
         this._stateService.setMap(this._blocks);
         this._stateService.setBricks(this.bricks);
+        this._eventAggregator.publish('bricksReady');
     }
 
     _findPosition() {
