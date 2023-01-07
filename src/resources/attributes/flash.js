@@ -20,7 +20,7 @@ export class FlashCustomAttribute {
     }
 
     valueChanged(newValue, oldValue) {
-        if (parseInt(newValue, 10) > parseInt(oldValue)) {
+        if (parseInt(newValue, 10) > parseInt(oldValue, 10)) {
             this.flash('flash--in');
         } else {
             this.flash('flash--out');

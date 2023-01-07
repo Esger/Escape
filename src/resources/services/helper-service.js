@@ -47,4 +47,14 @@ export class HelperService {
         const position2 = this.sumVectors(position, directionVector);
         return position2;
     }
+
+    flashElements(className) {
+        setTimeout(_ => {
+            const element = document.querySelectorAll(className)[0];
+            element.classList.add('flash', 'flash--in');
+            setTimeout(_ => {
+                element.classList.remove('flash', 'flash--in');
+            }, 200);
+        }, 300);
+    }
 }

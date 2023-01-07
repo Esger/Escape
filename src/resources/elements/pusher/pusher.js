@@ -17,7 +17,7 @@ export class PusherCustomElement {
         this._element = element;
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
-        this._helpers = helperService;
+        this._helperService = helperService;
         this.directions = ['right', 'down', 'left', 'up'];
     }
 
@@ -26,12 +26,7 @@ export class PusherCustomElement {
         !this._isFaassen && (this.gender = 'female');
         this._element.classList.add(this.pusher.type);
         this._setPositionStyle();
-        setTimeout(_ => {
-            this._element.classList.add('flash--in');
-            setTimeout(_ => {
-                this._element.classList.remove('flash--in');
-            }, 250);
-        });
+        this._helperService.flashElements('.player');
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
         });
@@ -43,7 +38,7 @@ export class PusherCustomElement {
         this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
         this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
             if (otherPusher.type !== this.pusher.type) {
-                const samePosition = this._helpers.areEqual([otherPusher.position, this.pusher.position]);
+                const samePosition = this._helperService.areEqual([otherPusher.position, this.pusher.position]);
                 if (samePosition) {
                     setTimeout(_ => this._eventAggregator.publish('caught'), 250);
                 }
@@ -128,8 +123,8 @@ export class PusherCustomElement {
         let afterMove = new Promise((resolve, reject) => {
             this._outsideResolve = resolve;
         });
-        const vector = this._helpers.direction2vector(direction);
-        const newPosition = this._helpers.sumVectors(this.pusher.position, vector);
+        const vector = this._helperService.direction2vector(direction);
+        const newPosition = this._helperService.sumVectors(this.pusher.position, vector);
         const exited = !this._isFaassen && this._throughExit(newPosition);
         if (exited) {
             this._doMove(newPosition);
