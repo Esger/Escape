@@ -1,0 +1,7 @@
+<template>
+    <require from="./power-ups.css"></require>
+
+    <power-up repeat.for="powerUp of powerUps"
+              class="powerUp powerUp--${powerUp.type}"
+              css="left:${powerUp.position[1]*blockSize}vmin;top:${powerUp.position[0]*blockSize}vmin;"></power-up>
+</template>
