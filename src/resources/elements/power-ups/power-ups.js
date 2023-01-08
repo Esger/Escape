@@ -7,6 +7,7 @@ import { HelperService } from 'services/helper-service';
 
 export class PowerUpsCustomElement {
 
+
     constructor(eventAggregator, stateService, helperService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
@@ -60,6 +61,7 @@ export class PowerUpsCustomElement {
 
     _initialize() {
         this.powerUps = [];
+        this._stateService.setPowerUps(this.powerUps);
     }
 
 }
