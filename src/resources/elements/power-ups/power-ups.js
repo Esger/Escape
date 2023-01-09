@@ -21,12 +21,14 @@ export class PowerUpsCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('bricksReady', _ => this._addInitalPowerUps());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._initialize());
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._initialize());
+        this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => this._consume(powerUp));
     }
 
     detached() {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription.dispose();
+        this._consumeSubscription.dispose();
     }
 
     _addInitalPowerUps() {
@@ -46,7 +48,7 @@ export class PowerUpsCustomElement {
                 this._helperService.randomNumberWithin(this._boardSize),
                 this._helperService.randomNumberWithin(this._boardSize)
             ];
-            if (this._stateService.isFree(position, false)) {
+            if (this._stateService.isFree(position, false) === true) {
                 powerUp.position = position;
                 this.powerUps.push(powerUp);
                 break;
@@ -57,6 +59,14 @@ export class PowerUpsCustomElement {
     _showPowerUp() {
         $('.powerUp--hidden').removeClass('powerUp--hidden');
         this._helperService.flashElements('.powerUp');
+    }
+
+    _consume(powerUp) {
+        const theOneIndex = this.powerUps.findIndex(p => {
+            return this._helperService.areEqual([p.position, powerUp.position]);
+        });
+        this.powerUps.splice(theOneIndex, 1);
+        this._stateService.setPowerUps(this.powerUps);
     }
 
     _initialize() {

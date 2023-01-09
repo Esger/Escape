@@ -175,11 +175,22 @@ export class StateService {
     }
 
     isFree(position, ignorePusher = true) {
-        if (!this.withinBounds(position)) return false;
+        if (!this.withinBounds(position))
+            return false;
+
         const brickAtPosition = !(this._blocks[position[1]][position[0]] === false);
+        if (brickAtPosition)
+            return 'brick';
+
         const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helperService.areEqual([position, pusher.position]));
-        const powerUpAtPosition = this._powerUps?.some(powerUp => this._helperService.areEqual([position, powerUp.position]));
-        return !brickAtPosition && !playerAtPosition && !powerUpAtPosition;
+        if (playerAtPosition)
+            return 'player';
+
+        const powerUp = this._powerUps.find(powerUp => this._helperService.areEqual([position, powerUp.position]));
+        if (powerUp)
+            return powerUp;
+
+        return true;
     }
 
 }

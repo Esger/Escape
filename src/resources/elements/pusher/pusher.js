@@ -132,20 +132,30 @@ export class PusherCustomElement {
                 this._eventAggregator.publish('win');
             }, 200);
         } else {
-            if (this._stateService.isFree(newPosition)) {
+            const fieldContent = this._stateService.isFree(newPosition);
+            if (fieldContent === true) {
                 this._doMove(newPosition);
                 afterMove.then(_ => {
                     this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
                 });
             } else {
-                const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
-                if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
+                const isObject = typeof fieldContent === 'object';
+                if (isObject) {
+                    this._eventAggregator.publish('consume', fieldContent);
                     this._doMove(newPosition);
                     afterMove.then(_ => {
                         this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
                     });
                 } else {
-                    this.pusher.direction = undefined;
+                    const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
+                    if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
+                        this._doMove(newPosition);
+                        afterMove.then(_ => {
+                            this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
+                        });
+                    } else {
+                        this.pusher.direction = undefined;
+                    }
                 }
             }
         }

@@ -55,6 +55,6 @@ export class HelperService {
             setTimeout(_ => {
                 $element.removeClass('flash--in');
             }, 200);
-        }, 300);
+        }, 500);
     }
 }
