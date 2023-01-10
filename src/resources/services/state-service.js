@@ -113,10 +113,10 @@ export class StateService {
         if (moveLongitudonal) {
             const doubleVector = this._helperService.multiplyVector(vector, 2);
             const spaceBehindBrick = this._helperService.sumVectors(position, doubleVector);
-            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
+            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false) === true;
         } else {
             const spacesBehindBrick = brick.blocks.map(block => this._helperService.sumVectors([brick.position[0], brick.position[1]], block, vector));
-            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
+            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false) === true);
         }
         if (spaceBehindBrickIsFree) {
             this.mapBrick(brick, false);

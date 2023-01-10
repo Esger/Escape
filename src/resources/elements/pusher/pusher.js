@@ -120,45 +120,45 @@ export class PusherCustomElement {
 
     _moveIfPossible(direction) {
         this._addTransitionendListenter();
-        let afterMove = new Promise((resolve, reject) => {
+        const afterMove = new Promise((resolve, reject) => {
             this._outsideResolve = resolve;
         });
+        const moveFaassen = _ => {
+            afterMove.then(_ => {
+                this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
+            });
+        }
         const vector = this._helperService.direction2vector(direction);
         const newPosition = this._helperService.sumVectors(this.pusher.position, vector);
+
         const exited = !this._isFaassen && this._throughExit(newPosition);
         if (exited) {
             this._doMove(newPosition);
-            setTimeout(_ => {
-                this._eventAggregator.publish('win');
-            }, 200);
-        } else {
-            const fieldContent = this._stateService.isFree(newPosition);
-            if (fieldContent === true) {
-                this._doMove(newPosition);
-                afterMove.then(_ => {
-                    this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
-                });
-            } else {
-                const isObject = typeof fieldContent === 'object';
-                if (isObject) {
-                    this._eventAggregator.publish('consume', fieldContent);
-                    this._doMove(newPosition);
-                    afterMove.then(_ => {
-                        this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
-                    });
-                } else {
-                    const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
-                    if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
-                        this._doMove(newPosition);
-                        afterMove.then(_ => {
-                            this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
-                        });
-                    } else {
-                        this.pusher.direction = undefined;
-                    }
-                }
-            }
+            setTimeout(_ => this._eventAggregator.publish('win'), 200);
+            return;
         }
-    }
 
+        const fieldContent = this._stateService.isFree(newPosition);
+        if (fieldContent === true) {
+            this._doMove(newPosition);
+            moveFaassen();
+            return;
+        }
+
+        const isObject = typeof fieldContent === 'object';
+        if (isObject) {
+            this._eventAggregator.publish('consume', fieldContent);
+            this._doMove(newPosition);
+            moveFaassen();
+            return;
+        }
+
+        const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
+        if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
+            this._doMove(newPosition);
+            moveFaassen();
+            return;
+        }
+        this.pusher.direction = undefined;
+    }
 }
