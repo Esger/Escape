@@ -160,7 +160,6 @@ export class BricksCustomElement {
                 return metrics;
             }
         }
-        // console.log('positionsTried ', count);
         return false;
     }
 
@@ -199,7 +198,6 @@ export class BricksCustomElement {
 
     _markExitBricks() {
         const exits = this._stateService.getBeforeExits();
-        // console.log(exits);
         const exitsFlat = exits.flat();
         exitsFlat.forEach(position => {
             if (position) {
@@ -225,11 +223,10 @@ export class BricksCustomElement {
                 const brick = this._newBrick(this.bricks.length, metrics);
                 this.bricks.push(brick);
                 this._mapBrick(brick);
-                // console.log('dichten', brick.position);
             }
             throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
-            throughs.length == 0 && this._eventAggregator.publish('bricksReady');
         }
+        throughs.length == 0 && this._eventAggregator.publish('bricksReady');
     }
 
 }
