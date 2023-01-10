@@ -10,9 +10,8 @@ export class MazeWorkerService {
         this._mazeWorker = new Worker('./assets/workers/maze-worker.js');
         this._outsideResolve;
         this._mazeWorker.onmessage = (event) => {
-            if (event.data.message == 'throughPositions' && event.data.positions.length) {
-                this._outsideResolve(event.data.positions);
-            }
+            if (event.data.message !== 'throughPositions') return;
+            this._outsideResolve(event.data.positions);
         };
     }
 

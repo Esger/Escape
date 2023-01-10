@@ -13,7 +13,7 @@ export class StateService {
 
     constructor(eventAggregator, helperService) {
         this._eventAggregator = eventAggregator;
-        this._helpers = helperService;
+        this._helperService = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this._realBoardSize = this._isMobile ? 100 : 80;
         this._boardSize = 20;
@@ -95,24 +95,32 @@ export class StateService {
         this._bricks = bricks;
     }
 
+    setPowerUps(powerUps) {
+        this._powerUps = powerUps;
+    }
+
+    getPowerUps() {
+        return this._powerUps;
+    }
+
     moveBrick(position, vector, hasBolts = false) {
         const brick = this.findBrickAt(position);
         if (!brick) return false;
 
-        const vectorDirection = this._helpers.vector2direction(vector);
+        const vectorDirection = this._helperService.vector2direction(vector);
         const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
         let spaceBehindBrickIsFree;
         if (moveLongitudonal) {
-            const doubleVector = this._helpers.multiplyVector(vector, 2);
-            const spaceBehindBrick = this._helpers.sumVectors(position, doubleVector);
-            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
+            const doubleVector = this._helperService.multiplyVector(vector, 2);
+            const spaceBehindBrick = this._helperService.sumVectors(position, doubleVector);
+            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false) === true;
         } else {
-            const spacesBehindBrick = brick.blocks.map(block => this._helpers.sumVectors([brick.position[0], brick.position[1]], block, vector));
-            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
+            const spacesBehindBrick = brick.blocks.map(block => this._helperService.sumVectors([brick.position[0], brick.position[1]], block, vector));
+            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false) === true);
         }
         if (spaceBehindBrickIsFree) {
             this.mapBrick(brick, false);
-            brick.position = this._helpers.sumVectors(brick.position, vector);
+            brick.position = this._helperService.sumVectors(brick.position, vector);
             this.mapBrick(brick, true);
             return true;
         } else {
@@ -130,7 +138,7 @@ export class StateService {
             [0, 0],
             [-1, 1], [1, 1]
         ];
-        const positions = offsets.map(offset => this._helpers.sumVectors(position, offset));
+        const positions = offsets.map(offset => this._helperService.sumVectors(position, offset));
         const bricks = [];
         positions.forEach(position => {
             const brick = this.findBrickAt(position);
@@ -153,7 +161,7 @@ export class StateService {
 
     mapBrick(brick, occupied) {
         brick.blocks?.forEach(block => {
-            const position = this._helpers.sumVectors(brick.position, block);
+            const position = this._helperService.sumVectors(brick.position, block);
             if (this.withinBounds(position)) {
                 const value = occupied ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
@@ -167,10 +175,22 @@ export class StateService {
     }
 
     isFree(position, ignorePusher = true) {
-        if (!this.withinBounds(position)) return false;
+        if (!this.withinBounds(position))
+            return false;
+
         const brickAtPosition = !(this._blocks[position[1]][position[0]] === false);
-        const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
-        return !brickAtPosition && !playerAtPosition;
+        if (brickAtPosition)
+            return 'brick';
+
+        const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helperService.areEqual([position, pusher.position]));
+        if (playerAtPosition)
+            return 'player';
+
+        const powerUp = this._powerUps.find(powerUp => this._helperService.areEqual([position, powerUp.position]));
+        if (powerUp)
+            return powerUp;
+
+        return true;
     }
 
 }

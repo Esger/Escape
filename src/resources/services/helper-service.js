@@ -47,4 +47,14 @@ export class HelperService {
         const position2 = this.sumVectors(position, directionVector);
         return position2;
     }
+
+    flashElements(className) {
+        setTimeout(_ => {
+            const $element = $(className);
+            $element.addClass('flash flash--in');
+            setTimeout(_ => {
+                $element.removeClass('flash--in');
+            }, 200);
+        }, 500);
+    }
 }

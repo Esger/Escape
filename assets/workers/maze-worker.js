@@ -104,7 +104,7 @@ const sendFeedBack = function (message, positions) {
     postMessage(workerData);
 };
 
-let treeNode = function (parent, xy, depth) {
+const treeNode = function (parent, xy, depth) {
     return {
         parent: parent,
         children: [],
@@ -113,7 +113,7 @@ let treeNode = function (parent, xy, depth) {
     };
 };
 
-let unMarkedCell = function (xy) {
+const unMarkedCell = function (xy) {
     const withinBounds = xy.every(coordinate => coordinate >= 0 && coordinate < markedCells.length);
     return withinBounds && !markedCells[xy[1]][xy[0]];
 };

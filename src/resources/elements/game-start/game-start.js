@@ -1,13 +1,16 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
-@inject(EventAggregator)
+import { HelperService } from 'services/helper-service';
+
+@inject(EventAggregator, HelperService)
 export class GameStart {
     gameStartVisible = true;
     animating = false;
     title = 'Escape';
 
-    constructor(eventAggregator) {
+    constructor(eventAggregator, helperService) {
         this._eventAggregator = eventAggregator;
+        this._helperService = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this.howToPlay = this._isMobile ? '<b>Swipe</b> to move' : 'Move with arrow keys';
         this.howToStart = this._isMobile ? '<b>Tap</b> to play' : '<b>Enter</b> to play';
@@ -15,17 +18,7 @@ export class GameStart {
 
     attached() {
         this._addStartSubscription();
-        this._flashHint();
-    }
-
-    _flashHint() {
-        setTimeout(_ => {
-            const keysHint = document.querySelectorAll('.keysHint')[0];
-            keysHint.classList.add('flash', 'flash--in');
-            setTimeout(_ => {
-                keysHint.classList.remove('flash', 'flash--in');
-            }, 200);
-        }, 300);
+        this._helperService.flashElements('.keysHint');
     }
 
     detached() {
@@ -39,7 +32,7 @@ export class GameStart {
         this.gameStartVisible = true;
         this.title = title;
         this._addStartSubscription();
-        this._flashHint();
+        this._helperService.flashElements('.keysHint');
     }
 
     _addStartSubscription() {
