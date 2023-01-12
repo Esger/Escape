@@ -147,7 +147,9 @@ export class PusherCustomElement {
 
         const isObject = typeof fieldContent === 'object';
         if (isObject) {
-            this._eventAggregator.publish('consume', fieldContent);
+            if (!this._isFaassen) {
+                this._eventAggregator.publish('consume', fieldContent);
+            }
             this._doMove(newPosition);
             moveFaassen();
             return;
