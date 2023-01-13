@@ -105,6 +105,8 @@ export class BricksCustomElement {
     _mapBricks() {
         this._cleanMap();
         this.bricks.forEach(brick => this._mapBrick(brick, brick.index));
+        this._stateService.setMap(this._blocks);
+        this._stateService.setBricks(this.bricks);
     }
 
     _mapBrick(brick, occupied) {
@@ -122,25 +124,19 @@ export class BricksCustomElement {
         this.bricks = remainingBricks;
         this._reIndexBricks();
         this._mapBricks();
-        this._stateService.setMap(this._blocks);
-        this._stateService.setBricks(this.bricks);
     }
 
     _setBricks() {
         this.bricks = [];
         this._cleanMap();
         this._fillRandom();
-        this._markExitBricks();
         this._markCenterBricks();
+        this._markExitBricks();
         this._removeMarkedBricks();
         this._reIndexBricks();
         this._mapBricks();
-        this._stateService.setBricks(this.bricks);
-        this._stateService.setMap(this._blocks);
         this._closeThroughs().then(_ => {
             this._mapBricks();
-            this._stateService.setBricks(this.bricks);
-            this._stateService.setMap(this._blocks);
         });
     }
 
@@ -204,6 +200,7 @@ export class BricksCustomElement {
                 const index = this._blocks[position[1]][position[0]];
                 if (index !== false) {
                     this.bricks[index].remove = true;
+                    console.log(this.bricks[index].position);
                 }
             }
         })
