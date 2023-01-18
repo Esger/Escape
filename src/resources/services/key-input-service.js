@@ -6,40 +6,32 @@ export class KeyInputService {
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
-        this._keys = {
-            'enter': 13,
-            'space': 32,
-            'escape': 27,
-            'left': 37,
-            'up': 38,
-            'right': 39,
-            'down': 40
-        };
-        document.addEventListener('keydown', event => this.handleKeyInput(event), true);
+        document.addEventListener('keydown', event => {
+            this.handleKeyInput(event);
+        });
     }
 
     handleKeyInput(event) {
-        let keycode = event.keyCode;
-        switch (keycode) {
-            case this._keys.left:
+        switch (event.code) {
+            case 'ArrowLeft':
                 this._eventAggregator.publish('moveKeyPressed', 'left');
                 break;
-            case this._keys.up:
+            case 'ArrowUp':
                 this._eventAggregator.publish('moveKeyPressed', 'up');
                 break;
-            case this._keys.right:
+            case 'ArrowRight':
                 this._eventAggregator.publish('moveKeyPressed', 'right');
                 break;
-            case this._keys.down:
+            case 'ArrowDown':
                 this._eventAggregator.publish('moveKeyPressed', 'down');
                 break;
-            case this._keys.enter:
+            case 'Enter':
                 this._eventAggregator.publish('start');
                 break;
-            case this._keys.space:
+            case 'Space':
                 this._eventAggregator.publish('start');
                 break;
-            case this._keys.escape:
+            case 'Escape':
                 this._eventAggregator.publish('giveUp');
                 break;
             default:
