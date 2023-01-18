@@ -32,10 +32,12 @@ export class PowerUpsCustomElement {
     }
 
     _addInitalPowerUps() {
-        for (let powerUps = 0; powerUps < 5; powerUps++) {
+        for (let count = 0; count < 5; count++) {
             this._addPowerUp('gold');
         }
-        setTimeout(_ => this._showPowerUp(), 1200);
+        setTimeout(_ => {
+            this._showPowerUp();
+        }, 1200);
     }
 
     _addPowerUp(type) {
@@ -48,7 +50,7 @@ export class PowerUpsCustomElement {
                 this._helperService.randomNumberWithin(this._boardSize),
                 this._helperService.randomNumberWithin(this._boardSize)
             ];
-            if (this._stateService.isFree(position, false) === true) {
+            if (this._stateService.isFreeForPowerUp(position) === true) {
                 powerUp.position = position;
                 this.powerUps.push(powerUp);
                 break;
