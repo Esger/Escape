@@ -76,13 +76,13 @@ export class Exits {
         };
         this._beforeExits = removeSomeExits(this._beforeExits);
 
-        let outwardsVectors = removeSomeExits([[0, -1], [1, 0], [0, 1], [-1, 0]]);
+        let outwardVectors = removeSomeExits([[0, -1], [1, 0], [0, 1], [-1, 0]]);
 
         // this._exits are just outside the board.
         this._exits = this._beforeExits.map((beforeExit, index) => {
             if (beforeExit) {
                 return beforeExit.map(vector => {
-                    const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
+                    const newVector = this._helpers.sumVectors(vector, outwardVectors[index]);
                     return newVector;
                 })
             }
@@ -90,11 +90,11 @@ export class Exits {
         this._stateService.setExits({ 'exits': this._exits, 'beforeExits': this._beforeExits });
         this._eventAggregator.publish('exitsReady');
 
-        outwardsVectors = removeSomeExits([[0, 0], [1, 0], [0, 1], [0, 0]]);
+        outwardVectors = removeSomeExits([[0, 0], [1, 0], [0, 1], [0, 0]]);
         // positions for visual exits one further out on the far sides
         const exitPositions = this._exits.map((exit, index) => {
             if (exit) return exit.map(vector => {
-                const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
+                const newVector = this._helpers.sumVectors(vector, outwardVectors[index]);
                 return newVector;
             });
         });
@@ -115,6 +115,8 @@ export class Exits {
                 }
             }
         });
+
+        this._eventAggregator.publish('exitsReady');
     }
 
     offset(use, value) {
