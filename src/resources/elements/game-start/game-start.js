@@ -36,7 +36,7 @@ export class GameStart {
     }
 
     _addStartSubscription() {
-        this._startSubscription = this._eventAggregator.subscribeOnce('start', _ => {
+        this._startSubscription && this._startSubscription.dispose();
             this.startGame();
         })
     }

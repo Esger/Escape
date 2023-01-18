@@ -14,10 +14,12 @@ export class Exits {
         this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
         this._boardSize = this._stateService.getBoardSize();
         this._blockSize = this._stateService.getBlockSize();
-        this._firstTime = true;
+        this._startOffset = 9; // center
+        this._clockwise = true;
     }
 
     attached() {
+        this._exitOffset = 10;
         this._setExits();
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
@@ -41,18 +43,36 @@ export class Exits {
 
     _gameEnd() {
         this._element.style.setProperty('--exitColor', 'red');
+        this._exitOffset = 10;
     }
 
     _setExits() {
+        const max = this._boardSize - 1;
+        const min = 1;
         const level = this._stateService.getLevel();
-        const max = this._boardSize;
-        const offset = 2 + ((level + 8) % 17); // 1..18
+        if (level > 0) {
+            if (this._clockwise) {
+                if (this._exitOffset < max) {
+                    this._exitOffset++;
+                } else {
+                    this._clockwise = !this._clockwise;
+                    this._exitOffset--;
+                }
+            } else {
+                if (this._exitOffset > min) {
+                    this._exitOffset--;
+                } else {
+                    this._clockwise = !this._clockwise;
+                    this._exitOffset++;
+                }
+            }
+        }
         // this._beforeExits are just inside the board, in front of the exits.
         this._beforeExits = [
-            [[offset, 0], [offset - 1, 0]],
-            [[max - 1, offset], [max - 1, offset - 1]],
-            [[max - offset, max - 1], [max - offset - 1, max - 1]],
-            [[0, max - offset], [0, max - offset - 1]]
+            [[this._exitOffset, 0], [this._exitOffset - 1, 0]], // boven
+            [[max, this._exitOffset], [max, this._exitOffset - 1]], // rechts
+            [[max - this._exitOffset, max], [max - this._exitOffset - 1, max]], // onder
+            [[0, max - this._exitOffset], [0, max - this._exitOffset - 1]] // links
         ];
         const getMaxExits = _ => {
             // return 3
@@ -76,25 +96,24 @@ export class Exits {
         };
         this._beforeExits = removeSomeExits(this._beforeExits);
 
-        let outwardsVectors = removeSomeExits([[0, -1], [1, 0], [0, 1], [-1, 0]]);
+        let outwardVectors = removeSomeExits([[0, -1], [1, 0], [0, 1], [-1, 0]]);
 
         // this._exits are just outside the board.
         this._exits = this._beforeExits.map((beforeExit, index) => {
             if (beforeExit) {
                 return beforeExit.map(vector => {
-                    const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
+                    const newVector = this._helpers.sumVectors(vector, outwardVectors[index]);
                     return newVector;
                 })
             }
         });
         this._stateService.setExits({ 'exits': this._exits, 'beforeExits': this._beforeExits });
-        this._eventAggregator.publish('exitsReady');
 
-        outwardsVectors = removeSomeExits([[0, 0], [1, 0], [0, 1], [0, 0]]);
+        outwardVectors = removeSomeExits([[0, 0], [1, 0], [0, 1], [0, 0]]);
         // positions for visual exits one further out on the far sides
         const exitPositions = this._exits.map((exit, index) => {
             if (exit) return exit.map(vector => {
-                const newVector = this._helpers.sumVectors(vector, outwardsVectors[index]);
+                const newVector = this._helpers.sumVectors(vector, outwardVectors[index]);
                 return newVector;
             });
         });
@@ -115,6 +134,8 @@ export class Exits {
                 }
             }
         });
+
+        this._eventAggregator.publish('exitsReady');
     }
 
     offset(use, value) {

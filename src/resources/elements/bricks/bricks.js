@@ -82,8 +82,9 @@ export class BricksCustomElement {
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
-            if (!this._stateService.withinBounds(pos))
-                return false;
+            if (!this._stateService.withinBounds(pos)) return false;
+            if (this._stateService.isBeforeExit(pos)) return false;
+            if (this._stateService.isInCenterArea(pos)) return false;
             return this._blocks[pos[1]][pos[0]] === false;
         });
         return isFree;
@@ -105,6 +106,8 @@ export class BricksCustomElement {
     _mapBricks() {
         this._cleanMap();
         this.bricks.forEach(brick => this._mapBrick(brick, brick.index));
+        this._stateService.setMap(this._blocks);
+        this._stateService.setBricks(this.bricks);
     }
 
     _mapBrick(brick, occupied) {
@@ -122,25 +125,15 @@ export class BricksCustomElement {
         this.bricks = remainingBricks;
         this._reIndexBricks();
         this._mapBricks();
-        this._stateService.setMap(this._blocks);
-        this._stateService.setBricks(this.bricks);
     }
 
     _setBricks() {
         this.bricks = [];
         this._cleanMap();
         this._fillRandom();
-        this._markExitBricks();
-        this._markCenterBricks();
-        this._removeMarkedBricks();
-        this._reIndexBricks();
-        this._mapBricks();
-        this._stateService.setBricks(this.bricks);
-        this._stateService.setMap(this._blocks);
         this._closeThroughs().then(_ => {
             this._mapBricks();
-            this._stateService.setBricks(this.bricks);
-            this._stateService.setMap(this._blocks);
+            this._eventAggregator.publish('bricksReady');
         });
     }
 
@@ -149,9 +142,7 @@ export class BricksCustomElement {
         const maxAttempts = 50;
         const metrics = {};
         for (let count = 0; count < maxAttempts; count++) {
-            position = [];
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position = [this._helpers.randomNumberWithin(this._boardSize), this._helpers.randomNumberWithin(this._boardSize)];
             direction = this._helpers.randomNumberWithin(4);
             positionFound = this._brickSpaceIsFree(position, direction);
             if (positionFound) {
@@ -182,36 +173,9 @@ export class BricksCustomElement {
         this.bricks.forEach((brick, i) => brick.index = i);
     }
 
-    _markCenterBricks() {
-        const c = Math.round(this._boardSize / 2);
-        const min = c - 1;
-        const max = c + 1;
-        for (let y = min; y <= max; y++) {
-            for (let x = min; x <= max; x++) {
-                const index = this._blocks[y][x];
-                if (index !== false) {
-                    this.bricks[index].remove = true;
-                }
-            }
-        }
-    }
-
-    _markExitBricks() {
-        const exits = this._stateService.getBeforeExits();
-        const exitsFlat = exits.flat();
-        exitsFlat.forEach(position => {
-            if (position) {
-                const index = this._blocks[position[1]][position[0]];
-                if (index !== false) {
-                    this.bricks[index].remove = true;
-                }
-            }
-        })
-    }
-
     async _closeThroughs() {
         // block the throughs
-        const center = Math.round(this._boardSize / 2);
+        const center = this._stateService.getCenter();
         const playerPosition = [center, center];
         this._beforeExits = this._stateService.getBeforeExits();
         let throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
@@ -226,7 +190,6 @@ export class BricksCustomElement {
             }
             throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
         }
-        throughs.length == 0 && this._eventAggregator.publish('bricksReady');
     }
 
 }
