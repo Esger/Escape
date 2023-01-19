@@ -76,7 +76,7 @@ export class Exits {
         ];
         const getMaxExits = _ => {
             // return 3
-            const exitsToRemove = Math.min(Math.floor(level / 4), 3);
+            const exitsToRemove = Math.min(Math.ceil(level / 4), 2);
             return 4 - exitsToRemove;
         }
         const maxExits = getMaxExits();
