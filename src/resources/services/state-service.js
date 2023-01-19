@@ -22,10 +22,14 @@ export class StateService {
         this._bricks = [];
         this._blocks = [];
         this._pushers = [];
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGameEndSubscription());
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGameEndSubscription();
+            this._isPlaying = true;
+        });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
+            this._isPlaying = false;
             console.info(this._bricksCount, 'bricks');
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
@@ -55,6 +59,11 @@ export class StateService {
     _gameEnd() {
         this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._isPlaying = false;
+    }
+
+    getIsPlaying() {
+        return this._isPlaying;
     }
 
     getCenter() {
