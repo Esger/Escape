@@ -37,6 +37,8 @@ export class GameStart {
 
     _addStartSubscription() {
         this._startSubscription && this._startSubscription.dispose();
+        this._eventAggregator.subscribeOnce('start', event => {
+            console.log(Math.random());
             this.startGame();
         })
     }
@@ -72,6 +74,7 @@ export class GameStart {
             this._addWinSubscription();
             this._addCaughtSubscription();
             this.gameStartVisible = false;
+            console.log('gameStart');
             this._eventAggregator.publish('gameStart');
             this.animating = false;
         }, 500);
