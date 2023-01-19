@@ -1,31 +1,29 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
-@inject(EventAggregator)
+import { StateService } from 'services/state-service';
+import { HelperService } from 'services/helper-service';
+
+@inject(EventAggregator, StateService, HelperService)
 export class GameStart {
     gameStartVisible = true;
     animating = false;
     title = 'Escape';
 
-    constructor(eventAggregator) {
+    constructor(eventAggregator, stateService, helperService) {
         this._eventAggregator = eventAggregator;
+        this._stateService = stateService;
+        this._helperService = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this.howToPlay = this._isMobile ? '<b>Swipe</b> to move' : 'Move with arrow keys';
         this.howToStart = this._isMobile ? '<b>Tap</b> to play' : '<b>Enter</b> to play';
     }
 
     attached() {
-        this._addStartSubscription();
-        this._flashHint();
-    }
-
-    _flashHint() {
-        setTimeout(_ => {
-            const keysHint = document.querySelectorAll('.keysHint')[0];
-            keysHint.classList.add('flash', 'flash--in');
-            setTimeout(_ => {
-                keysHint.classList.remove('flash', 'flash--in');
-            }, 200);
-        }, 300);
+        this._helperService.flashElements('.keysHint');
+        this._gameStartSubscription = this._eventAggregator.subscribe('start', event => {
+            if (this._stateService.getIsPlaying()) return;
+            this.startGame();
+        });
     }
 
     detached() {
@@ -33,19 +31,13 @@ export class GameStart {
         this._caughtSubscribtion?.dispose();
         this._giveUpSubscription?.dispose();
         this._startSubscription?.dispose();
+        this._gameStartSubscription.dispose();
     }
 
     _showEndScreen(title) {
         this.gameStartVisible = true;
         this.title = title;
-        this._addStartSubscription();
-        this._flashHint();
-    }
-
-    _addStartSubscription() {
-        this._startSubscription = this._eventAggregator.subscribeOnce('start', _ => {
-            this.startGame();
-        })
+        this._helperService.flashElements('.keysHint');
     }
 
     _addWinSubscription() {

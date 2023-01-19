@@ -17,6 +17,7 @@ export class Score {
         this._levelScore = 5;
         this._boltScore = -50;
         this._moveScore = 1;
+        this._goldScore = 25;
         this._resetScore = true;
         this._getHighScore();
     }
@@ -42,6 +43,9 @@ export class Score {
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
             this.score -= (pusher.type == 'player') ? this._moveScore : 0;
+        });
+        this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => {
+            this.score += (powerUp.type == 'gold') ? this._goldScore : 0;
         });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;

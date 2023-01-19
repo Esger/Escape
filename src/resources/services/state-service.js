@@ -13,23 +13,34 @@ export class StateService {
 
     constructor(eventAggregator, helperService) {
         this._eventAggregator = eventAggregator;
-        this._helpers = helperService;
+        this._helperService = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this._realBoardSize = this._isMobile ? 100 : 80;
         this._boardSize = 20;
+        this._center = Math.round(this._boardSize / 2);
         this._blockSize = Math.round(this._realBoardSize / this._boardSize);
         this._bricks = [];
         this._blocks = [];
         this._pushers = [];
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._addGameEndSubscription());
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
+            this._addGameEndSubscription();
+            this._isPlaying = true;
+        });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
-            console.log(this._bricksCount);
+            this._isPlaying = false;
+            console.info(this._bricksCount, 'bricks');
         });
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
             this._pushers[pusher.index].position = pusher.position;
         });
+        this._centerArea = [];
+        for (let x = -2; x < 2; x++) {
+            for (let y = -2; y < 2; y++) {
+                this._centerArea.push([this._center + x, this._center + y]);
+            }
+        }
     }
 
     detached() {
@@ -48,6 +59,15 @@ export class StateService {
     _gameEnd() {
         this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._isPlaying = false;
+    }
+
+    getIsPlaying() {
+        return this._isPlaying;
+    }
+
+    getCenter() {
+        return this._center;
     }
 
     setExits(data) {
@@ -95,24 +115,32 @@ export class StateService {
         this._bricks = bricks;
     }
 
+    setPowerUps(powerUps) {
+        this._powerUps = powerUps;
+    }
+
+    getPowerUps() {
+        return this._powerUps;
+    }
+
     moveBrick(position, vector, hasBolts = false) {
         const brick = this.findBrickAt(position);
         if (!brick) return false;
 
-        const vectorDirection = this._helpers.vector2direction(vector);
+        const vectorDirection = this._helperService.vector2direction(vector);
         const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
         let spaceBehindBrickIsFree;
         if (moveLongitudonal) {
-            const doubleVector = this._helpers.multiplyVector(vector, 2);
-            const spaceBehindBrick = this._helpers.sumVectors(position, doubleVector);
-            spaceBehindBrickIsFree = this.isFree(spaceBehindBrick, false);
+            const doubleVector = this._helperService.multiplyVector(vector, 2);
+            const areaBehindBrick = this._helperService.sumVectors(position, doubleVector);
+            spaceBehindBrickIsFree = this.isFree(areaBehindBrick, false) === true;
         } else {
-            const spacesBehindBrick = brick.blocks.map(block => this._helpers.sumVectors([brick.position[0], brick.position[1]], block, vector));
-            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false));
+            const spacesBehindBrick = brick.blocks.map(block => this._helperService.sumVectors([brick.position[0], brick.position[1]], block, vector));
+            spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false) === true);
         }
         if (spaceBehindBrickIsFree) {
             this.mapBrick(brick, false);
-            brick.position = this._helpers.sumVectors(brick.position, vector);
+            brick.position = this._helperService.sumVectors(brick.position, vector);
             this.mapBrick(brick, true);
             return true;
         } else {
@@ -130,7 +158,7 @@ export class StateService {
             [0, 0],
             [-1, 1], [1, 1]
         ];
-        const positions = offsets.map(offset => this._helpers.sumVectors(position, offset));
+        const positions = offsets.map(offset => this._helperService.sumVectors(position, offset));
         const bricks = [];
         positions.forEach(position => {
             const brick = this.findBrickAt(position);
@@ -153,7 +181,7 @@ export class StateService {
 
     mapBrick(brick, occupied) {
         brick.blocks?.forEach(block => {
-            const position = this._helpers.sumVectors(brick.position, block);
+            const position = this._helperService.sumVectors(brick.position, block);
             if (this.withinBounds(position)) {
                 const value = occupied ? brick.index : false;
                 this._blocks[position[1]][position[0]] = value;
@@ -166,11 +194,43 @@ export class StateService {
         return withinBounds;
     }
 
+    isBeforeExit(position) {
+        const isBeforeExit = this._beforeExits?.flat().some(coordinate => this._helperService.areEqual([coordinate, position]));
+        return isBeforeExit;
+    }
+
+    isInCenterArea(position) {
+        const isInCenter = this._centerArea?.some(coordinate => this._helperService.areEqual([coordinate, position]));
+        return isInCenter;
+    }
+
+    isOnBrick(position) {
+        if (!this._blocks.length) return false;
+        return this._blocks[position[1]][position[0]] !== false;
+    }
+
+    isFreeForPowerUp(position) {
+        if (this.isInCenterArea(position)) return false;
+        return !this.isOnBrick(position);
+    }
+
     isFree(position, ignorePusher = true) {
         if (!this.withinBounds(position)) return false;
-        const brickAtPosition = !(this._blocks[position[1]][position[0]] === false);
-        const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helpers.areEqual([position, pusher.position]));
-        return !brickAtPosition && !playerAtPosition;
+        if (!this._blocks.length) return false;
+
+        const brickAtPosition = this.isOnBrick(position);
+        if (brickAtPosition)
+            return 'brick';
+
+        const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helperService.areEqual([position, pusher.position]));
+        if (playerAtPosition)
+            return 'player';
+
+        const powerUp = this._powerUps.find(powerUp => this._helperService.areEqual([position, powerUp.position]));
+        if (powerUp)
+            return powerUp;
+
+        return true;
     }
 
 }

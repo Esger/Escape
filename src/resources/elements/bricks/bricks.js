@@ -22,10 +22,9 @@ export class BricksCustomElement {
         this._boardSize = this._stateService.getBoardSize();
         this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
             setTimeout(_ => this._cleanMap(), 500);
-            this._addBeforeExitsReadySubscription();
+            this._addExitsReadySubscription();
         });
-        this._addBeforeExitsReadySubscription();
-        this._addGameStartSubscription();
+        this._addExitsReadySubscription();
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             const bricksToRemove = this.bricks.filter(brick => indices.includes(brick.index));
@@ -46,13 +45,7 @@ export class BricksCustomElement {
         this._gameStartSubscription.dispose();
     }
 
-    _addGameStartSubscription() {
-        this._gameStartSubscription = this._eventAggregator.subscribeOnce('gameStart', _ => {
-            this._initialize();
-        });
-    }
-
-    _addBeforeExitsReadySubscription() {
+    _addExitsReadySubscription() {
         this._beforeExitsReadySubscription = this._eventAggregator.subscribeOnce('exitsReady', _ => {
             this._initialize();
         });
@@ -65,8 +58,7 @@ export class BricksCustomElement {
     _gameEnd() {
         this._giveUpSubscription?.dispose();
         setTimeout(_ => {
-            this._addBeforeExitsReadySubscription();
-            this._addGameStartSubscription();
+            this._addExitsReadySubscription();
         }, 500);
     }
 
@@ -90,8 +82,9 @@ export class BricksCustomElement {
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
         const isFree = [position, position2].every(pos => {
-            if (!this._stateService.withinBounds(pos))
-                return false;
+            if (!this._stateService.withinBounds(pos)) return false;
+            if (this._stateService.isBeforeExit(pos)) return false;
+            if (this._stateService.isInCenterArea(pos)) return false;
             return this._blocks[pos[1]][pos[0]] === false;
         });
         return isFree;
@@ -113,6 +106,8 @@ export class BricksCustomElement {
     _mapBricks() {
         this._cleanMap();
         this.bricks.forEach(brick => this._mapBrick(brick, brick.index));
+        this._stateService.setMap(this._blocks);
+        this._stateService.setBricks(this.bricks);
     }
 
     _mapBrick(brick, occupied) {
@@ -130,23 +125,16 @@ export class BricksCustomElement {
         this.bricks = remainingBricks;
         this._reIndexBricks();
         this._mapBricks();
-        this._stateService.setMap(this._blocks);
-        this._stateService.setBricks(this.bricks);
     }
 
     _setBricks() {
         this.bricks = [];
         this._cleanMap();
         this._fillRandom();
-        this._markExitBricks();
-        this._markCenterBricks();
-        this._removeMarkedBricks();
-        this._reIndexBricks();
-        this._mapBricks();
-        this._closeThroughs();
-        this._mapBricks();
-        this._stateService.setMap(this._blocks);
-        this._stateService.setBricks(this.bricks);
+        this._closeThroughs().then(_ => {
+            this._mapBricks();
+            this._eventAggregator.publish('bricksReady');
+        });
     }
 
     _findPosition() {
@@ -154,9 +142,7 @@ export class BricksCustomElement {
         const maxAttempts = 50;
         const metrics = {};
         for (let count = 0; count < maxAttempts; count++) {
-            position = [];
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
-            position.push(this._helpers.randomNumberWithin(this._boardSize));
+            position = [this._helpers.randomNumberWithin(this._boardSize), this._helpers.randomNumberWithin(this._boardSize)];
             direction = this._helpers.randomNumberWithin(4);
             positionFound = this._brickSpaceIsFree(position, direction);
             if (positionFound) {
@@ -165,7 +151,6 @@ export class BricksCustomElement {
                 return metrics;
             }
         }
-        console.log('positionsTried ', count);
         return false;
     }
 
@@ -188,37 +173,9 @@ export class BricksCustomElement {
         this.bricks.forEach((brick, i) => brick.index = i);
     }
 
-    _markCenterBricks() {
-        const c = Math.round(this._boardSize / 2);
-        const min = c - 1;
-        const max = c + 1;
-        for (let y = min; y <= max; y++) {
-            for (let x = min; x <= max; x++) {
-                const index = this._blocks[y][x];
-                if (index !== false) {
-                    this.bricks[index].remove = true;
-                }
-            }
-        }
-    }
-
-    _markExitBricks() {
-        const exits = this._stateService.getBeforeExits();
-        // console.log(exits);
-        const exitsFlat = exits.flat();
-        exitsFlat.forEach(position => {
-            if (position) {
-                const index = this._blocks[position[1]][position[0]];
-                if (index !== false) {
-                    this.bricks[index].remove = true;
-                }
-            }
-        })
-    }
-
     async _closeThroughs() {
         // block the throughs
-        const center = Math.round(this._boardSize / 2);
+        const center = this._stateService.getCenter();
         const playerPosition = [center, center];
         this._beforeExits = this._stateService.getBeforeExits();
         let throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
@@ -228,8 +185,8 @@ export class BricksCustomElement {
             if (direction !== false) {
                 const metrics = { direction: direction, position: position }
                 const brick = this._newBrick(this.bricks.length, metrics);
-                this._mapBrick(brick);
                 this.bricks.push(brick);
+                this._mapBrick(brick);
             }
             throughs = await this._mazeWorkerService.findThrough(this._blocks, playerPosition, this._beforeExits);
         }
