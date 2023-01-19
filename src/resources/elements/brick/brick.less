@@ -19,7 +19,12 @@ brick {
         align-items    : center;
         justify-content: center;
         transition     : opacity 300ms ease-out;
-        opacity        : 0;
+
+        .isMobile & {
+            transition: opacity 150ms ease-in-out;
+        }
+
+        opacity : 0;
 
         &:empty {
             opacity: 1;
