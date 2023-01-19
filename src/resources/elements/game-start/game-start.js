@@ -1,15 +1,17 @@
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
+import { StateService } from 'services/state-service';
 import { HelperService } from 'services/helper-service';
 
-@inject(EventAggregator, HelperService)
+@inject(EventAggregator, StateService, HelperService)
 export class GameStart {
     gameStartVisible = true;
     animating = false;
     title = 'Escape';
 
-    constructor(eventAggregator, helperService) {
+    constructor(eventAggregator, stateService, helperService) {
         this._eventAggregator = eventAggregator;
+        this._stateService = stateService;
         this._helperService = helperService;
         this._isMobile = sessionStorage.getItem('isMobile') == 'true';
         this.howToPlay = this._isMobile ? '<b>Swipe</b> to move' : 'Move with arrow keys';
@@ -17,8 +19,11 @@ export class GameStart {
     }
 
     attached() {
-        this._addStartSubscription();
         this._helperService.flashElements('.keysHint');
+        this._gameStartSubscription = this._eventAggregator.subscribe('start', event => {
+            if (this._stateService.getIsPlaying()) return;
+            this.startGame();
+        });
     }
 
     detached() {
@@ -26,21 +31,13 @@ export class GameStart {
         this._caughtSubscribtion?.dispose();
         this._giveUpSubscription?.dispose();
         this._startSubscription?.dispose();
+        this._gameStartSubscription.dispose();
     }
 
     _showEndScreen(title) {
         this.gameStartVisible = true;
         this.title = title;
-        this._addStartSubscription();
         this._helperService.flashElements('.keysHint');
-    }
-
-    _addStartSubscription() {
-        this._startSubscription && this._startSubscription.dispose();
-        this._eventAggregator.subscribeOnce('start', event => {
-            console.log(Math.random());
-            this.startGame();
-        })
     }
 
     _addWinSubscription() {
@@ -74,7 +71,6 @@ export class GameStart {
             this._addWinSubscription();
             this._addCaughtSubscription();
             this.gameStartVisible = false;
-            console.log('gameStart');
             this._eventAggregator.publish('gameStart');
             this.animating = false;
         }, 500);
