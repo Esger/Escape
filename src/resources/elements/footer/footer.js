@@ -11,7 +11,8 @@ export class Footer {
         this._messages = [
             'escape through the <span class="green">exits</span>',
             this._isMobile ? 'Tap here when stuck' : 'Press Escape when stuck',
-            'press r to restart level',
+            'each move costs 1 score',
+            // 'press r to restart level',
             'exiting is rewarded with 💚',
             'push blocking bricks away',
             'five 💚 buys a 💥',
