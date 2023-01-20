@@ -2,11 +2,14 @@ board {
     --boardColor   : #1e1e1e;
     aspect-ratio   : 1;
     position       : relative;
-    display        : block;
+    display        : flex;
+    align-items    : stretch;
+    justify-content: stretch;
+    position       : relative;
     width          : 80vmin;
     height         : 80vmin;
     background     : var(--boardColor);
-    overflow    : hidden;
+    overflow       : hidden;
 
     .isMobile & {
         width : 100vmin;

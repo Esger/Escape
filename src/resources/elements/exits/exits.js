@@ -16,6 +16,12 @@ export class Exits {
         this._blockSize = this._stateService.getBlockSize();
         this._startOffset = 9; // center
         this._clockwise = true;
+        this._angles = [
+            0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90
+        ];
+        this._margins = [
+            0, 1, 1.6, 2.2, 2.8, 3.4, 4, 4.6, 6, 6.4, 6.4, 6, 4.6, 4, 3.4, 2.8, 2.2, 1.6, 1
+        ]
     }
 
     attached() {
@@ -67,6 +73,9 @@ export class Exits {
                 }
             }
         }
+        this.angle = this._angles[this._exitOffset - 1];
+        this.margin = this._margins[this._exitOffset - 1];
+
         // this._beforeExits are just inside the board, in front of the exits.
         this._beforeExits = [
             [[this._exitOffset, 0], [this._exitOffset - 1, 0]], // boven
@@ -109,38 +118,7 @@ export class Exits {
         });
         this._stateService.setExits({ 'exits': this._exits, 'beforeExits': this._beforeExits });
 
-        outwardVectors = removeSomeExits([[0, 0], [1, 0], [0, 1], [0, 0]]);
-        // positions for visual exits one further out on the far sides
-        const exitPositions = this._exits.map((exit, index) => {
-            if (exit) return exit.map(vector => {
-                const newVector = this._helpers.sumVectors(vector, outwardVectors[index]);
-                return newVector;
-            });
-        });
-        const positions = exitPositions.map(exit => {
-            if (exit)
-                return this._helpers.multiplyVector(exit[0], this._blockSize);
-        });
-
-        const boardSize = this._isTouchDevice ? 100 : 80;
-        this.exits = positions.map((position, index) => {
-            if (position) {
-                const positionToUse = index % 2 === 0 ? 0 : 1;
-                const negative = index > 1;
-                const offset = negative ? boardSize - position[positionToUse] : position[positionToUse];
-                return {
-                    'position': position,
-                    'angle': (index * Math.PI / 2) + Math.PI / 2 * offset / boardSize
-                }
-            }
-        });
-
         this._eventAggregator.publish('exitsReady');
-    }
-
-    offset(use, value) {
-        value = use * (value * (9 / 8) - (34 / 8)) || value;
-        return value;
     }
 
     _setArrow() {
