@@ -1,14 +1,41 @@
 exits {
-    position      : relative;
     --exitSize    : 26vmin;
     --gradientSize: 45%;
+    display       : block;
+    position      : absolute;
+    inset         : 0;
+    transform     : rotate(45deg);
+    transition    : all 200ms ease-in-out;
     // --arrowPath:'m40 30h50l-20 20l50 50l-20 20l-50 -50l-20 20v-50';
 }
 
 .exit {
     position        : absolute;
     overflow        : hidden;
-    transform-origin: left top;
+    width           : var(--exitSize);
+    height          : var(--exitSize);
+    background-image: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
+    filter          : blur(.5vmin);
+
+    &.exit-0 {
+        rotate: 0deg;
+    }
+
+    &.exit-1 {
+        rotate: 90deg;
+        right : 0;
+    }
+
+    &.exit-2 {
+        right : 0;
+        bottom: 0;
+        rotate: 180deg;
+    }
+
+    &.exit-3 {
+        bottom: 0;
+        rotate: 270deg;
+    }
 
     &:before,
     &:after {
@@ -47,14 +74,8 @@ exits {
 
     .isMobile & {
         --gradientSize: 60%;
+        margin        : 1.9vmin;
     }
-
-    width           : var(--exitSize);
-    height          : var(--exitSize);
-    background-image: radial-gradient(at top left, var(--exitColor), transparent var(--gradientSize));
-    transition      : transform 200ms ease-in-out;
-    filter          : blur(.5vmin);
-
 }
 
 .arrow {

@@ -11,7 +11,8 @@ export class Footer {
         this._messages = [
             'escape through the <span class="green">exits</span>',
             this._isMobile ? 'Tap here when stuck' : 'Press Escape when stuck',
-            'press r to restart level',
+            'each move costs 1 score',
+            // 'press r to restart level',
             'exiting is rewarded with 💚',
             'push blocking bricks away',
             'five 💚 buys a 💥',
@@ -23,11 +24,10 @@ export class Footer {
 
     attached() {
         this._setNextHint();
-        this._addGameStartSubscription();
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
+        this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => this._setNextHint());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._addGameStartSubscription();
             (this._wins == 0) && this._messages.shift();
             this._showMessage('or hit enter/space');
             this._wins++;
@@ -35,15 +35,8 @@ export class Footer {
     }
 
     _gameEnd() {
-        this._addGameStartSubscription();
         this._messageIndex = 0;
         this._showMessage('or hit enter/space');
-    }
-
-    _addGameStartSubscription() {
-        this._gameStartSubscrption = this._eventAggregator.subscribeOnce('gameStart', _ => {
-            this._setNextHint();
-        });
     }
 
     detached() {

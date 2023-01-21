@@ -1,12 +1,19 @@
 board {
-    --boardColor   : #1e1e1e;
-    aspect-ratio   : 1;
-    position       : relative;
-    display        : block;
-    width          : 80vmin;
-    height         : 80vmin;
-    background     : var(--boardColor);
-    overflow    : hidden;
+    --boardColor    : #1e1e1e;
+    aspect-ratio    : 1;
+    position        : relative;
+    display         : flex;
+    align-items     : stretch;
+    justify-content : stretch;
+    position        : relative;
+    width           : 80vmin;
+    height          : 80vmin;
+    background-color: var(--boardColor);
+    overflow        : hidden;
+
+    &.grid {
+        background-image: repeating-linear-gradient(#0000 0 calc(~'4vmin - 1px'), #fff2 calc(~'4vmin - 1px') 4vmin), repeating-linear-gradient(90deg, #0000 0 calc(~'4vmin - 1px'), #fff2 calc(~'4vmin - 1px') 4vmin);
+    }
 
     .isMobile & {
         width : 100vmin;
