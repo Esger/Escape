@@ -22,9 +22,9 @@ export class StateService {
         this._bricks = [];
         this._blocks = [];
         this._pushers = [];
-        this._startOffset = 9; // center
+        this._startOffset = 9; // center (9)
         this._exitOffset = this._startOffset;
-        this._clockwise = true;
+        this._clockwise = true; // true
         this._exits = [
             {
                 angle: 2,
@@ -174,8 +174,8 @@ export class StateService {
     }
 
     _calcExitOffset() {
-        const max = this._boardSize - 1;
-        const min = 1;
+        const max = this._exits.length - 1;
+        const min = 0;
         if (this._level > 0) {
             if (this._clockwise) {
                 if (this._exitOffset < max) {
