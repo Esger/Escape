@@ -108,7 +108,7 @@ export class StateService {
                 angle: 69,
                 inset: 4,
                 before: [[13, 0], [14, 0], [19, 13], [19, 14], [6, 19], [5, 19], [0, 6], [0, 5]],
-                behind: [[13, -1], [14 - 1], [20, 13], [20, 14], [6, 20], [5, 20], [-1, 6], [-1, 5]]
+                behind: [[13, -1], [14, -1], [20, 13], [20, 14], [6, 20], [5, 20], [-1, 6], [-1, 5]]
             },
             {
                 angle: 74,
@@ -119,28 +119,29 @@ export class StateService {
             {
                 angle: 78.5,
                 inset: 1.5,
-                before: [[15, 0], [16, 0], [19, 15], [19, 16], [7, 19], [3, 19], [0, 4], [0, 3]],
+                before: [[15, 0], [16, 0], [19, 15], [19, 16], [4, 19], [3, 19], [0, 4], [0, 3]],
                 behind: [[15, -1], [16, -1], [20, 15], [20, 16], [7, 20], [3, 20], [-1, 4], [-1, 3]]
             },
             {
                 angle: 82.5,
                 inset: 0,
-                before: [[16, 0], [17, 0], [19, 16], [19, 17], [8, 19], [2, 19], [0, 3], [0, 2]],
+                before: [[16, 0], [17, 0], [19, 16], [19, 17], [3, 19], [2, 19], [0, 3], [0, 2]],
                 behind: [[16, -1], [17, -1], [19, 16], [19, 17], [8, 20], [2, 20], [-1, 3], [-1, 2]]
             },
             {
                 angle: 85,
                 inset: -2,
-                before: [[17, 0], [18, 0], [19, 17], [19, 18], [9, 19], [1, 19], [0, 2], [0, 1]],
+                before: [[17, 0], [18, 0], [19, 17], [19, 18], [2, 19], [1, 19], [0, 2], [0, 1]],
                 behind: [[17, -1], [18, -1], [20, 17], [20, 18], [9, 20], [1, 20], [-1, 2], [-1, 1]]
             },
             {
                 angle: 88,
                 inset: -3,
-                before: [[18, 0], [19, 0], [19, 18], [19, 19], [10, 19], [0, 19], [0, 1], [0, 0]],
+                before: [[18, 0], [19, 0], [19, 18], [19, 19], [1, 19], [0, 19], [0, 1], [0, 0]],
                 behind: [[18, -1], [19, -1], [20, 18], [20, 19], [10, 20], [0, 20], [-1, 1], [-1, 0]]
             }
         ];
+        this._disableSomeExits();
 
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._isPlaying = true;
@@ -151,6 +152,7 @@ export class StateService {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
             this._calcExitOffset();
+            this._disableSomeExits();
             this._isPlaying = false;
             console.info(this._bricksCount, 'bricks');
         });
@@ -171,6 +173,35 @@ export class StateService {
         this._giveUpSubscription.dispose();
         this._caughtSubscription.dispose();
         this._moveSubscription.dispose();
+    }
+
+    _disableSomeExits() {
+        const getMaxExits = level => {
+            switch (true) {
+                case level > 16: return 1;
+                case level > 8: return 2;
+                case level > 4: return 3;
+                default: return 4;
+            }
+        }
+        const randomBooleans = trueElements => {
+            const boolArray = [];
+            let trueCount = 0;
+            while (boolArray.length < trueElements) {
+                boolArray.push(true);
+            }
+            while (boolArray.length < 4) {
+                const randBool = Math.random() >= 0.5;
+                boolArray.push(randBool);
+            }
+            return boolArray.sort(_ => Math.random() - 0.5);
+        }
+        const enabledExitsCount = getMaxExits(this._level);
+        const enabledExitsMap = randomBooleans(enabledExitsCount);
+
+        const exits = this._exits[this._exitOffset];
+        exits.enabledExits = [];
+        enabledExitsMap.forEach(bool => exits.enabledExits.push(bool, bool));
     }
 
     _calcExitOffset() {
@@ -198,6 +229,8 @@ export class StateService {
     _gameEnd() {
         this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._exitOffset = this._startOffset;
+        this._clockwise = true;
         this._isPlaying = false;
     }
 

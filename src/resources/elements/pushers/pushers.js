@@ -18,7 +18,7 @@ export class PushersCustomElement {
 
     attached() {
         this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
-            this.exits = this._stateService.getBehindExits();
+            this.exits = this._stateService.getExits();
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
@@ -76,7 +76,9 @@ export class PushersCustomElement {
         let exitNumber = this._helpers.randomNumberWithin(8); // 0..7
         const limit = 25;
         let count = 0;
-        while (this._exitNumbersTaken.includes(exitNumber) && (count < limit)) {
+        while (this._exitNumbersTaken.includes(exitNumber) &&
+            (this.exits.enabledExits[exitNumber]) &&
+            (count < limit)) {
             exitNumber = this._helpers.randomNumberWithin(8); // 0..7
             count++;
         }
@@ -88,7 +90,7 @@ export class PushersCustomElement {
         // 2 -> 3
         // 3 -> 0
         const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
-        const position = this.exits[exitNumber];
+        const position = this.exits.behind[exitNumber];
         if (position) {
             const pusher = this._newPusher('faassen', position, direction);
             this.pushers.push(pusher);

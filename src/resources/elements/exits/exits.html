@@ -6,6 +6,7 @@
                 left:var(--inset);">
     <require from="./exits.css"></require>
     <div repeat.for="i of 4"
+         show.bind="exits.enabledExits[i * 2] === true"
          class="exit exit-${$index}">
         <div class="arrow"></div>
     </div>
