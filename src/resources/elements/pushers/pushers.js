@@ -73,11 +73,11 @@ export class PushersCustomElement {
     }
 
     _addFaassen() {
-        let exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+        let exitNumber = this._helpers.randomNumberWithin(8); // 0..7
         const limit = 25;
         let count = 0;
         while (this._exitNumbersTaken.includes(exitNumber) && (count < limit)) {
-            exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+            exitNumber = this._helpers.randomNumberWithin(8); // 0..7
             count++;
         }
         if (count < limit) {
@@ -87,7 +87,7 @@ export class PushersCustomElement {
         // 1 -> 2
         // 2 -> 3
         // 3 -> 0
-        const direction = [1, 2, 3, 0][exitNumber];
+        const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
         const position = this.exits[exitNumber];
         if (position) {
             const pusher = this._newPusher('faassen', position[0], direction);

@@ -96,11 +96,7 @@ export class PusherCustomElement {
     }
 
     _throughExit(position) {
-        const exited = this.exits?.some((exit) => {
-            if (exit) {
-                return exit.some((e) => e[0] == position[0] && e[1] == position[1])
-            }
-        });
+        const exited = this.exits?.some((exit) => this._helperService.areEqual([exit, position]));
         return exited;
     }
 
