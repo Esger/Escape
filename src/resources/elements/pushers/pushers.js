@@ -18,14 +18,15 @@ export class PushersCustomElement {
 
     attached() {
         this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
-            this.exits = this._stateService.getExits();
+            this.exits = this._stateService.getBehindExits();
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGameEndSubscription();
             this._exitNumbersTaken = [];
             this.isVisible = true;
         });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this.isVisible = false);
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this.isVisible = false);
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.isVisible = false;
         });
@@ -38,11 +39,6 @@ export class PushersCustomElement {
         this._giveUpSubscription?.dispose();
         this._caughtSubscription?.dispose();
         this._retrySubscription.dispose();
-    }
-
-    _addGameEndSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this.isVisible = false);
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this.isVisible = false);
     }
 
     _initialize() {

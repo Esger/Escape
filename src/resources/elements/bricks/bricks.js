@@ -20,12 +20,10 @@ export class BricksCustomElement {
         this.showBricks = false;
         this.blockSize = this._stateService.getBlockSize();
         this._boardSize = this._stateService.getBoardSize();
-        this._winSubscristion = this._eventAggregator.subscribe('win', _ => {
-            setTimeout(_ => this._cleanMap(), 500);
-            this._addExitsReadySubscription();
-        });
-        this._addExitsReadySubscription();
+        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => this._setBricks());
+        this._winSubscristion = this._eventAggregator.subscribe('win', _ => this._gameEnd());
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
         this._removeSubscription = this._eventAggregator.subscribe('removeBricks', indices => {
             const bricksToRemove = this.bricks.filter(brick => indices.includes(brick.index));
             bricksToRemove.forEach(brick => {
@@ -38,34 +36,17 @@ export class BricksCustomElement {
 
     detached() {
         this._winSubscristion.dispose();
-        this._giveUpSubscription?.dispose();
+        this._giveUpSubscription.dispose();
         this._caughtSubscription.dispose();
         this._beforeExitsReadySubscription.dispose();
         this._removeSubscription.dispose();
         this._gameStartSubscription.dispose();
     }
 
-    _addExitsReadySubscription() {
-        this._beforeExitsReadySubscription = this._eventAggregator.subscribeOnce('exitsReady', _ => {
-            this._initialize();
-        });
-    }
-
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
-    }
-
     _gameEnd() {
-        this._giveUpSubscription?.dispose();
         setTimeout(_ => {
-            this._addExitsReadySubscription();
-        }, 500);
-    }
-
-    _initialize() {
-        this._setBricks();
-        this._addGiveUpSubscription();
-        this.showBricks = true;
+            this.showBricks = false;
+        }, 600);
     }
 
     _newBrick(i, metrics) {
@@ -133,6 +114,7 @@ export class BricksCustomElement {
         this._fillRandom();
         this._closeThroughs().then(_ => {
             this._mapBricks();
+            this.showBricks = true;
             this._eventAggregator.publish('bricksReady');
         });
     }

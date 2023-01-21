@@ -24,13 +24,22 @@ export class GameStart {
             if (this._stateService.getIsPlaying()) return;
             this.startGame();
         });
+        this._winSubscribtion = this._eventAggregator.subscribe('win', _ => {
+            this._showEndScreen('Escaped');
+        });
+        this._caughtSubscribtion = this._eventAggregator.subscribe('caught', _ => {
+            this._showEndScreen('Caught');
+        });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => {
+            this._showEndScreen('Stuck');
+        });
     }
 
     detached() {
-        this._winSubscribtion?.dispose();
-        this._caughtSubscribtion?.dispose();
-        this._giveUpSubscription?.dispose();
-        this._startSubscription?.dispose();
+        this._winSubscribtion.dispose();
+        this._caughtSubscribtion.dispose();
+        this._giveUpSubscription.dispose();
+        this._startSubscription.dispose();
         this._gameStartSubscription.dispose();
     }
 
@@ -40,36 +49,9 @@ export class GameStart {
         this._helperService.flashElements('.keysHint');
     }
 
-    _addWinSubscription() {
-        this._winSubscribtion = this._eventAggregator.subscribeOnce('win', _ => {
-            this._caughtSubscribtion.dispose();
-            this._giveUpSubscription.dispose();
-            this._showEndScreen('Escaped');
-        });
-    }
-
-    _addCaughtSubscription() {
-        this._caughtSubscribtion = this._eventAggregator.subscribeOnce('caught', _ => {
-            this._winSubscribtion.dispose();
-            this._giveUpSubscription.dispose();
-            this._showEndScreen('Caught');
-        });
-    }
-
-    _addGiveUpSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => {
-            this._winSubscribtion.dispose();
-            this._caughtSubscribtion.dispose();
-            this._showEndScreen('Stuck');
-        });
-    }
-
     startGame() {
         this.animating = true;
         setTimeout(_ => {
-            this._addGiveUpSubscription();
-            this._addWinSubscription();
-            this._addCaughtSubscription();
             this.gameStartVisible = false;
             this._eventAggregator.publish('gameStart');
             this.animating = false;

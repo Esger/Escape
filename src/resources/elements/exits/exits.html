@@ -1,4 +1,9 @@
-<template css="transform:rotate(${angle}deg);margin:${margin}vmin">
+<template css="transform:rotate(${exits.angle}deg); 
+                --inset:${exits.inset}vmin;
+                top:var(--inset);
+                right:var(--inset);
+                bottom:var(--inset);
+                left:var(--inset);">
     <require from="./exits.css"></require>
     <div repeat.for="i of 4"
          class="exit exit-${$index}">
