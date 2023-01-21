@@ -22,13 +22,137 @@ export class StateService {
         this._bricks = [];
         this._blocks = [];
         this._pushers = [];
+        this._startOffset = 9; // center (9)
+        this._exitOffset = this._startOffset;
+        this._clockwise = true; // true
+        this._exits = [
+            {
+                angle: 2,
+                inset: -3,
+                before: [[0, 0], [1, 0], [19, 0], [19, 1], [19, 19], [18, 19], [0, 19], [0, 18]],
+                behind: [[0, -1], [1, -1], [20, 0], [20, 1], [19, 20], [18, 20], [-1, 19], [-1, 18]]
+            },
+            {
+                angle: 5,
+                inset: -2,
+                before: [[1, 0], [2, 0], [19, 1], [19, 2], [18, 19], [17, 19], [0, 18], [0, 17]],
+                behind: [[1, -1], [2, -1], [20, 1], [20, 2], [18, 20], [17, 20], [-1, 18], [-1, 17]]
+            },
+            {
+                angle: 7.5,
+                inset: 0,
+                before: [[2, 0], [3, 0], [19, 2], [19, 3], [17, 19], [16, 19], [0, 17], [0, 16]],
+                behind: [[2, -1], [3, -1], [19, 1], [19, 2], [17, 20], [16, 20], [-1, 17], [-1, 16]]
+            },
+            {
+                angle: 11.5,
+                inset: 1.5,
+                before: [[3, 0], [4, 0], [19, 3], [19, 4], [16, 19], [15, 19], [0, 16], [0, 15]],
+                behind: [[3, -1], [4, -1], [20, 3], [20, 4], [16, 20], [15, 20], [-1, 16], [-1, 15]]
+            },
+            {
+                angle: 16,
+                inset: 3,
+                before: [[4, 0], [5, 0], [19, 4], [19, 5], [15, 19], [14, 19], [0, 15], [0, 14]],
+                behind: [[4, -1], [5, -1], [20, 4], [20, 5], [15, 20], [14, 20], [-1, 15], [-1, 14]]
+            },
+            {
+                angle: 21,
+                inset: 4,
+                before: [[5, 0], [6, 0], [19, 5], [19, 6], [14, 19], [13, 19], [0, 14], [0, 13]],
+                behind: [[5, -1], [6, -1], [20, 5], [20, 6], [14, 20], [13, 20], [-1, 14], [-1, 13]]
+            },
+            {
+                angle: 26.5,
+                inset: 5,
+                before: [[6, 0], [7, 0], [19, 6], [19, 7], [13, 19], [12, 19], [0, 13], [0, 12]],
+                behind: [[6, -1], [7, -1], [20, 6], [20, 7], [13, 20], [12, 20], [-1, 13], [-1, 12]]
+            },
+            {
+                angle: 32.5,
+                inset: 6,
+                before: [[7, 0], [8, 0], [19, 7], [19, 8], [12, 19], [11, 19], [0, 12], [0, 11]],
+                behind: [[7, -1], [8, -1], [20, 7], [20, 8], [12, 20], [11, 20], [-1, 12], [-1, 11]]
+            },
+            {
+                angle: 38.5,
+                inset: 6.5,
+                before: [[8, 0], [9, 0], [19, 8], [19, 9], [11, 19], [10, 19], [0, 11], [0, 10]],
+                behind: [[8, -1], [9, -1], [20, 8], [20, 9], [11, 20], [10, 20], [-1, 11], [-1, 10]]
+            },
+            {
+                angle: 45,
+                inset: 6.5,
+                before: [[9, 0], [10, 0], [19, 9], [19, 10], [10, 19], [9, 19], [0, 10], [0, 9]],
+                behind: [[9, -1], [10, -1], [20, 9], [20, 10], [10, 20], [9, 20], [-1, 10], [-1, 9]]
+            },
+            {
+                angle: 51.5,
+                inset: 6.5,
+                before: [[10, 0], [11, 0], [19, 10], [19, 11], [9, 19], [8, 19], [0, 9], [0, 8]],
+                behind: [[10, -1], [11, -1], [20, 10], [20, 11], [9, 20], [8, 20], [-1, 9], [-1, 8]]
+            },
+            {
+                angle: 57.5,
+                inset: 6,
+                before: [[11, 0], [12, 0], [19, 11], [19, 12], [8, 19], [7, 19], [0, 8], [0, 7]],
+                behind: [[11, -1], [12, -1], [20, 11], [20, 12], [8, 20], [7, 20], [-1, 8], [-1, 7]]
+            },
+            {
+                angle: 63.5,
+                inset: 5,
+                before: [[12, 0], [13, 0], [19, 12], [19, 13], [7, 19], [6, 19], [0, 7], [0, 6]],
+                behind: [[12, -1], [13, -1], [20, 12], [20, 13], [7, 20], [6, 20], [-1, 7], [-1, 6]]
+            },
+            {
+                angle: 69,
+                inset: 4,
+                before: [[13, 0], [14, 0], [19, 13], [19, 14], [6, 19], [5, 19], [0, 6], [0, 5]],
+                behind: [[13, -1], [14, -1], [20, 13], [20, 14], [6, 20], [5, 20], [-1, 6], [-1, 5]]
+            },
+            {
+                angle: 74,
+                inset: 3,
+                before: [[14, 0], [15, 0], [19, 14], [19, 15], [5, 19], [4, 19], [0, 5], [0, 4]],
+                behind: [[14, -1], [15, -1], [20, 14], [20, 15], [5, 20], [4, 20], [-1, 5], [-1, 4]]
+            },
+            {
+                angle: 78.5,
+                inset: 1.5,
+                before: [[15, 0], [16, 0], [19, 15], [19, 16], [4, 19], [3, 19], [0, 4], [0, 3]],
+                behind: [[15, -1], [16, -1], [20, 15], [20, 16], [7, 20], [3, 20], [-1, 4], [-1, 3]]
+            },
+            {
+                angle: 82.5,
+                inset: 0,
+                before: [[16, 0], [17, 0], [19, 16], [19, 17], [3, 19], [2, 19], [0, 3], [0, 2]],
+                behind: [[16, -1], [17, -1], [19, 16], [19, 17], [8, 20], [2, 20], [-1, 3], [-1, 2]]
+            },
+            {
+                angle: 85,
+                inset: -2,
+                before: [[17, 0], [18, 0], [19, 17], [19, 18], [2, 19], [1, 19], [0, 2], [0, 1]],
+                behind: [[17, -1], [18, -1], [20, 17], [20, 18], [9, 20], [1, 20], [-1, 2], [-1, 1]]
+            },
+            {
+                angle: 88,
+                inset: -3,
+                before: [[18, 0], [19, 0], [19, 18], [19, 19], [1, 19], [0, 19], [0, 1], [0, 0]],
+                behind: [[18, -1], [19, -1], [20, 18], [20, 19], [10, 20], [0, 20], [-1, 1], [-1, 0]]
+            }
+        ];
+        this._disableSomeExits();
+
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGameEndSubscription();
             this._isPlaying = true;
         });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this._bricksCount = Math.min(this._bricksCount + this._bricksIncrement, this._maxBricksCount);
             this._level++;
+            this._calcExitOffset();
+            this._disableSomeExits();
             this._isPlaying = false;
             console.info(this._bricksCount, 'bricks');
         });
@@ -46,19 +170,67 @@ export class StateService {
     detached() {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
-        this._giveUpSubscription?.dispose();
-        this._caughtSubscription?.dispose();
+        this._giveUpSubscription.dispose();
+        this._caughtSubscription.dispose();
         this._moveSubscription.dispose();
     }
 
-    _addGameEndSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
+    _disableSomeExits() {
+        const getMaxExits = level => {
+            switch (true) {
+                case level > 16: return 1;
+                case level > 8: return 2;
+                case level > 4: return 3;
+                default: return 4;
+            }
+        }
+        const randomBooleans = trueElements => {
+            const boolArray = [];
+            let trueCount = 0;
+            while (boolArray.length < trueElements) {
+                boolArray.push(true);
+            }
+            while (boolArray.length < 4) {
+                const randBool = Math.random() >= 0.5;
+                boolArray.push(randBool);
+            }
+            return boolArray.sort(_ => Math.random() - 0.5);
+        }
+        const enabledExitsCount = getMaxExits(this._level);
+        const enabledExitsMap = randomBooleans(enabledExitsCount);
+
+        const exits = this._exits[this._exitOffset];
+        exits.enabledExits = [];
+        enabledExitsMap.forEach(bool => exits.enabledExits.push(bool, bool));
+    }
+
+    _calcExitOffset() {
+        const max = this._exits.length - 1;
+        const min = 0;
+        if (this._level > 0) {
+            if (this._clockwise) {
+                if (this._exitOffset < max) {
+                    this._exitOffset++;
+                } else {
+                    this._clockwise = !this._clockwise;
+                    this._exitOffset--;
+                }
+            } else {
+                if (this._exitOffset > min) {
+                    this._exitOffset--;
+                } else {
+                    this._clockwise = !this._clockwise;
+                    this._exitOffset++;
+                }
+            }
+        }
     }
 
     _gameEnd() {
         this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._exitOffset = this._startOffset;
+        this._clockwise = true;
         this._isPlaying = false;
     }
 
@@ -70,17 +242,15 @@ export class StateService {
         return this._center;
     }
 
-    setExits(data) {
-        this._exits = data.exits;
-        this._beforeExits = data.beforeExits;
-    }
-
     getExits() {
-        return this._exits;
+        return this._exits[this._exitOffset];
     }
 
+    getBehindExits() {
+        return this._exits[this._exitOffset].behind;
+    }
     getBeforeExits() {
-        return this._beforeExits;
+        return this._exits[this._exitOffset].before;
     }
 
     getBricksCount() {
@@ -195,7 +365,8 @@ export class StateService {
     }
 
     isBeforeExit(position) {
-        const isBeforeExit = this._beforeExits?.flat().some(coordinate => this._helperService.areEqual([coordinate, position]));
+        const beforeExits = this._exits[this._exitOffset].before;
+        const isBeforeExit = beforeExits?.some(coordinate => this._helperService.areEqual([coordinate, position]));
         return isBeforeExit;
     }
 

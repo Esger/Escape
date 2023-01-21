@@ -22,10 +22,11 @@ export class PushersCustomElement {
             this._initialize();
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGameEndSubscription();
             this._exitNumbersTaken = [];
             this.isVisible = true;
         });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this.isVisible = false);
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this.isVisible = false);
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.isVisible = false;
         });
@@ -38,11 +39,6 @@ export class PushersCustomElement {
         this._giveUpSubscription?.dispose();
         this._caughtSubscription?.dispose();
         this._retrySubscription.dispose();
-    }
-
-    _addGameEndSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this.isVisible = false);
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this.isVisible = false);
     }
 
     _initialize() {
@@ -77,11 +73,13 @@ export class PushersCustomElement {
     }
 
     _addFaassen() {
-        let exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+        let exitNumber = this._helpers.randomNumberWithin(8); // 0..7
         const limit = 25;
         let count = 0;
-        while (this._exitNumbersTaken.includes(exitNumber) && (count < limit)) {
-            exitNumber = this._helpers.randomNumberWithin(4); // 0..3
+        while (this._exitNumbersTaken.includes(exitNumber) &&
+            (this.exits.enabledExits[exitNumber]) &&
+            (count < limit)) {
+            exitNumber = this._helpers.randomNumberWithin(8); // 0..7
             count++;
         }
         if (count < limit) {
@@ -91,10 +89,10 @@ export class PushersCustomElement {
         // 1 -> 2
         // 2 -> 3
         // 3 -> 0
-        const direction = [1, 2, 3, 0][exitNumber];
-        const position = this.exits[exitNumber];
+        const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
+        const position = this.exits.behind[exitNumber];
         if (position) {
-            const pusher = this._newPusher('faassen', position[0], direction);
+            const pusher = this._newPusher('faassen', position, direction);
             this.pushers.push(pusher);
         } else {
             // removed exit

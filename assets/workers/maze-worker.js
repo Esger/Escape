@@ -38,10 +38,10 @@ const copyMazeWithMarks = function () {
     return cells.map(row => row.map(cell => false));
 };
 
-const findPositionHalfway = function (targetPositionSets) {
-    const isTargetPosition = (xy) => xy && targetPositionSets.some(positionSet => {
-        if (positionSet) {
-            return positionSet.some(position => position.every((coordinate, i) => coordinate == xy[i]));
+const findPositionHalfway = function (targetPosition) {
+    const isTargetPosition = (xy) => xy && targetPosition.some(position => {
+        if (position) {
+            return position.every((coordinate, i) => coordinate == xy[i]);
         }
     });
     const queue = [];

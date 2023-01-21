@@ -30,10 +30,9 @@ export class PusherCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._addGameEndSubscription();
         });
-        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this._keyMoveSubscription?.dispose();
-            this.lastKey = 'down';
-        });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => this._gameEnd());
         this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => this._dispatchMove(key));
         this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
         this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
@@ -57,12 +56,9 @@ export class PusherCustomElement {
     }
 
     _addGameEndSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
     }
 
     _gameEnd() {
-        this._keyMoveSubscription?.dispose();
         this.lastKey = 'down';
     }
 
@@ -100,11 +96,7 @@ export class PusherCustomElement {
     }
 
     _throughExit(position) {
-        const exited = this.exits?.some((exit) => {
-            if (exit) {
-                return exit.some((e) => e[0] == position[0] && e[1] == position[1])
-            }
-        });
+        const exited = this.exits.behind?.some((exit) => this._helperService.areEqual([exit, position]));
         return exited;
     }
 

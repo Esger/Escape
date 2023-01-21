@@ -1,10 +1,13 @@
-<template>
+<template css="transform:rotate(${exits.angle}deg); 
+                --inset:${exits.inset}vmin;
+                top:var(--inset);
+                right:var(--inset);
+                bottom:var(--inset);
+                left:var(--inset);">
     <require from="./exits.css"></require>
-    <div repeat.for="exit of exits"
-         show.bind="exit"
-         class="exit exit-${$index}"
-         data-position="${exit.position}"
-         css="transform:translate3d(${offset($even,exit.position[0])}vmin, ${offset($odd,exit.position[1])}vmin, 0) rotate(${exit.angle + 'rad'})">
+    <div repeat.for="i of 4"
+         show.bind="exits.enabledExits[i * 2] === true"
+         class="exit exit-${$index}">
         <div class="arrow"></div>
     </div>
 </template>

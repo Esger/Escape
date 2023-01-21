@@ -32,7 +32,6 @@ export class Score {
                 this._publishBolts();
                 this._resetScore = false;
             }
-            this._addGameEndSubscription();
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.score += this._winScore + this.level * this._levelScore;
@@ -41,6 +40,8 @@ export class Score {
             this.lives++;
             this._publishBolts();
         });
+        this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
+        this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
             this.score -= (pusher.type == 'player') ? this._moveScore : 0;
         });
@@ -52,13 +53,12 @@ export class Score {
             this.score += this._boltScore;
             this._publishBolts();
         });
-        this._addGameEndSubscription();
     }
 
     detached() {
         this._gameStartSubscrption.dispose();
-        this._giveUpSubscription?.dispose();
-        this._caughtSubscription?.dispose();
+        this._giveUpSubscription.dispose();
+        this._caughtSubscription.dispose();
         this._winSubscription.dispose();
         this._moveSubscription.dispose();
         this._boltThrownSubscription.dispose();
@@ -69,11 +69,6 @@ export class Score {
         this._caughtSubscription?.dispose();
         this._resetScore = true;
         this._saveScores();
-    }
-
-    _addGameEndSubscription() {
-        this._giveUpSubscription = this._eventAggregator.subscribeOnce('giveUp', _ => this._gameEnd());
-        this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._gameEnd());
     }
 
     resetHigh() {
