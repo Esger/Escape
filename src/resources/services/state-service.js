@@ -176,7 +176,7 @@ export class StateService {
     _calcExitOffset() {
         const max = this._boardSize - 1;
         const min = 1;
-        if (level > 0) {
+        if (this._level > 0) {
             if (this._clockwise) {
                 if (this._exitOffset < max) {
                     this._exitOffset++;
