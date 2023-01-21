@@ -90,7 +90,7 @@ export class PushersCustomElement {
         const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
         const position = this.exits[exitNumber];
         if (position) {
-            const pusher = this._newPusher('faassen', position[0], direction);
+            const pusher = this._newPusher('faassen', position, direction);
             this.pushers.push(pusher);
         } else {
             // removed exit
