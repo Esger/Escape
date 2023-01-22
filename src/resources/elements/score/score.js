@@ -12,12 +12,15 @@ export class Score {
     constructor(eventAggregator, stateService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this.score = 0;
+        this.level = 0;
         this._boltsUsed = 0;
         this._winScore = 25;
         this._levelScore = 5;
         this._boltScore = -50;
         this._moveScore = 1;
-        this._goldScore = 25;
+        this._goldScore = 50;
+        this._allGoldScore = 250;
         this._resetScore = true;
         this._getHighScore();
     }
@@ -48,6 +51,9 @@ export class Score {
         this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => {
             this.score += (powerUp.type == 'gold') ? this._goldScore : 0;
         });
+        this._allGoldConsumedSubscription = this._eventAggregator.subscribe('allGoldConsumed', _ => {
+            this.score += this._allGoldScore;
+        });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
@@ -62,11 +68,11 @@ export class Score {
         this._winSubscription.dispose();
         this._moveSubscription.dispose();
         this._boltThrownSubscription.dispose();
+        this._consumeSubscription.dispose();
+        this._allGoldConsumedSubscription.dispose();
     }
 
     _gameEnd() {
-        this._giveUpSubscription?.dispose();
-        this._caughtSubscription?.dispose();
         this._resetScore = true;
         this._saveScores();
     }
