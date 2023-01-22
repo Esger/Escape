@@ -375,27 +375,27 @@ export class StateService {
         return isInCenter;
     }
 
-    isOnBrick(position) {
+    _isOnBrick(position) {
         if (!this._blocks.length) return false;
         return this._blocks[position[1]][position[0]] !== false;
     }
 
-    isOnPowerUp(position) {
+    _isOnPowerUp(position) {
         if (!this._powerUps.length) return false;
         return this._powerUps.some(powerup => this._helperService.areEqual([powerup.position, position]));
     }
 
     isFreeForPowerUp(position) {
         if (this.isInCenterArea(position)) return false;
-        if (this.isOnPowerUp(position)) return false;
-        return !this.isOnBrick(position);
+        if (this._isOnPowerUp(position)) return false;
+        return !this._isOnBrick(position);
     }
 
     isFree(position, ignorePusher = true) {
         if (!this.withinBounds(position)) return false;
         if (!this._blocks.length) return false;
 
-        const brickAtPosition = this.isOnBrick(position);
+        const brickAtPosition = this._isOnBrick(position);
         if (brickAtPosition)
             return 'brick';
 
