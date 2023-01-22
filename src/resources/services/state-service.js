@@ -380,8 +380,14 @@ export class StateService {
         return this._blocks[position[1]][position[0]] !== false;
     }
 
+    isOnPowerUp(position) {
+        if (!this._powerUps.length) return false;
+        return this._powerUps.some(powerup => this._helperService.areEqual([powerup.position, position]));
+    }
+
     isFreeForPowerUp(position) {
         if (this.isInCenterArea(position)) return false;
+        if (this.isOnPowerUp(position)) return false;
         return !this.isOnBrick(position);
     }
 
