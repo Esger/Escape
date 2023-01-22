@@ -50,7 +50,7 @@ export class PowerUpsCustomElement {
                 this._helperService.randomNumberWithin(this._boardSize),
                 this._helperService.randomNumberWithin(this._boardSize)
             ];
-            if (this._stateService.isFreeForPowerUp(position) === true) {
+            if (this._stateService.isFreeForPowerUp(position)) {
                 powerUp.position = position;
                 this.powerUps.push(powerUp);
                 break;

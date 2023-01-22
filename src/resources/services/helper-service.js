@@ -5,7 +5,9 @@ export class HelperService {
     }
 
     areEqual(vectors) { // array of 2 positions [x,y]
-        const areEqual = JSON.stringify(vectors[0]) == JSON.stringify(vectors[1]);
+        const v0 = JSON.stringify(vectors[0]);
+        const v1 = JSON.stringify(vectors[1]);
+        const areEqual = v0 === v1;
         return areEqual;
     }
 
