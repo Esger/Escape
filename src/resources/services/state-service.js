@@ -20,7 +20,7 @@ export class StateService {
         this._center = Math.round(this._boardSize / 2);
         this._blockSize = Math.round(this._realBoardSize / this._boardSize);
         this._bricks = [];
-        this._blocks = [];
+        this._map = [];
         this._pushers = [];
         this._startOffset = 9; // center (9)
         this._exitOffset = this._startOffset;
@@ -249,6 +249,7 @@ export class StateService {
     getBehindExits() {
         return this._exits[this._exitOffset].behind;
     }
+
     getBeforeExits() {
         return this._exits[this._exitOffset].before;
     }
@@ -339,14 +340,14 @@ export class StateService {
 
     findBrickAt(position) {
         if (!this.withinBounds(position)) return false;
-        const brickIndex = this._blocks[position[1]][position[0]];
+        const brickIndex = this._map[position[1]][position[0]];
         if (brickIndex !== false) {
             return this._bricks[brickIndex];
         }
     }
 
     setMap(blocks) {
-        this._blocks = blocks;
+        this._map = blocks;
     }
 
     mapBrick(brick, occupied) {
@@ -354,7 +355,7 @@ export class StateService {
             const position = this._helperService.sumVectors(brick.position, block);
             if (this.withinBounds(position)) {
                 const value = occupied ? brick.index : false;
-                this._blocks[position[1]][position[0]] = value;
+                this._map[position[1]][position[0]] = value;
             };
         });
     }
@@ -376,8 +377,8 @@ export class StateService {
     }
 
     _isOnBrick(position) {
-        if (!this._blocks.length) return false;
-        return this._blocks[position[1]][position[0]] !== false;
+        if (!this._map.length) return false;
+        return this._map[position[1]][position[0]] !== false;
     }
 
     _isOnPowerUp(position) {
@@ -393,7 +394,7 @@ export class StateService {
 
     isFree(position, ignorePusher = true) {
         if (!this.withinBounds(position)) return false;
-        if (!this._blocks.length) return false;
+        if (!this._map.length) return false;
 
         const brickAtPosition = this._isOnBrick(position);
         if (brickAtPosition)

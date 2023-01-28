@@ -27,9 +27,7 @@ export class PushersCustomElement {
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this.isVisible = false);
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this.isVisible = false);
-        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this.isVisible = false;
-        });
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => this.isVisible = false);
     }
 
     detached() {

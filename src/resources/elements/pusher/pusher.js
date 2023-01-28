@@ -36,12 +36,11 @@ export class PusherCustomElement {
         this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => this._dispatchMove(key));
         this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
         this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
-            if (otherPusher.type !== this.pusher.type) {
+            if (otherPusher.type == this.pusher.type) return;
+
                 const samePosition = this._helperService.areEqual([otherPusher.position, this.pusher.position]);
-                if (samePosition) {
+            if (!samePosition) return;
                     setTimeout(_ => this._eventAggregator.publish('caught'), 250);
-                }
-            }
         });
     }
 
