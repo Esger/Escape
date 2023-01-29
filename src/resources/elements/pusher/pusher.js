@@ -10,7 +10,6 @@ export class PusherCustomElement {
 
     step = '';
     gender = '';
-    bolts = 0;
     positionStyle = '';
 
     constructor(eventAggregator, element, stateService, helperService) {
@@ -27,34 +26,21 @@ export class PusherCustomElement {
         this._element.classList.add(this.pusher.type);
         this._setPositionStyle();
         this._helperService.flashElements('.player');
-        this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
-            this._addGameEndSubscription();
-        });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._gameEnd());
         this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => this._dispatchMove(key));
         this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
-        this._moveOtherPusherSubscription = this._eventAggregator.subscribe('move', otherPusher => {
-            if (otherPusher.type == this.pusher.type) return;
-
-                const samePosition = this._helperService.areEqual([otherPusher.position, this.pusher.position]);
-            if (!samePosition) return;
-                    setTimeout(_ => this._eventAggregator.publish('caught'), 250);
-        });
+        this._dieSubscription = this._eventAggregator.subscribe('die', index => this._fallDown(index));
     }
 
     detached() {
-        this._gameStartSubscription.dispose();
         this._keyMoveSubscription.dispose();
         this._swipeMoveSubscription.dispose();
-        this._moveOtherPusherSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription?.dispose();
         this._caughtSubscription?.dispose();
-    }
-
-    _addGameEndSubscription() {
+        this._dieSubscription.dispose();
     }
 
     _gameEnd() {
@@ -100,25 +86,18 @@ export class PusherCustomElement {
     }
 
     _doMove(newPosition) {
+        this.pusher.previousPosition = this.pusher.position;
         this.pusher.position = newPosition;
         this._setPositionStyle();
         this._eventAggregator.publish('move', this.pusher);
     }
 
-    _addTransitionendListenter() {
-        this._element.addEventListener('transitionend.move', this._outsideResolve, { 'once': true });
+    _fallDown(index) {
+        if (index !== this.pusher.index) return;
+        this._element.classList.add('pusher--fallDown');
     }
 
     _moveIfPossible(direction) {
-        this._addTransitionendListenter();
-        const afterMove = new Promise((resolve, reject) => {
-            this._outsideResolve = resolve;
-        });
-        const moveFaassen = _ => {
-            afterMove.then(_ => {
-                this._isFaassen && this._moveIfPossible(this.pusher.direction || direction);
-            });
-        }
         const vector = this._helperService.direction2vector(direction);
         const newPosition = this._helperService.sumVectors(this.pusher.position, vector);
 
@@ -129,10 +108,22 @@ export class PusherCustomElement {
             return;
         }
 
+        let canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
+        const faassen = !this._isFaassen && this._stateService.isOnFaassen();
+        if (faassen) {
+            if (canThrowBolts) {
+                this._eventAggregator.publish('die', faassen.index);
+                setTimeout(_ => {
+                    this._eventAggregator.publish('kill', faassen.index)
+                }, 500);
+            } else {
+                setTimeout(_ => this._eventAggregator.publish('caught'), 250);
+            }
+        }
+
         const fieldContent = this._stateService.isFree(newPosition);
         if (fieldContent === true) {
             this._doMove(newPosition);
-            moveFaassen();
             return;
         }
 
@@ -142,14 +133,11 @@ export class PusherCustomElement {
                 this._eventAggregator.publish('consume', fieldContent);
             }
             this._doMove(newPosition);
-            moveFaassen();
             return;
         }
 
-        const canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
         if (this._stateService.moveBrick(newPosition, vector, canThrowBolts)) {
             this._doMove(newPosition);
-            moveFaassen();
             return;
         }
         this.pusher.direction = undefined;

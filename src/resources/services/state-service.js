@@ -120,19 +120,19 @@ export class StateService {
                 angle: 78.5,
                 inset: 1.5,
                 before: [[15, 0], [16, 0], [19, 15], [19, 16], [4, 19], [3, 19], [0, 4], [0, 3]],
-                behind: [[15, -1], [16, -1], [20, 15], [20, 16], [7, 20], [3, 20], [-1, 4], [-1, 3]]
+                behind: [[15, -1], [16, -1], [20, 15], [20, 16], [4, 20], [3, 20], [-1, 4], [-1, 3]]
             },
             {
                 angle: 82.5,
                 inset: 0,
                 before: [[16, 0], [17, 0], [19, 16], [19, 17], [3, 19], [2, 19], [0, 3], [0, 2]],
-                behind: [[16, -1], [17, -1], [19, 16], [19, 17], [8, 20], [2, 20], [-1, 3], [-1, 2]]
+                behind: [[16, -1], [17, -1], [19, 16], [19, 17], [3, 20], [2, 20], [-1, 3], [-1, 2]]
             },
             {
                 angle: 85,
                 inset: -2,
                 before: [[17, 0], [18, 0], [19, 17], [19, 18], [2, 19], [1, 19], [0, 2], [0, 1]],
-                behind: [[17, -1], [18, -1], [20, 17], [20, 18], [9, 20], [1, 20], [-1, 2], [-1, 1]]
+                behind: [[17, -1], [18, -1], [20, 17], [20, 18], [2, 20], [1, 20], [-1, 2], [-1, 1]]
             },
             {
                 angle: 88,
@@ -280,6 +280,7 @@ export class StateService {
 
     setPushers(pushers) {
         this._pushers = pushers;
+        this._player = this._pushers.find(pusher => pusher.type === 'player')
     }
 
     setBricks(bricks) {
@@ -374,6 +375,12 @@ export class StateService {
     isInCenterArea(position) {
         const isInCenter = this._centerArea?.some(coordinate => this._helperService.areEqual([coordinate, position]));
         return isInCenter;
+    }
+
+    isOnFaassen() {
+        this._player.position;
+        const faassen = this._pushers.find(pusher => pusher.type === 'faassen' && this._helperService.areEqual([pusher.position, this._player.position]) || this._helperService.areEqual([pusher.previousPosition, this._player.position]));
+        return faassen;
     }
 
     _isOnBrick(position) {
