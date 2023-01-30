@@ -43,13 +43,13 @@ export class PushersCustomElement {
 
     _initialize() {
         this.pushers = [];
-        this._addPlayer();
         const level = this._stateService.getLevel();
         let faassenCount = level / 5 + .6;
         faassenCount = Math.max(0, Math.min(4, Math.floor(faassenCount)));
         for (let i = 0; i < faassenCount; i++) {
             this._addFaassen();
         }
+        this._addPlayer();
         this._stateService.setPushers(this.pushers);
     }
 
@@ -102,6 +102,7 @@ export class PushersCustomElement {
 
     _removePusher(index) {
         this.pushers.splice(index, 1);
+        this.pushers.forEach((pusher, index) => pusher.index = index);
     }
 
 }

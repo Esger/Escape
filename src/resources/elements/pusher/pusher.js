@@ -109,17 +109,19 @@ export class PusherCustomElement {
         }
 
         let canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
-        const faassen = !this._isFaassen && this._stateService.isOnFaassen();
-        if (faassen) {
-            if (canThrowBolts) {
-                this._eventAggregator.publish('die', faassen.index);
-                setTimeout(_ => {
-                    this._eventAggregator.publish('kill', faassen.index)
-                }, 500);
-            } else {
-                setTimeout(_ => this._eventAggregator.publish('caught'), 250);
+        setTimeout(_ => {
+            const faassen = !this._isFaassen && this._stateService.isOnFaassen();
+            if (faassen) {
+                if (canThrowBolts) {
+                    this._eventAggregator.publish('die', faassen.index);
+                    setTimeout(_ => {
+                        this._eventAggregator.publish('kill', faassen.index)
+                    }, 500);
+                } else {
+                    setTimeout(_ => this._eventAggregator.publish('caught'), 250);
+                }
             }
-        }
+        });
 
         const fieldContent = this._stateService.isFree(newPosition);
         if (fieldContent === true) {
