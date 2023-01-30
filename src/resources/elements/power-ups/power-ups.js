@@ -21,6 +21,7 @@ export class PowerUpsCustomElement {
         this._gameStartSubscription = this._eventAggregator.subscribe('bricksReady', _ => this._addInitalPowerUps());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._initialize());
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._initialize());
+        this._caughtUpSubscription = this._eventAggregator.subscribe('caught', _ => this._initialize());
         this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => this._consume(powerUp));
     }
 
@@ -28,6 +29,7 @@ export class PowerUpsCustomElement {
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
         this._giveUpSubscription.dispose();
+        this._caughtUpSubscription.dispose();
         this._consumeSubscription.dispose();
     }
 
@@ -50,7 +52,7 @@ export class PowerUpsCustomElement {
                 this._helperService.randomNumberWithin(this._boardSize),
                 this._helperService.randomNumberWithin(this._boardSize)
             ];
-            if (this._stateService.isFreeForPowerUp(position) === true) {
+            if (this._stateService.isFreeForPowerUp(position)) {
                 powerUp.position = position;
                 this.powerUps.push(powerUp);
                 break;
@@ -68,7 +70,8 @@ export class PowerUpsCustomElement {
             return this._helperService.areEqual([p.position, powerUp.position]);
         });
         this.powerUps.splice(theOneIndex, 1);
-        this._stateService.setPowerUps(this.powerUps);
+        const allGoldConsumed = !this.powerUps?.find(powerUp => powerUp.type === 'gold');
+        allGoldConsumed && this._eventAggregator.publish('allGoldConsumed');
     }
 
     _initialize() {

@@ -26,7 +26,7 @@ export class BrickCustomElement {
         this._caughtSubscription = this._eventAggregator.subscribeOnce('caught', _ => this._hideBrick());
         setTimeout(_ => {
             this.visible = true;
-        }, Math.random() * 1000);
+        }, Math.random() * 1000 - (this.top * 30));
     }
 
     detached() {

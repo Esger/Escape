@@ -12,25 +12,30 @@ export class Score {
     constructor(eventAggregator, stateService) {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
+        this.score = 0;
+        this.level = 0;
         this._boltsUsed = 0;
+        this._boltCost = 5;
+        this._boltScore = -50;
         this._winScore = 25;
         this._levelScore = 5;
-        this._boltScore = -50;
         this._moveScore = 1;
-        this._goldScore = 25;
+        this._goldScore = 50;
+        this._allGoldScore = 250;
         this._resetScore = true;
         this._getHighScore();
     }
 
     attached() {
+        this._stateService.setBolts(this.bolts);
         this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
             if (this._resetScore) {
                 this.score = 0;
                 this.level = 0;
                 this.lives = 0;
                 this.bolts = 0;
-                this._publishBolts();
                 this._resetScore = false;
+                this._stateService.setBolts(this.bolts);
             }
         });
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
@@ -38,7 +43,11 @@ export class Score {
             this._saveScores();
             this.level++;
             this.lives++;
-            this._publishBolts();
+            if (this.lives >= this._boltCost) {
+                this.lives -= this._boltCost;
+                this.bolts++;
+                this._stateService.setBolts(this.bolts);
+            }
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
@@ -48,10 +57,20 @@ export class Score {
         this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => {
             this.score += (powerUp.type == 'gold') ? this._goldScore : 0;
         });
+        this._allGoldConsumedSubscription = this._eventAggregator.subscribe('allGoldConsumed', _ => {
+            this.score += this._allGoldScore;
+        });
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
-            this._publishBolts();
+            this.bolts--;
+            this._stateService.setBolts(this.bolts);
+        });
+        this._killSubscription = this._eventAggregator.subscribe('kill', _ => {
+            this._boltsUsed++;
+            this.score += this._boltScore;
+            this.bolts--;
+            this._stateService.setBolts(this.bolts);
         });
     }
 
@@ -62,11 +81,12 @@ export class Score {
         this._winSubscription.dispose();
         this._moveSubscription.dispose();
         this._boltThrownSubscription.dispose();
+        this._consumeSubscription.dispose();
+        this._allGoldConsumedSubscription.dispose();
+        this._killSubscription.dispose();
     }
 
     _gameEnd() {
-        this._giveUpSubscription?.dispose();
-        this._caughtSubscription?.dispose();
         this._resetScore = true;
         this._saveScores();
     }
@@ -78,12 +98,6 @@ export class Score {
 
     _publishLives() {
         this._eventAggregator.publish('lives', this.lives);
-    }
-
-    _publishBolts() {
-        this.bolts = Math.floor(this.level / 5) - this._boltsUsed;
-        this.lives = this.level % 5;
-        this._stateService.setBolts(this.bolts);
     }
 
     _getHighScore() {

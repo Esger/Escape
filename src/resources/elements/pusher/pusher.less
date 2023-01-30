@@ -1,15 +1,16 @@
 .pusher {
-    position         : absolute;
-    width            : var(--blockSize);
-    height           : var(--blockSize);
-    border-radius    : 1in;
-    background-repeat: no-repeat;
-    background-size  : 200%;
-    background-image : url("./smileys.png");
-    box-shadow       : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 10px 0 rgba(0, 0, 0, 0.7);
-    transform        : translate3d(0, 0, 0) rotate(90deg);
+    position           : absolute;
+    width              : var(--blockSize);
+    height             : var(--blockSize);
+    border-radius      : 1in;
+    background-repeat  : no-repeat;
+    background-size    : 200%;
+    background-image   : url("./smileys.png");
+    box-shadow         : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 10px 0 rgba(0, 0, 0, 0.7);
+    transform          : translate3d(0, 0, 0) rotate(90deg);
     transition         : 200ms ease-in-out;
     transition-property: transform, left, top;
+
     .isMobile & {
         transition: all 150ms ease-out;
     }
@@ -34,6 +35,20 @@
     &.player {
         .isMobile & {
             box-shadow: 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 5px 0 rgba(0, 0, 0, 0.7);
+        }
+    }
+
+    &.pusher--fallDown {
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        transition     : 500ms ease-in;
+        transform      : translate3d(0, 100vmin, 0) !important;
+
+        &::after {
+            display  : block;
+            font-size: 4vmin;
+            content  : '💥';
         }
     }
 

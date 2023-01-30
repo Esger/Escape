@@ -27,29 +27,29 @@ export class PushersCustomElement {
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this.isVisible = false);
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this.isVisible = false);
-        this._winSubscription = this._eventAggregator.subscribe('win', _ => {
-            this.isVisible = false;
-        });
+        this._killSubscription = this._eventAggregator.subscribe('kill', index => this._removePusher(index));
+        this._winSubscription = this._eventAggregator.subscribe('win', _ => this.isVisible = false);
     }
 
     detached() {
         this._exitsReadySubscription.dispose();
         this._gameStartSubscription.dispose();
         this._winSubscription.dispose();
-        this._giveUpSubscription?.dispose();
-        this._caughtSubscription?.dispose();
+        this._giveUpSubscription.dispose();
+        this._caughtSubscription.dispose();
+        this._killSubscription.dispose();
         this._retrySubscription.dispose();
     }
 
     _initialize() {
         this.pushers = [];
-        this._addPlayer();
         const level = this._stateService.getLevel();
         let faassenCount = level / 5 + .6;
         faassenCount = Math.max(0, Math.min(4, Math.floor(faassenCount)));
         for (let i = 0; i < faassenCount; i++) {
             this._addFaassen();
         }
+        this._addPlayer();
         this._stateService.setPushers(this.pushers);
     }
 
@@ -98,6 +98,11 @@ export class PushersCustomElement {
             // removed exit
             this._addFaassen();
         }
+    }
+
+    _removePusher(index) {
+        this.pushers.splice(index, 1);
+        this.pushers.forEach((pusher, index) => pusher.index = index);
     }
 
 }
