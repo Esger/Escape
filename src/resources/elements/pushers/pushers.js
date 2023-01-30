@@ -102,6 +102,7 @@ export class PushersCustomElement {
 
     _removePusher(index) {
         this.pushers.splice(index, 1);
+        this.pushers.forEach((pusher, index) => pusher.index = index);
     }
 
 }
