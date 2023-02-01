@@ -25,7 +25,6 @@ export class PusherCustomElement {
         !this._isFaassen && (this.gender = 'female');
         this._element.classList.add(this.pusher.type);
         this._setPositionStyle();
-        this._helperService.flashElements('.player');
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
         this._winSubscription = this._eventAggregator.subscribe('win', _ => this._gameEnd());

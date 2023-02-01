@@ -5,9 +5,9 @@
     border-radius      : 1in;
     background-repeat  : no-repeat;
     background-size    : 200%;
-    background-image   : url("./smileys.png");
+    background-image   : url("./smileys_v2.png");
     box-shadow         : 0 0 7px 0 rgba(0, 0, 0, 1), inset 0 0 10px 0 rgba(0, 0, 0, 0.7);
-    transform          : translate3d(0, 0, 0) rotate(90deg);
+    transform          : translate3d(0, 0, 0);
     transition         : 200ms ease-in-out;
     transition-property: transform, left, top;
 
@@ -21,7 +21,7 @@
     &.faassen {
         width           : 4.5vmin;
         height          : 4.5vmin;
-        background-image: url(./baardman.webp);
+        background-image: url(./baardman_v2.webp);
         background-size : cover;
         background-color: transparent !important;
         box-shadow      : none;
@@ -54,40 +54,36 @@
 
 
     &.male {
-        background-position: 0 100%;
+        background-position: 0 0;
         background-color   : crimson;
     }
 
     &.male.step {
-        background-position: 100% 100%;
+        background-position: 0 100%;
     }
 
     &.female {
-        background-position: 0 0;
+        background-position: 100% 0;
         background-color   : gold;
     }
 
     &.female.step {
-        background-position: 100% 0;
+        background-position: 100% 100%;
     }
 
     &.up {
-        transform: rotate(-90deg);
-    }
-
-    &.right {
-        transform: rotate(0);
-    }
-
-    &.down {
-        transform: rotate(90deg);
-    }
-
-    &.left {
         transform: rotate(180deg);
     }
 
-    &.flash--in {
-        transform: scale3d(1.41, 1.41, 1.41) rotate(90deg);
+    &.right {
+        transform: rotate(-90deg);
+    }
+
+    &.down {
+        transform: rotate(0deg);
+    }
+
+    &.left {
+        transform: rotate(90deg);
     }
 }

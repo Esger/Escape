@@ -20,10 +20,10 @@ export class PushersCustomElement {
         this._exitsReadySubscription = this._eventAggregator.subscribe('exitsReady', _ => {
             this.exits = this._stateService.getExits();
             this._initialize();
+            setTimeout(_ => this.isVisible = true, 1200);
         });
         this._gameStartSubscription = this._eventAggregator.subscribe('gameStart', _ => {
             this._exitNumbersTaken = [];
-            this.isVisible = true;
         });
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this.isVisible = false);
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this.isVisible = false);
