@@ -1,7 +1,9 @@
-<template>
+<template class="au-stagger">
     <require from="./power-ups.css"></require>
 
-    <power-up repeat.for="powerUp of powerUps"
-              class="powerUp powerUp--hidden powerUp--${powerUp.type}"
-              css="left:${powerUp.position[0]*blockSize}vmin;top:${powerUp.position[1]*blockSize}vmin;"></power-up>
+    <template if.bind="bricksReady">
+        <power-up repeat.for="powerUp of powerUps"
+                  class="au-animate animate-grow-in animate-shrink-out powerUp powerUp--${powerUp.type}"
+                  css="left:${powerUp.position[0]*blockSize}vmin;top:${powerUp.position[1]*blockSize}vmin;"></power-up>
+    </template>
 </template>

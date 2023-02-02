@@ -1,4 +1,4 @@
-import { inject, bindable } from 'aurelia-framework';
+import { inject } from 'aurelia-framework';
 
 @inject(Element)
 export class FlashCustomAttribute {
