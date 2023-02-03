@@ -10,4 +10,14 @@
          class="exit exit-${$index}">
         <div class="arrow"></div>
     </div>
+    <div class="doors"
+         css="rotate: ${-exits.angle + 'deg'}">
+        <div repeat.for="i of 4"
+             show.bind="exits.enabledExits[i * 2] === true"
+             class="door door-${$index}"
+             css="--left: ${exits.before[i * 2][0] * 4 + 'vmin'};
+             --top: ${exits.before[i * 2][1] * 4 + 'vmin'}">
+            <div class="arrow"></div>
+        </div>
+    </div>
 </template>
