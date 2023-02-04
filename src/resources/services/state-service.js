@@ -138,7 +138,7 @@ export class StateService {
                 angle: 88,
                 inset: -3,
                 before: [[18, 0], [19, 0], [19, 18], [19, 19], [1, 19], [0, 19], [0, 1], [0, 0]],
-                behind: [[18, -1], [19, -1], [20, 18], [20, 19], [10, 20], [0, 20], [-1, 1], [-1, 0]]
+                behind: [[18, -1], [19, -1], [20, 18], [20, 19], [1, 20], [0, 20], [-1, 1], [-1, 0]]
             }
         ];
         this._disableSomeExits();
@@ -227,11 +227,12 @@ export class StateService {
     }
 
     _gameEnd() {
-        this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._bricksCount = this._initialBricksCount;
         this._exitOffset = this._startOffset;
         this._clockwise = true;
         this._isPlaying = false;
+        this._disableSomeExits();
     }
 
     getIsPlaying() {

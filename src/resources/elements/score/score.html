@@ -2,9 +2,12 @@
     <require from="./score.css"></require>
     <require from="attributes/flash"></require>
     <h3 click.delegate="resetHigh()">Best: <span flash="${highScore}">${highScore}</span></h3>
-    <p>
-        <span repeat.for="i of bolts">💥</span>
-        <span repeat.for="i of lives">💚</span>
+    <p class="powerUps au-stagger">
+        <span repeat.for="symbol of symbols"
+            class="au-animate animate-grow-in animate-shrink-out">
+            <template if.bind="symbol === 'bolt'">💥</template>
+            <template if.bind="symbol === 'life'">💚</template>
+        </span>
     </p>
     <h2 flash="${score}">${score}</h2>
 </template>

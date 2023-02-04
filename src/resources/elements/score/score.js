@@ -27,50 +27,61 @@ export class Score {
     }
 
     attached() {
-        this._stateService.setBolts(this.bolts);
+        this._stateService.setBolts(this._getSymbolCount('bolts'));
+
         this._gameStartSubscrption = this._eventAggregator.subscribe('gameStart', _ => {
             if (this._resetScore) {
                 this.score = 0;
                 this.level = 0;
-                this.lives = 0;
-                this.bolts = 0;
+                this.symbols = [];
                 this._resetScore = false;
-                this._stateService.setBolts(this.bolts);
+                this._stateService.setBolts(this._getSymbolCount('bolts'));
             }
         });
+
         this._winSubscription = this._eventAggregator.subscribe('win', _ => {
             this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
             this.level++;
-            this.lives++;
-            if (this.lives >= this._boltCost) {
-                this.lives -= this._boltCost;
-                this.bolts++;
-                this._stateService.setBolts(this.bolts);
+            this.symbols.push('life');
+            const lives = this._getSymbolCount('life');
+            if (lives >= this._boltCost) {
+                for (let i = 0; i < this._boltCost; i++) {
+                    this._removeKey('life');
+                }
+                setTimeout(_ => {
+                    this.symbols.unshift('bolt');
+                    this._stateService.setBolts(this._getSymbolCount('bolt'));
+                }, 750);
             }
         });
+
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
+
         this._caughtSubscription = this._eventAggregator.subscribe('caught', _ => this._gameEnd());
+
         this._moveSubscription = this._eventAggregator.subscribe('move', pusher => {
             this.score -= (pusher.type == 'player') ? this._moveScore : 0;
         });
+
         this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => {
             this.score += (powerUp.type == 'gold') ? this._goldScore : 0;
         });
+
         this._allGoldConsumedSubscription = this._eventAggregator.subscribe('allGoldConsumed', _ => {
             this.score += this._allGoldScore;
         });
+
         this._boltThrownSubscription = this._eventAggregator.subscribe('removeBricks', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
-            this.bolts--;
-            this._stateService.setBolts(this.bolts);
+            this._removeKey('bolt');
         });
+
         this._killSubscription = this._eventAggregator.subscribe('kill', _ => {
             this._boltsUsed++;
             this.score += this._boltScore;
-            this.bolts--;
-            this._stateService.setBolts(this.bolts);
+            this._removeKey('bolt');
         });
     }
 
@@ -86,18 +97,34 @@ export class Score {
         this._killSubscription.dispose();
     }
 
-    _gameEnd() {
-        this._resetScore = true;
-        this._saveScores();
-    }
-
     resetHigh() {
         this.highScore = 0;
         localStorage.setItem('escape-score', this.highScore);
     }
 
-    _publishLives() {
-        this._eventAggregator.publish('lives', this.lives);
+    _removeKey(key) {
+        const firstKey = this.symbols.indexOf(key);
+        this.symbols.splice(firstKey, 1);
+        const keyCount = this._getSymbolCount(key);
+        switch (key) {
+            case 'bolt':
+                this._stateService.setBolts(keyCount);
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    _getSymbolCount(key) {
+        const keySymbols = this.symbols?.filter(s => s === key) || 0;
+        return keySymbols.length;
+    }
+
+    _gameEnd() {
+        this._resetScore = true;
+        this._saveScores();
     }
 
     _getHighScore() {

@@ -37,9 +37,7 @@ export class PowerUpsCustomElement {
         for (let count = 0; count < 5; count++) {
             this._addPowerUp('gold');
         }
-        setTimeout(_ => {
-            this._showPowerUp();
-        }, 1200);
+        setTimeout(_ => this.bricksReady = true, 1200);
     }
 
     _addPowerUp(type) {
@@ -60,21 +58,18 @@ export class PowerUpsCustomElement {
         }
     }
 
-    _showPowerUp() {
-        $('.powerUp--hidden').removeClass('powerUp--hidden');
-        this._helperService.flashElements('.powerUp');
-    }
-
     _consume(powerUp) {
         const theOneIndex = this.powerUps.findIndex(p => {
             return this._helperService.areEqual([p.position, powerUp.position]);
         });
         this.powerUps.splice(theOneIndex, 1);
+
         const allGoldConsumed = !this.powerUps?.find(powerUp => powerUp.type === 'gold');
         allGoldConsumed && this._eventAggregator.publish('allGoldConsumed');
     }
 
     _initialize() {
+        this.bricksReady = false;
         this.powerUps = [];
         this._stateService.setPowerUps(this.powerUps);
     }

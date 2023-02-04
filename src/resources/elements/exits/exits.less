@@ -85,4 +85,65 @@ exits {
     background-color: var(--boardColor);
     clip-path       : path(var(--arrowPath));
     opacity         : .4;
+
+    .isMobile & {
+        inset: 1vmin;
+    }
+}
+
+.doors {
+    position: absolute;
+    left    : calc(-1 * var(--inset));
+    top     : calc(-1 * var(--inset));
+    right   : calc(-1 * var(--inset));
+    bottom  : calc(-1 * var(--inset));
+}
+
+.door {
+    position        : absolute;
+    left            : var(--left);
+    top             : var(--top);
+    width           : 8vmin;
+    height          : 1vmin;
+    background-color: var(--exitColor);
+    filter          : blur(0.3vmin) drop-shadow(0 0 6px var(--exitColor));
+    border-radius   : 1in;
+    opacity         : .8;
+
+    &:nth-child(even) {
+        height: 8vmin;
+        width : 1vmin;
+    }
+
+    &.door-0 {
+        top: calc(var(--top) - .5vmin);
+
+        .isMobile & {
+            top : calc(var(--top) - .5vmin);
+            left: calc(var(--left) + 1vmin);
+        }
+    }
+
+    &.door-1 {
+        left: calc(var(--left) + 3.5vmin);
+
+        .isMobile & {
+            left: calc(var(--left) + 4.5vmin);
+            top : calc(var(--top) + 1vmin);
+        }
+    }
+
+    &.door-2 {
+        left: calc(var(--left) - 4vmin);
+        top : calc(var(--top) + 3.5vmin);
+
+        .isMobile & {
+            top: calc(var(--top) + 4.5vmin);
+        }
+    }
+
+    &.door-3 {
+        left: calc(var(--left) - .5vmin);
+        top : calc(var(--top) - 4vmin);
+    }
 }
