@@ -85,6 +85,10 @@ exits {
     background-color: var(--boardColor);
     clip-path       : path(var(--arrowPath));
     opacity         : .4;
+
+    .isMobile & {
+        inset: 1vmin;
+    }
 }
 
 .doors {
