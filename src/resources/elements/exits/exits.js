@@ -11,7 +11,7 @@ export class Exits {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._helpers = helperService;
-        this._isTouchDevice = sessionStorage.getItem('isMobile') == 'true';
+        this.isMobile = sessionStorage.getItem('isMobile') == 'true';
         this._boardSize = this._stateService.getBoardSize();
         this._blockSize = this._stateService.getBlockSize();
         this.exits = this._stateService.getExits();
