@@ -227,11 +227,12 @@ export class StateService {
     }
 
     _gameEnd() {
-        this._bricksCount = this._initialBricksCount;
         this._level = 0;
+        this._bricksCount = this._initialBricksCount;
         this._exitOffset = this._startOffset;
         this._clockwise = true;
         this._isPlaying = false;
+        this._disableSomeExits();
     }
 
     getIsPlaying() {
