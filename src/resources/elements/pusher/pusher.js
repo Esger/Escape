@@ -73,6 +73,10 @@ export class PusherCustomElement {
             const directionToPlayer = this._stateService.directionToPlayer(this.pusher);
             if (directionToPlayer !== undefined)
                 direction = directionToPlayer;
+            else { // direction = +1 or -1 randomly selected direction
+                const delta = this._helperService.randomNumberWithin(3) - 1;
+                direction = (direction + delta + 3) % 3;
+            }
             this.lastKey = this.directions[direction];
         } else {
             this.lastKey = key;
