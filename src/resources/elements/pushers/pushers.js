@@ -60,7 +60,8 @@ export class PushersCustomElement {
             position: [...position],
             startDirection: direction,
             direction: direction,
-            type: type
+            type: type,
+            isSmart: true
         }
         return pusher;
     }
@@ -85,14 +86,9 @@ export class PushersCustomElement {
         if (count < limit) {
             this._exitNumbersTaken.push(exitNumber);
         }
-        // 0 -> 1
-        // 1 -> 2
-        // 2 -> 3
-        // 3 -> 0
-        const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
         const position = this.exits.behind[exitNumber];
         if (position) {
-            const pusher = this._newPusher('faassen', position, direction);
+            const pusher = this._newPusher('faassen', position);
             this.pushers.push(pusher);
         } else {
             // removed exit

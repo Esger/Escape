@@ -68,12 +68,13 @@ export class PusherCustomElement {
     }
 
     _dispatchMove(key) {
-        let direction;
-        if (this._isFaassen && this.pusher.direction !== undefined) {
-            direction = this.pusher.direction;
+        let direction = this.directions.indexOf(key);
+        if (this._isFaassen && this.pusher.isSmart) {
+            const directionToPlayer = this._stateService.directionToPlayer(this.pusher);
+            if (directionToPlayer !== undefined)
+                direction = directionToPlayer;
             this.lastKey = this.directions[direction];
         } else {
-            direction = this.directions.indexOf(key);
             this.lastKey = key;
         }
         direction > -1 && this._moveIfPossible(direction);
@@ -109,7 +110,7 @@ export class PusherCustomElement {
 
         let canThrowBolts = !this._isFaassen && this._stateService.getBolts() > 0;
         setTimeout(_ => {
-            const faassen = !this._isFaassen && this._stateService.isOnFaassen();
+            const faassen = !this._isFaassen && this._stateService.isOnFaassen(); // areEqual gebruiken???
             if (faassen) {
                 if (canThrowBolts) {
                     this._eventAggregator.publish('die', faassen.index);

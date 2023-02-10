@@ -1,6 +1,7 @@
 export class HelperService {
 
     constructor() {
+        // right, down, left, up, none
         this._directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [0, 0]];
     }
 
