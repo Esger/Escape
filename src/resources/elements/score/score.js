@@ -43,17 +43,7 @@ export class Score {
             this.score += this._winScore + this.level * this._levelScore;
             this._saveScores();
             this.level++;
-            this.symbols.push('life');
-            const lives = this._getSymbolCount('life');
-            if (lives >= this._boltCost) {
-                for (let i = 0; i < this._boltCost; i++) {
-                    this._removeKey('life');
-                }
-                setTimeout(_ => {
-                    this.symbols.unshift('bolt');
-                    this._stateService.setBolts(this._getSymbolCount('bolt'));
-                }, 750);
-            }
+            this._add1Life();
         });
 
         this._giveUpSubscription = this._eventAggregator.subscribe('giveUp', _ => this._gameEnd());
@@ -66,6 +56,7 @@ export class Score {
 
         this._consumeSubscription = this._eventAggregator.subscribe('consume', powerUp => {
             this.score += (powerUp.type == 'gold') ? this._goldScore : 0;
+            (powerUp.type == 'heart') && this._add1Life();
         });
 
         this._allGoldConsumedSubscription = this._eventAggregator.subscribe('allGoldConsumed', _ => {
@@ -100,6 +91,20 @@ export class Score {
     resetHigh() {
         this.highScore = 0;
         localStorage.setItem('escape-score', this.highScore);
+    }
+
+    _add1Life() {
+        this.symbols.push('heart');
+        const lives = this._getSymbolCount('heart');
+        if (lives >= this._boltCost) {
+            for (let i = 0; i < this._boltCost; i++) {
+                this._removeKey('heart');
+            }
+            setTimeout(_ => {
+                this.symbols.unshift('bolt');
+                this._stateService.setBolts(this._getSymbolCount('bolt'));
+            }, 750);
+        }
     }
 
     _removeKey(key) {
