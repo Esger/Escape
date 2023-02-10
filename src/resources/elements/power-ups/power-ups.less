@@ -10,7 +10,19 @@
     background-size    : contain;
     opacity            : 1;
 
-    &--gold {
+    &.powerUp--gold {
         background-image: url(./gold.png);
+    }
+
+    &.powerUp--heart {
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+
+        &::before {
+            content   : '💚';
+            font-size : 3vmin;
+            text-align: center;
+        }
     }
 }
