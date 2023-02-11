@@ -58,7 +58,6 @@ export class PushersCustomElement {
             index: this.pushers.length,
             startPosition: position,
             position: [...position],
-            startDirection: direction,
             direction: direction,
             type: type,
         }

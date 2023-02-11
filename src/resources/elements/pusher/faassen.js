@@ -72,6 +72,5 @@ export class FaassenCustomElement extends AbstractPusher {
             this._doMove(newPosition);
             return;
         }
-        this.pusher.direction = undefined;
     }
 }

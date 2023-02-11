@@ -389,7 +389,7 @@ export class StateService {
 
     isOnFaassen() {
         this._player.position;
-        const faassen = this._pushers.find(pusher => pusher.type === 'faassen' && this._helperService.areEqual([pusher.position, this._player.position]));// || this._helperService.areEqual([pusher.previousPosition, this._player.position]));
+        const faassen = this._pushers.find(pusher => pusher.type === 'faassen' && this._helperService.areEqual([pusher.position, this._player.position]));
         return faassen;
     }
 

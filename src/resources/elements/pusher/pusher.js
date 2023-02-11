@@ -58,18 +58,17 @@ export class PusherCustomElement extends AbstractPusher {
             return;
         }
 
-        let canThrowBolts = this._stateService.getBolts() > 0;
+        const canThrowBolts = this._stateService.getBolts() > 0;
         setTimeout(_ => {
-            const faassen = this._stateService.isOnFaassen(); // areEqual gebruiken???
-            if (faassen) {
-                if (canThrowBolts) {
-                    this._eventAggregator.publish('die', faassen.index);
-                    setTimeout(_ => {
-                        this._eventAggregator.publish('kill', faassen.index)
-                    }, 500);
-                } else {
-                    setTimeout(_ => this._eventAggregator.publish('caught'), 250);
-                }
+            const onFaassen = this._stateService.isOnFaassen();
+            if (!onFaassen) return;
+            if (canThrowBolts) {
+                this._eventAggregator.publish('die', onFaassen.index);
+                setTimeout(_ => {
+                    this._eventAggregator.publish('kill', onFaassen.index)
+                }, 500);
+            } else {
+                setTimeout(_ => this._eventAggregator.publish('caught'), 250);
             }
         });
 
@@ -90,6 +89,5 @@ export class PusherCustomElement extends AbstractPusher {
             this._doMove(newPosition);
             return;
         }
-        this.pusher.direction = undefined;
     }
 }
