@@ -61,7 +61,6 @@ export class PushersCustomElement {
             startDirection: direction,
             direction: direction,
             type: type,
-            isSmart: true
         }
         return pusher;
     }

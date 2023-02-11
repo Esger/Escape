@@ -377,6 +377,11 @@ export class StateService {
         return isBeforeExit;
     }
 
+    throughExit(position) {
+        const exited = this._exits[this._exitOffset].behind?.some((exit) => this._helperService.areEqual([exit, position]));
+        return exited;
+    }
+
     isInCenterArea(position) {
         const isInCenter = this._centerArea?.some(coordinate => this._helperService.areEqual([coordinate, position]));
         return isInCenter;
