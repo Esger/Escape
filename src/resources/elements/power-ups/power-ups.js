@@ -34,6 +34,7 @@ export class PowerUpsCustomElement {
     }
 
     _addInitalPowerUps() {
+        this._addPowerUp('heart');
         for (let count = 0; count < 5; count++) {
             this._addPowerUp('gold');
         }
@@ -66,6 +67,8 @@ export class PowerUpsCustomElement {
 
         const allGoldConsumed = !this.powerUps?.find(powerUp => powerUp.type === 'gold');
         allGoldConsumed && this._eventAggregator.publish('allGoldConsumed');
+        const lifeConsumed = powerUp.type == 'heart';
+        lifeConsumed && this._eventAggregator.publish('lifeConsumed');
     }
 
     _initialize() {
