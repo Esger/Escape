@@ -14,7 +14,14 @@ export class AbstractPusher {
         this.directions = ['right', 'down', 'left', 'up'];
     }
 
-    _setPositionStyle(offset = -.3) {
+    _doMove(newPosition) {
+        this.pusher.position = newPosition;
+        this._setPositionStyle();
+        this._eventAggregator.publish('move', this.pusher);
+    }
+
+    _setPositionStyle() {
+        const offset = this.pusher.type === 'faassen' ? -.3 : 0;
         const left = this._blockSize * this.pusher.position[0] + offset;
         const top = this._blockSize * this.pusher.position[1] + offset;
         requestAnimationFrame(_ => {

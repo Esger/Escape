@@ -30,12 +30,6 @@ export class FaassenCustomElement extends AbstractPusher {
         this._dieSubscription.dispose();
     }
 
-    _doMove(newPosition) {
-        this.pusher.position = newPosition;
-        this._setPositionStyle();
-        this._eventAggregator.publish('move', this.pusher);
-    }
-
     _fallDown(index) {
         if (index !== this.pusher.index) return;
         this._element.classList.add('pusher--fallDown');
@@ -84,7 +78,6 @@ export class FaassenCustomElement extends AbstractPusher {
                 this._tryMove(direction);
         }
         this.lastKey = this.directions[this.pusher.direction];
-
     }
 
     _tryMove(stepVector) {
