@@ -415,11 +415,10 @@ export class StateService {
         if (!this.withinBounds(position)) return false;
         if (!this._map.length) return false;
 
-        const brickAtPosition = this._isOnBrick(position);
-        if (brickAtPosition) {
-            const broken = this._bricks.find(brick =>
-                brick.index == brickAtPosition && brick.bumpedIn);
-            if (broken) return 'brokenbrick';
+        const positionHasBrick = this._isOnBrick(position);
+        if (positionHasBrick) {
+            const brick = this.findBrickAt(position);
+            if (brick.bumpedIn) return 'brokenbrick';
             return 'brick';
         }
 

@@ -63,13 +63,16 @@ export class FaassenCustomElement extends AbstractPusher {
                 break;
             case cellAhead.includes('brokenbrick'):
                 this._turnLeft();
-                this._tryMove(stepVector);
+                if (!this._tryMove(stepVector)) {
+                    this._dispatchMove(this.pusher.direction);
+                }
                 break;
             case cellAhead.includes('brick'):
-                this._tryMove(stepVector);
-                if (direction === 'undefined') {
-                    this._turnRight();
-                    this._dispatchMove(this.pusher.direction);
+                if (!this._tryMove(stepVector)) {
+                    if (direction === undefined) {
+                        this._turnRight();
+                        this._dispatchMove(this.pusher.direction);
+                    }
                 }
                 break;
             case cellAhead === false:

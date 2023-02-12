@@ -62,13 +62,13 @@ export class BricksCustomElement {
 
     _brickSpaceIsFree(position, direction) { // [x,y], 0..3
         const position2 = this._helpers.getBlockPosition(position, direction);
-        const isFree = [position, position2].every(pos => {
+        const spaceIsFree = [position, position2].every(pos => {
             if (!this._stateService.withinBounds(pos)) return false;
             if (this._stateService.isBeforeExit(pos)) return false;
             if (this._stateService.isInCenterArea(pos)) return false;
             return this._blocks[pos[1]][pos[0]] === false;
         });
-        return isFree;
+        return spaceIsFree;
     }
 
     _findDirection(position) {
