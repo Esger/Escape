@@ -27,6 +27,20 @@ export class HelperService {
         return sumVector;
     }
 
+    clamp(num) {
+        return Math.min(Math.max(num, -1), 1);
+    }
+
+    clampVector(vector) {
+        if (Math.abs(vector[0]) > Math.abs(vector[1])) {
+            const dx = this.clamp(vector[0]);
+            return [dx, 0];
+        } else {
+            const dy = this.clamp(vector[1]);
+            return [0, dy];
+        };
+    }
+
     randomNumberWithin(max) {
         return Math.floor(Math.random() * max);
     }

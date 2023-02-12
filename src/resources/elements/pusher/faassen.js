@@ -16,9 +16,12 @@ export class FaassenCustomElement extends AbstractPusher {
 
     attached() {
         this._setPositionStyle();
-        this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed', key => this._dispatchMove(key));
-        this._swipeMoveSubscription = this._eventAggregator.subscribe('direction', direction => this._dispatchMove(direction));
-        this._dieSubscription = this._eventAggregator.subscribe('die', index => this._fallDown(index));
+        this._keyMoveSubscription = this._eventAggregator.subscribe('moveKeyPressed',
+            _ => this._dispatchMove());
+        this._swipeMoveSubscription = this._eventAggregator.subscribe('direction',
+            _ => this._dispatchMove());
+        this._dieSubscription = this._eventAggregator.subscribe('die',
+            index => this._fallDown(index));
     }
 
     detached() {
@@ -27,21 +30,7 @@ export class FaassenCustomElement extends AbstractPusher {
         this._dieSubscription.dispose();
     }
 
-    _dispatchMove(key) {
-        let direction = this.directions.indexOf(key);
-        const directionToPlayer = this._stateService.directionToPlayer(this.pusher);
-        if (directionToPlayer !== undefined)
-            direction = directionToPlayer;
-        else { // direction = +1 or -1 randomly selected direction
-            const delta = this._helperService.randomNumberWithin(3) - 1;
-            direction = (direction + delta + 3) % 3;
-        }
-        this.lastKey = this.directions[direction];
-        direction > -1 && this._moveIfPossible(direction);
-    }
-
     _doMove(newPosition) {
-        this.pusher.previousPosition = this.pusher.position;
         this.pusher.position = newPosition;
         this._setPositionStyle();
         this._eventAggregator.publish('move', this.pusher);
@@ -52,25 +41,62 @@ export class FaassenCustomElement extends AbstractPusher {
         this._element.classList.add('pusher--fallDown');
     }
 
-    _moveIfPossible(direction) {
-        const vector = this._helperService.direction2vector(direction);
-        const newPosition = this._helperService.sumVectors(this.pusher.position, vector);
-
-        const fieldContent = this._stateService.isFree(newPosition);
-        if (fieldContent === true) {
-            this._doMove(newPosition);
-            return;
-        }
-
-        const isObject = typeof fieldContent === 'object';
-        if (isObject) {
-            this._doMove(newPosition);
-            return;
-        }
-
-        if (this._stateService.moveBrick(newPosition, vector, false)) {
-            this._doMove(newPosition);
-            return;
-        }
+    _turnLeft() {
+        this.pusher.direction = (this.pusher.direction + 3) % 4;
+        this.lastKey = this.directions[this.pusher.direction];
     }
+
+    _turnRight() {
+        this.pusher.direction = (this.pusher.direction + 1) % 4;
+        this.lastKey = this.directions[this.pusher.direction];
+    }
+
+    _dispatchMove(direction = undefined) {
+        let stepVector;
+        if (direction === undefined) {
+            const vectorToPlayer = this._stateService.vectorToPlayer(this.pusher);
+            stepVector = this._helperService.clampVector(vectorToPlayer);
+            this.pusher.direction = this._helperService.vector2direction(stepVector);
+        } else stepVector = this._helperService.direction2vector(this.pusher.direction);
+        const newPosition = this._helperService.sumVectors(this.pusher.position, stepVector);
+        const cellAhead = this._stateService.isFree(newPosition);
+        switch (true) {
+            case typeof cellAhead === 'object':
+                this._doMove(newPosition)
+                break;
+            case cellAhead === true:
+                this._doMove(newPosition)
+                break;
+            case cellAhead.includes('brokenbrick'):
+                this._turnLeft();
+                this._tryMove(stepVector);
+                break;
+            case cellAhead.includes('brick'):
+                this._tryMove(stepVector);
+                if (direction === 'undefined') {
+                    this._turnRight();
+                    this._dispatchMove(this.pusher.direction);
+                }
+                break;
+            case cellAhead === false:
+                break;
+            default:
+                this._tryMove(direction);
+        }
+        this.lastKey = this.directions[this.pusher.direction];
+
+    }
+
+    _tryMove(stepVector) {
+        let newPosition = this._helperService.sumVectors(this.pusher.position, stepVector);
+        let fieldContent = this._stateService.isFree(newPosition);
+        if (fieldContent === true ||
+            typeof fieldContent === 'object' ||
+            this._stateService.moveBrick(newPosition, stepVector)) {
+            this._doMove(newPosition);
+            return true;
+        }
+        return false;
+    }
+
 }

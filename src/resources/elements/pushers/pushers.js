@@ -53,12 +53,12 @@ export class PushersCustomElement {
         this._stateService.setPushers(this.pushers);
     }
 
-    _newPusher(type, position, direction) {
+    _newPusher(type, position) {
         const pusher = {
             index: this.pushers.length,
             startPosition: position,
             position: [...position],
-            direction: direction,
+            direction: 1,
             type: type,
         }
         return pusher;
@@ -67,7 +67,7 @@ export class PushersCustomElement {
     _addPlayer() {
         this.boardSize = this._stateService.getBoardSize();
         const position = [Math.round(this.boardSize / 2), Math.round(this.boardSize / 2)];
-        const pusher = this._newPusher('player', position, 1);
+        const pusher = this._newPusher('player', position);
         this.pushers.push(pusher);
     }
 

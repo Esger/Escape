@@ -35,20 +35,19 @@ export class PusherCustomElement extends AbstractPusher {
     }
 
     _dispatchMove(key) {
-        let direction = this.directions.indexOf(key);
         this.lastKey = key;
-        direction > -1 && this._moveIfPossible(direction);
+        this.pusher.direction = this.directions.indexOf(key);
+        this.pusher.direction > -1 && this._tryMove();
     }
 
-    _doMove(newPosition) {
-        this.pusher.previousPosition = this.pusher.position;
+    _doMove(newPosition) { // kan naar abstract pusher; offset!!
         this.pusher.position = newPosition;
         this._setPositionStyle(0);
         this._eventAggregator.publish('move', this.pusher);
     }
 
-    _moveIfPossible(direction) {
-        const vector = this._helperService.direction2vector(direction);
+    _tryMove() {
+        const vector = this._helperService.direction2vector(this.pusher.direction);
         const newPosition = this._helperService.sumVectors(this.pusher.position, vector);
 
         const exited = this._stateService.throughExit(newPosition);

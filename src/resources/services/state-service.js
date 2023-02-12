@@ -305,13 +305,15 @@ export class StateService {
             brick.position = this._helperService.sumVectors(brick.position, vector);
             this.mapBrick(brick, true);
             return true;
-        } else {
-            if (brick.bumpedIn && hasBolts) {
-                this._throwBolt(position);
-            } else {
-                brick.bumpedIn = true;
-            }
         }
+
+        if (brick.bumpedIn && hasBolts) {
+            this._throwBolt(position);
+            return true;
+        }
+
+        brick.bumpedIn = true;
+        return false;
     }
 
     _spaceBehindBrickIsFree(position, vector, brick) {
@@ -414,8 +416,12 @@ export class StateService {
         if (!this._map.length) return false;
 
         const brickAtPosition = this._isOnBrick(position);
-        if (brickAtPosition)
+        if (brickAtPosition) {
+            const broken = this._bricks.find(brick =>
+                brick.index == brickAtPosition && brick.bumpedIn);
+            if (broken) return 'brokenbrick';
             return 'brick';
+        }
 
         const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helperService.areEqual([position, pusher.position]));
         if (playerAtPosition)
@@ -428,27 +434,13 @@ export class StateService {
         return true;
     }
 
-    directionToPlayer(faassen) {
-        // later slimmer maken met kortste weg zoeken via breadth first binary tree search
+    vectorToPlayer(faassen) {
         const calcDirection = (pos1, pos2) => {
-            const clamp = num => Math.min(Math.max(num, -1), 1);
             const delta = [pos1[0] - pos2[0], pos1[1] - pos2[1]];
-            if (Math.abs(delta[0]) > Math.abs(delta[1])) {
-                const dx = clamp(delta[0]);
-                return [dx, 0];
-            } else {
-                const dy = clamp(delta[1]);
-                return [0, dy];
-            };
+            return delta;
         }
         const vector = calcDirection(this._player.position, faassen.position);
-        const newPosition = this._helperService.sumVectors(faassen.position, vector)
-        const field = this.isFree(newPosition, true);
-        if (field !== 'brick') {
-            const direction = this._helperService.vector2direction(vector);
-            return direction;
-        }
-        return undefined;
+        return vector;
     }
 
 }

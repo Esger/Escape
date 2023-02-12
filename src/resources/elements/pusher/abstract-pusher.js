@@ -10,15 +10,14 @@ export class AbstractPusher {
         this._eventAggregator = eventAggregator;
         this._stateService = stateService;
         this._helperService = helperService;
+        this._blockSize = this._stateService.getBlockSize();
         this.directions = ['right', 'down', 'left', 'up'];
     }
 
     _setPositionStyle(offset = -.3) {
-        const blockSize = this._stateService.getBlockSize();
-        const left = blockSize * this.pusher.position[0] + offset;
-        const top = blockSize * this.pusher.position[1] + offset;
+        const left = this._blockSize * this.pusher.position[0] + offset;
+        const top = this._blockSize * this.pusher.position[1] + offset;
         requestAnimationFrame(_ => {
-            this.lastKey = this.pusher.direction !== undefined ? this.directions[this.pusher.direction] : this.lastKey;
             this.positionStyle = 'left:' + left + 'vmin; top:' + top + 'vmin;';
         });
     }
