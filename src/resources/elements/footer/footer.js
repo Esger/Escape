@@ -12,14 +12,16 @@ export class Footer {
             'escape through the <span class="green">exits</span>',
             this._isMobile ? 'Tap here when stuck' : 'Press Escape when stuck',
             'each move costs 1 score',
-            // 'press r to restart level',
             'push blocking bricks away',
             'gold scores 50',
-            'exiting is rewarded with 💚',
             'all gold scores 250 extra',
+            'exiting is rewarded with 💚',
+            'collect extra 💚 on your way',
             'five 💚 buys a 💥',
             '💥 lets you destroy bricks',
-            'move into an unmoveable brick to destroy it 💥',
+            '💥 eliminates a gatekeeper too',
+            'move into either to use 💥',
+            // 'press r to restart level',
         ];
         this._wins = 0;
     }
