@@ -61,13 +61,13 @@ export class FaassenCustomElement extends AbstractPusher {
             case cellAhead === true:
                 this._doMove(newPosition)
                 break;
-            case cellAhead.includes('brokenbrick'):
+            case cellAhead?.includes('brokenbrick'):
                 this._turnLeft();
                 if (!this._tryMove(stepVector)) {
                     this._dispatchMove(this.pusher.direction);
                 }
                 break;
-            case cellAhead.includes('brick'):
+            case cellAhead?.includes('brick'):
                 if (!this._tryMove(stepVector)) {
                     if (direction === undefined) {
                         this._turnRight();
