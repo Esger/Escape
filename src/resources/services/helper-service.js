@@ -1,6 +1,7 @@
 export class HelperService {
 
     constructor() {
+        // right, down, left, up, none
         this._directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [0, 0]];
     }
 
@@ -24,6 +25,20 @@ export class HelperService {
             sumVector[1] += arg[1];
         });
         return sumVector;
+    }
+
+    clamp(num) {
+        return Math.min(Math.max(num, -1), 1);
+    }
+
+    clampVector(vector) {
+        if (Math.abs(vector[0]) > Math.abs(vector[1])) {
+            const dx = this.clamp(vector[0]);
+            return [dx, 0];
+        } else {
+            const dy = this.clamp(vector[1]);
+            return [0, dy];
+        };
     }
 
     randomNumberWithin(max) {
