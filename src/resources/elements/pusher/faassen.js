@@ -55,6 +55,8 @@ export class FaassenCustomElement extends AbstractPusher {
         const newPosition = this._helperService.sumVectors(this.pusher.position, stepVector);
         const cellAhead = this._stateService.isFree(newPosition);
         switch (true) {
+            case !cellAhead:
+                break;
             case typeof cellAhead === 'object':
                 this._doMove(newPosition)
                 break;
@@ -74,8 +76,6 @@ export class FaassenCustomElement extends AbstractPusher {
                         this._dispatchMove(this.pusher.direction);
                     }
                 }
-                break;
-            case cellAhead === false:
                 break;
             default:
                 this._tryMove(direction);
