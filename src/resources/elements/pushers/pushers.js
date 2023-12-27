@@ -53,14 +53,13 @@ export class PushersCustomElement {
         this._stateService.setPushers(this.pushers);
     }
 
-    _newPusher(type, position, direction) {
+    _newPusher(type, position) {
         const pusher = {
             index: this.pushers.length,
             startPosition: position,
             position: [...position],
-            startDirection: direction,
-            direction: direction,
-            type: type
+            direction: 1,
+            type: type,
         }
         return pusher;
     }
@@ -68,7 +67,7 @@ export class PushersCustomElement {
     _addPlayer() {
         this.boardSize = this._stateService.getBoardSize();
         const position = [Math.round(this.boardSize / 2), Math.round(this.boardSize / 2)];
-        const pusher = this._newPusher('player', position, 1);
+        const pusher = this._newPusher('player', position);
         this.pushers.push(pusher);
     }
 
@@ -85,14 +84,9 @@ export class PushersCustomElement {
         if (count < limit) {
             this._exitNumbersTaken.push(exitNumber);
         }
-        // 0 -> 1
-        // 1 -> 2
-        // 2 -> 3
-        // 3 -> 0
-        const direction = [1, 1, 2, 2, 3, 3, 0, 0][exitNumber];
         const position = this.exits.behind[exitNumber];
         if (position) {
-            const pusher = this._newPusher('faassen', position, direction);
+            const pusher = this._newPusher('faassen', position);
             this.pushers.push(pusher);
         } else {
             // removed exit

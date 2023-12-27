@@ -300,29 +300,35 @@ export class StateService {
         const brick = this.findBrickAt(position);
         if (!brick) return false;
 
-        const vectorDirection = this._helperService.vector2direction(vector);
-        const moveLongitudonal = vectorDirection == brick.direction || vectorDirection == (brick.direction + 2) % 4;
+        if (this._spaceBehindBrickIsFree(position, vector, brick)) {
+            this.mapBrick(brick, false);
+            brick.position = this._helperService.sumVectors(brick.position, vector);
+            this.mapBrick(brick, true);
+            return true;
+        }
+
+        if (brick.bumpedIn && hasBolts) {
+            this._throwBolt(position);
+            return true;
+        }
+
+        brick.bumpedIn = true;
+        return false;
+    }
+
+    _spaceBehindBrickIsFree(position, vector, brick) {
+        const direction = this._helperService.vector2direction(vector);
+        const moveLongitudonal = direction == brick.direction || direction == (brick.direction + 2) % 4;
         let spaceBehindBrickIsFree;
         if (moveLongitudonal) {
             const doubleVector = this._helperService.multiplyVector(vector, 2);
             const areaBehindBrick = this._helperService.sumVectors(position, doubleVector);
             spaceBehindBrickIsFree = this.isFree(areaBehindBrick, false) === true;
         } else {
-            const spacesBehindBrick = brick.blocks.map(block => this._helperService.sumVectors([brick.position[0], brick.position[1]], block, vector));
+            const spacesBehindBrick = brick.blocks.map(block => this._helperService.sumVectors(brick.position, block, vector));
             spaceBehindBrickIsFree = spacesBehindBrick.every(space => this.isFree(space, false) === true);
         }
-        if (spaceBehindBrickIsFree) {
-            this.mapBrick(brick, false);
-            brick.position = this._helperService.sumVectors(brick.position, vector);
-            this.mapBrick(brick, true);
-            return true;
-        } else {
-            if (brick.bumpedIn && hasBolts) {
-                this._throwBolt(position);
-            } else {
-                brick.bumpedIn = true;
-            }
-        }
+        return spaceBehindBrickIsFree;
     }
 
     _throwBolt(position) {
@@ -373,6 +379,11 @@ export class StateService {
         return isBeforeExit;
     }
 
+    throughExit(position) {
+        const exited = this._exits[this._exitOffset].behind?.some((exit) => this._helperService.areEqual([exit, position]));
+        return exited;
+    }
+
     isInCenterArea(position) {
         const isInCenter = this._centerArea?.some(coordinate => this._helperService.areEqual([coordinate, position]));
         return isInCenter;
@@ -380,7 +391,7 @@ export class StateService {
 
     isOnFaassen() {
         this._player.position;
-        const faassen = this._pushers.find(pusher => pusher.type === 'faassen' && this._helperService.areEqual([pusher.position, this._player.position]));// || this._helperService.areEqual([pusher.previousPosition, this._player.position]));
+        const faassen = this._pushers.find(pusher => pusher.type === 'faassen' && this._helperService.areEqual([pusher.position, this._player.position]));
         return faassen;
     }
 
@@ -404,9 +415,12 @@ export class StateService {
         if (!this.withinBounds(position)) return false;
         if (!this._map.length) return false;
 
-        const brickAtPosition = this._isOnBrick(position);
-        if (brickAtPosition)
+        const positionHasBrick = this._isOnBrick(position);
+        if (positionHasBrick) {
+            const brick = this.findBrickAt(position);
+            if (brick.bumpedIn) return 'brokenbrick';
             return 'brick';
+        }
 
         const playerAtPosition = !ignorePusher && this._pushers.some(pusher => this._helperService.areEqual([position, pusher.position]));
         if (playerAtPosition)
@@ -417,6 +431,15 @@ export class StateService {
             return powerUp;
 
         return true;
+    }
+
+    vectorToPlayer(faassen) {
+        const calcDirection = (pos1, pos2) => {
+            const delta = [pos1[0] - pos2[0], pos1[1] - pos2[1]];
+            return delta;
+        }
+        const vector = calcDirection(this._player.position, faassen.position);
+        return vector;
     }
 
 }

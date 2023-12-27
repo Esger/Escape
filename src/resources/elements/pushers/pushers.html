@@ -1,7 +1,11 @@
 <template>
     <require from="elements/pusher/pusher"></require>
-    <pusher repeat.for="pusher of pushers"
-            if.bind="isVisible"
-            pusher.bind="pusher"
-            exits.bind="exits"></pusher>
+    <require from="elements/pusher/faassen"></require>
+
+    <template repeat.for="pusher of pushers">
+        <pusher if.bind="pusher.type === 'player' && isVisible"
+                pusher.bind="pusher"></pusher>
+        <faassen if.bind="pusher.type === 'faassen' && isVisible"
+                 pusher.bind="pusher"></faassen>
+    </template>
 </template>
